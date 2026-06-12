@@ -3,7 +3,10 @@ package com.lms.authservice.service.impl;
 import com.lms.authservice.dto.request.LoginRequestDTO;
 import com.lms.authservice.dto.request.RegisterRequestDTO;
 import com.lms.authservice.dto.response.AuthResponseDTO;
+import com.lms.authservice.dto.response.UserResponseDTO;
+import com.lms.authservice.dto.response.ValidateTokenResponseDTO;
 import com.lms.authservice.entity.User;
+import com.lms.authservice.mapper.UserMapper;
 import com.lms.authservice.repository.UserRepository;
 import com.lms.authservice.security.JwtUtil;
 import com.lms.authservice.service.AuthService;
@@ -11,7 +14,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Service
 public class AuthServiceImpl implements AuthService {
@@ -22,20 +27,30 @@ public class AuthServiceImpl implements AuthService {
     @Autowired
     private JwtUtil jwtUtil;
 
-    private final BCryptPasswordEncoder encoder = new BCryptPasswordEncoder();
+    @Autowired
+    private BCryptPasswordEncoder encoder;
 
     @Override
     public AuthResponseDTO register(RegisterRequestDTO request) {
+
+        if (userRepository.findByEmail(request.getEmail()).isPresent()) {
+            return new AuthResponseDTO("Email already in use", null);
+        }
 
         User user = new User();
         user.setName(request.getName());
         user.setEmail(request.getEmail());
         user.setPassword(encoder.encode(request.getPassword()));
-        user.setRole("USER");
+        
+        String assignedRole = request.getRole() != null && !request.getRole().trim().isEmpty() 
+                ? request.getRole().trim().toUpperCase() 
+                : "USER";
+        user.setRole(assignedRole);
 
-        userRepository.save(user);
+        User savedUser = userRepository.save(user);
+        String token = jwtUtil.generateToken(savedUser.getId(), savedUser.getEmail(), savedUser.getRole());
 
-        return new AuthResponseDTO("User registered successfully", null);
+        return new AuthResponseDTO("User registered successfully", token);
     }
 
     @Override
@@ -53,8 +68,46 @@ public class AuthServiceImpl implements AuthService {
             return new AuthResponseDTO("Invalid password", null);
         }
 
-        String token = jwtUtil.generateToken(user.getEmail());
+        String token = jwtUtil.generateToken(user.getId(), user.getEmail(), user.getRole());
 
         return new AuthResponseDTO("Login successful", token);
+    }
+
+    @Override
+    public ValidateTokenResponseDTO validateToken(String token) {
+        if (token == null || !jwtUtil.validateToken(token)) {
+            return new ValidateTokenResponseDTO(false, null, null, null);
+        }
+        try {
+            Long userId = jwtUtil.extractUserId(token);
+            String email = jwtUtil.extractEmail(token);
+            String role = jwtUtil.extractRole(token);
+            return new ValidateTokenResponseDTO(true, userId, email, role);
+        } catch (Exception e) {
+            return new ValidateTokenResponseDTO(false, null, null, null);
+        }
+    }
+
+    @Override
+    public UserResponseDTO updateUserRole(Long userId, String role) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new RuntimeException("User not found with id: " + userId));
+        user.setRole(role.trim().toUpperCase());
+        User updatedUser = userRepository.save(user);
+        return UserMapper.toDTO(updatedUser);
+    }
+
+    @Override
+    public List<UserResponseDTO> getAllUsers() {
+        return userRepository.findAll().stream()
+                .map(UserMapper::toDTO)
+                .collect(Collectors.toList());
+    }
+
+    @Override
+    public UserResponseDTO getCurrentUser(String email) {
+        User user = userRepository.findByEmail(email)
+                .orElseThrow(() -> new RuntimeException("User not found with email: " + email));
+        return UserMapper.toDTO(user);
     }
 }
