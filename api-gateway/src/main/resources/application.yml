@@ -1,0 +1,49 @@
+server:
+  port: 8080
+
+spring:
+  application:
+    name: api-gateway
+  cloud:
+    compatibility-verifier:
+      enabled: false
+    gateway:
+      routes:
+        - id: auth-service
+          uri: http://localhost:8081
+          predicates:
+            - Path=/api/auth/**
+          # Optional Filter:
+          # filters:
+          #   - StripPrefix=1
+
+        - id: user-service
+          uri: http://localhost:8082
+          predicates:
+            - Path=/api/users/**
+          # Optional Filter:
+          # filters:
+          #   - StripPrefix=1
+
+        - id: course-service
+          uri: http://localhost:8083
+          predicates:
+            - Path=/api/courses/**, /api/modules/**, /api/students/**, /api/certificates/**
+          filters:
+            - StripPrefix=1
+
+        - id: quiz-service
+          uri: http://localhost:8084
+          predicates:
+            - Path=/api/quizzes/**, /api/questions/**
+          filters:
+            - StripPrefix=1
+
+# Log levels for debugging microservice calls through the gateway
+logging:
+  level:
+    org.springframework.cloud.gateway: INFO
+    org.springframework.http.server.reactive: INFO
+    org.springframework.web.reactive: INFO
+    reactor.netty: INFO
+    com.lms.apigateway: DEBUG
