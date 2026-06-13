@@ -17,6 +17,6 @@ spring:
         format_sql: true
 
 brevo:
-  api-key: ${BREVO_API_KEY:mock}
+  api-key: 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
   sender-name: LMS Platform
   sender-email: dinithplatform@gmail.com

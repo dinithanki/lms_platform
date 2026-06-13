@@ -68,6 +68,15 @@ public class EmailServiceImpl implements EmailService {
             notificationLog.setStatus("SUCCESS");
             logRepository.save(notificationLog);
 
+        } catch (feign.FeignException e) {
+            String responseBody = e.contentUTF8();
+            log.error("Failed to send email to {} via Brevo. Status: {}, Response: {}", to, e.status(), responseBody, e);
+
+            notificationLog.setStatus("FAILED");
+            notificationLog.setErrorMessage("Status: " + e.status() + ", Response: " + responseBody);
+            logRepository.save(notificationLog);
+
+            throw new EmailSendException("Failed to send email via Brevo: " + responseBody, e);
         } catch (Exception e) {
             log.error("Failed to send email to {} via Brevo: {}", to, e.getMessage(), e);
 
