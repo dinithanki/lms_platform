@@ -37,7 +37,10 @@ public class EmailServiceImpl implements EmailService {
         notificationLog.setSubject(subject);
         notificationLog.setSentAt(LocalDateTime.now());
 
-        String apiKey = brevoConfig.getApiKey();
+        String apiKey = brevoConfig.getSecretKey();
+        log.info("Using API key: {}...{}", 
+                 apiKey != null && apiKey.length() > 10 ? apiKey.substring(0, 15) : "N/A",
+                 apiKey != null && apiKey.length() > 10 ? apiKey.substring(apiKey.length() - 10) : "N/A");
         if (apiKey == null || apiKey.trim().isEmpty() || "mock".equalsIgnoreCase(apiKey.trim())) {
             log.info("-----------------[ MOCK EMAIL DELIVERY ]-----------------");
             log.info("Recipient: {}", to);

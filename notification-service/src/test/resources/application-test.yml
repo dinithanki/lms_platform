@@ -11,6 +11,6 @@ spring:
     show-sql: true
 
 brevo:
-  api-key: mock
+  secret-key: mock
   sender-name: Test Sender
   sender-email: test@example.com

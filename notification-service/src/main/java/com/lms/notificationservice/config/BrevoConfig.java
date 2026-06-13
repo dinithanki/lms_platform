@@ -10,7 +10,7 @@ import org.springframework.context.annotation.Configuration;
 @Configuration
 @ConfigurationProperties(prefix = "brevo")
 public class BrevoConfig {
-    private String apiKey;
+    private String secretKey;
     private String senderName;
     private String senderEmail;
 }
