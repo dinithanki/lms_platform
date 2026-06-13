@@ -4,7 +4,11 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="6f586ae9-defd-483d-b25c-09243b81dc36" name="Changes" comment="" />
+    <list default="true" id="6f586ae9-defd-483d-b25c-09243b81dc36" name="Changes" comment="">
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/quiz-service/src/main/java/com/lms/quizservice/QuizServiceApplication.java" beforeDir="false" afterPath="$PROJECT_DIR$/quiz-service/src/main/java/com/lms/quizservice/QuizServiceApplication.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/quiz-service/src/main/resources/application.properties" beforeDir="false" afterPath="$PROJECT_DIR$/quiz-service/src/main/resources/application.properties" afterDir="false" />
+    </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
@@ -123,6 +127,8 @@
       <workItem from="1781285576104" duration="127000" />
       <workItem from="1781320460538" duration="436000" />
       <workItem from="1781321882688" duration="481000" />
+      <workItem from="1781326486829" duration="160000" />
+      <workItem from="1781326921307" duration="54000" />
     </task>
     <servers />
   </component>
