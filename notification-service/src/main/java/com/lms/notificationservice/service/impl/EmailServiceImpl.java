@@ -1,29 +1,31 @@
 package com.lms.notificationservice.service.impl;
 
-import com.lms.notificationservice.client.BrevoClient;
-import com.lms.notificationservice.config.BrevoConfig;
 import com.lms.notificationservice.exception.EmailSendException;
 import com.lms.notificationservice.model.NotificationLog;
 import com.lms.notificationservice.repository.NotificationLogRepository;
 import com.lms.notificationservice.service.EmailService;
+import jakarta.mail.internet.MimeMessage;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.mail.javamail.JavaMailSender;
+import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
 
 @Slf4j
 @Service
 public class EmailServiceImpl implements EmailService {
 
-    @Autowired
-    private BrevoClient brevoClient;
+    @Autowired(required = false)
+    private JavaMailSender mailSender;
 
-    @Autowired
-    private BrevoConfig brevoConfig;
+    @Value("${spring.mail.username:mock}")
+    private String senderEmail;
+
+    @Value("${spring.mail.host:mock}")
+    private String mailHost;
 
     @Autowired
     private NotificationLogRepository logRepository;
@@ -37,17 +39,25 @@ public class EmailServiceImpl implements EmailService {
         notificationLog.setSubject(subject);
         notificationLog.setSentAt(LocalDateTime.now());
 
-        String apiKey = brevoConfig.getSecretKey();
-        log.info("Using API key: {}...{}", 
-                 apiKey != null && apiKey.length() > 10 ? apiKey.substring(0, 15) : "N/A",
-                 apiKey != null && apiKey.length() > 10 ? apiKey.substring(apiKey.length() - 10) : "N/A");
-        if (apiKey == null || apiKey.trim().isEmpty() || "mock".equalsIgnoreCase(apiKey.trim())) {
+        if (mailSender == null || "mock".equalsIgnoreCase(mailHost) || "mock".equalsIgnoreCase(senderEmail)) {
             log.info("-----------------[ MOCK EMAIL DELIVERY ]-----------------");
             log.info("Recipient: {}", to);
-            log.info("Sender Name: {}", brevoConfig.getSenderName());
-            log.info("Sender Email: {}", brevoConfig.getSenderEmail());
+            log.info("Sender: {}", senderEmail);
             log.info("Subject: {}", subject);
             log.info("Content Preview:\n{}", htmlContent);
+            
+            // Extract and print any links found in the HTML for easy clicking in the dev console
+            java.util.regex.Matcher matcher = java.util.regex.Pattern.compile("href='([^']+)'").matcher(htmlContent);
+            if (matcher.find()) {
+                log.info("👉 DEV TESTING LINK (Ctrl+Click to open in browser): {}", matcher.group(1));
+            }
+            
+            // Extract and print any 6-digit OTP code found in the HTML for easy copy-pasting in local dev
+            java.util.regex.Matcher otpMatcher = java.util.regex.Pattern.compile("class='otp-code'>(\\d{6})</h2>").matcher(htmlContent);
+            if (otpMatcher.find()) {
+                log.info("👉 DEV TESTING OTP CODE: {}", otpMatcher.group(1));
+            }
+            
             log.info("---------------------------------------------------------");
 
             notificationLog.setStatus("SUCCESS");
@@ -56,38 +66,28 @@ public class EmailServiceImpl implements EmailService {
         }
 
         try {
-            Map<String, Object> requestBody = new HashMap<>();
-            requestBody.put("sender", Map.of(
-                    "name", brevoConfig.getSenderName(),
-                    "email", brevoConfig.getSenderEmail()
-            ));
-            requestBody.put("to", List.of(Map.of("email", to)));
-            requestBody.put("subject", subject);
-            requestBody.put("htmlContent", htmlContent);
+            MimeMessage message = mailSender.createMimeMessage();
+            MimeMessageHelper helper = new MimeMessageHelper(message, true, "UTF-8");
 
-            brevoClient.sendEmail(apiKey, requestBody);
-            log.info("Email sent successfully to {} via Brevo", to);
+            helper.setFrom(senderEmail);
+            helper.setTo(to);
+            helper.setSubject(subject);
+            helper.setText(htmlContent, true);
+
+            mailSender.send(message);
+            log.info("Email sent successfully to {} via SMTP", to);
 
             notificationLog.setStatus("SUCCESS");
             logRepository.save(notificationLog);
 
-        } catch (feign.FeignException e) {
-            String responseBody = e.contentUTF8();
-            log.error("Failed to send email to {} via Brevo. Status: {}, Response: {}", to, e.status(), responseBody, e);
-
-            notificationLog.setStatus("FAILED");
-            notificationLog.setErrorMessage("Status: " + e.status() + ", Response: " + responseBody);
-            logRepository.save(notificationLog);
-
-            throw new EmailSendException("Failed to send email via Brevo: " + responseBody, e);
         } catch (Exception e) {
-            log.error("Failed to send email to {} via Brevo: {}", to, e.getMessage(), e);
+            log.error("Failed to send email to {} via SMTP: {}", to, e.getMessage(), e);
 
             notificationLog.setStatus("FAILED");
             notificationLog.setErrorMessage(e.getMessage());
             logRepository.save(notificationLog);
 
-            throw new EmailSendException("Failed to send email via Brevo: " + e.getMessage(), e);
+            throw new EmailSendException("Failed to send email via SMTP: " + e.getMessage(), e);
         }
     }
 }

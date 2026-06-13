@@ -16,7 +16,14 @@ spring:
       hibernate:
         format_sql: true
 
-brevo:
-  secret-key: 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
-  sender-name: LMS Platform
-  sender-email: dinithplatform@gmail.com
+  mail:
+    host: ${SPRING_MAIL_HOST:mock}
+    port: ${SPRING_MAIL_PORT:587}
+    username: ${SPRING_MAIL_USERNAME:mock}
+    password: ${SPRING_MAIL_PASSWORD:mock}
+    properties:
+      mail:
+        smtp:
+          auth: true
+          starttls:
+            enable: true

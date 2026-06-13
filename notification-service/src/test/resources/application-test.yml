@@ -10,7 +10,5 @@ spring:
       ddl-auto: create-drop
     show-sql: true
 
-brevo:
-  secret-key: mock
-  sender-name: Test Sender
-  sender-email: test@example.com
+  mail:
+    host: mock
