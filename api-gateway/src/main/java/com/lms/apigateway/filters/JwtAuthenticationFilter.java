@@ -48,14 +48,22 @@ public class JwtAuthenticationFilter implements GlobalFilter, Ordered {
             return chain.filter(exchange);
         }
 
-        // 2. Extract Authorization Header
-        String authHeader = request.getHeaders().getFirst(HttpHeaders.AUTHORIZATION);
-        if (authHeader == null || !authHeader.startsWith("Bearer ")) {
-            log.warn("Missing or invalid Authorization header for secure route: {}", path);
-            return handleUnauthorized(exchange, "Missing or invalid Authorization header");
+        // 2. Extract Token from Cookie or Authorization Header
+        String token = null;
+        org.springframework.http.HttpCookie cookie = request.getCookies().getFirst("jwt");
+        if (cookie != null) {
+            token = cookie.getValue();
+        } else {
+            String authHeader = request.getHeaders().getFirst(HttpHeaders.AUTHORIZATION);
+            if (authHeader != null && authHeader.startsWith("Bearer ")) {
+                token = authHeader.substring(7);
+            }
         }
 
-        String token = authHeader.substring(7);
+        if (token == null) {
+            log.warn("Missing or invalid Authorization token for secure route: {}", path);
+            return handleUnauthorized(exchange, "Missing or invalid Authorization token");
+        }
 
         // 3. Validate Token
         if (!jwtUtil.validateToken(token)) {

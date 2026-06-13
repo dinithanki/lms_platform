@@ -67,7 +67,8 @@ const CourseDetails = () => {
     setError("");
     try {
       const data = await courseService.getCourseById(id);
-      setCourse(data);
+      const modules = await courseService.getModules(id);
+      setCourse({ ...data, modules });
 
       if (user) {
         // Check if user is enrolled
@@ -98,7 +99,7 @@ const CourseDetails = () => {
 
   const fetchQuizDetails = async () => {
     try {
-      const quizData = await quizService.getQuizByCourseId(id, user.id);
+      const quizData = await quizService.getQuizByCourseId(id, user.role === "STUDENT" ? user.id : null);
       setQuiz(quizData);
 
       if (quizData) {
@@ -145,7 +146,8 @@ const CourseDetails = () => {
       const prog = await courseService.getCourseProgress(id, user.id);
       setProgress(prog);
       const data = await courseService.getCourseById(id);
-      setCourse(data);
+      const modules = await courseService.getModules(id);
+      setCourse({ ...data, modules });
     } catch (err) {
       console.error(err);
       alert("Failed to mark module as complete.");
@@ -224,7 +226,8 @@ const CourseDetails = () => {
       setShowModuleModal(false);
       // Reload course
       const data = await courseService.getCourseById(id);
-      setCourse(data);
+      const modules = await courseService.getModules(id);
+      setCourse({ ...data, modules });
     } catch (err) {
       console.error(err);
       alert("Failed to create module.");
