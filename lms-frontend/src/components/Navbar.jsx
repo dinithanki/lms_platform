@@ -1,49 +1,85 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useAuth } from "../context/AuthContext";
 import { useNavigate } from "react-router-dom";
+import notificationService from "../services/notificationService";
 
 const Navbar = () => {
   const { user, logout } = useAuth();
   const navigate = useNavigate();
   const [showNotifications, setShowNotifications] = useState(false);
+  const [notifications, setNotifications] = useState([]);
+  const [unreadCount, setUnreadCount] = useState(0);
 
-  // Mock notifications to satisfy the "Notification Service" visually
-  const [notifications, setNotifications] = useState([
-    {
-      id: 1,
-      title: "Welcome to LMS Platform!",
-      message: "Start browsing courses from your dashboard.",
-      time: "Just now",
-      unread: true,
-    },
-    {
-      id: 2,
-      title: "New Quiz Available",
-      message: "A new quiz has been published in 'Introduction to Spring Boot'.",
-      time: "2 hours ago",
-      unread: true,
-    },
-    {
-      id: 3,
-      title: "Enrollment Confirmed",
-      message: "You have successfully enrolled in 'Full Stack Development'.",
-      time: "1 day ago",
-      unread: false,
-    },
-  ]);
+  useEffect(() => {
+    if (user) {
+      fetchNotifications();
+      const interval = setInterval(fetchNotifications, 15000); // Poll every 15 seconds
+      return () => clearInterval(interval);
+    }
+  }, [user]);
+
+  const fetchNotifications = async () => {
+    try {
+      const res = await notificationService.getNotifications();
+      if (res.success && res.data) {
+        setNotifications(res.data);
+        const count = res.data.filter((n) => !n.read && !n.isRead).length;
+        setUnreadCount(count);
+      }
+    } catch (err) {
+      console.error("Failed to fetch notifications:", err);
+    }
+  };
 
   const handleLogout = async () => {
     await logout();
     navigate("/login");
   };
 
-  const markAllRead = () => {
-    setNotifications(
-      notifications.map((n) => ({ ...n, unread: false }))
-    );
+  const markAllRead = async () => {
+    try {
+      await notificationService.markAllAsRead();
+      setNotifications(
+        notifications.map((n) => ({ ...n, read: true, isRead: true }))
+      );
+      setUnreadCount(0);
+    } catch (err) {
+      console.error("Failed to mark all notifications as read:", err);
+    }
   };
 
-  const unreadCount = notifications.filter((n) => n.unread).length;
+  const handleNotificationClick = async (notif) => {
+    const isUnread = !notif.read && !notif.isRead;
+    if (isUnread) {
+      try {
+        await notificationService.markAsRead(notif.id);
+        setNotifications(
+          notifications.map((n) => (n.id === notif.id ? { ...n, read: true, isRead: true } : n))
+        );
+        setUnreadCount((prev) => Math.max(0, prev - 1));
+      } catch (err) {
+        console.error("Failed to mark notification as read:", err);
+      }
+    }
+  };
+
+  const formatNotificationTime = (createdAtString) => {
+    if (!createdAtString) return "Just now";
+    try {
+      const date = new Date(createdAtString);
+      const now = new Date();
+      const diffMs = now - date;
+      const diffMins = Math.floor(diffMs / 60000);
+      if (diffMins < 1) return "Just now";
+      if (diffMins < 60) return `${diffMins}m ago`;
+      const diffHours = Math.floor(diffMins / 60);
+      if (diffHours < 24) return `${diffHours}h ago`;
+      const diffDays = Math.floor(diffHours / 24);
+      return `${diffDays}d ago`;
+    } catch (e) {
+      return "Just now";
+    }
+  };
 
   return (
     <header className="sticky top-0 z-30 flex items-center justify-between h-16 px-6 bg-slate-900/80 backdrop-blur-md border-b border-slate-800">
@@ -113,30 +149,34 @@ const Navbar = () => {
                       No notifications
                     </div>
                   ) : (
-                    notifications.map((notif) => (
-                      <div
-                        key={notif.id}
-                        className={`p-4 transition-colors duration-200 ${
-                          notif.unread ? "bg-indigo-500/5" : "hover:bg-slate-800/30"
-                        }`}
-                      >
-                        <div className="flex justify-between items-start gap-2 mb-1">
-                          <span
-                            className={`text-xs font-semibold ${
-                              notif.unread ? "text-indigo-300" : "text-slate-300"
-                            }`}
-                          >
-                            {notif.title}
-                          </span>
-                          <span className="text-[10px] text-slate-500 whitespace-nowrap">
-                            {notif.time}
-                          </span>
+                    notifications.map((notif) => {
+                      const isUnread = !notif.read && !notif.isRead;
+                      return (
+                        <div
+                          key={notif.id}
+                          onClick={() => handleNotificationClick(notif)}
+                          className={`p-4 transition-colors duration-200 cursor-pointer ${
+                            isUnread ? "bg-indigo-500/5 hover:bg-indigo-500/10" : "hover:bg-slate-800/30"
+                          }`}
+                        >
+                          <div className="flex justify-between items-start gap-2 mb-1">
+                            <span
+                              className={`text-xs font-semibold ${
+                                isUnread ? "text-indigo-300" : "text-slate-300"
+                              }`}
+                            >
+                              {notif.title}
+                            </span>
+                            <span className="text-[10px] text-slate-500 whitespace-nowrap">
+                              {formatNotificationTime(notif.createdAt)}
+                            </span>
+                          </div>
+                          <p className="text-xs text-slate-400 leading-relaxed whitespace-pre-line">
+                            {notif.message}
+                          </p>
                         </div>
-                        <p className="text-xs text-slate-400 leading-relaxed">
-                          {notif.message}
-                        </p>
-                      </div>
-                    ))
+                      );
+                    })
                   )}
                 </div>
               </div>

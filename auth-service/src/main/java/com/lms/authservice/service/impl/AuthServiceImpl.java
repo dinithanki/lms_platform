@@ -65,33 +65,48 @@ public class AuthServiceImpl implements AuthService {
                 : "USER";
         user.setRole(assignedRole);
         
-        // Account starts as unverified
-        user.setVerified(false);
-        
-        // Generate a 6-digit OTP
-        String otp = String.format("%06d", new Random().nextInt(1000000));
-        user.setOtp(otp);
-        user.setOtpExpiry(LocalDateTime.now().plusMinutes(5));
+        // Account starts as verified immediately
+        user.setVerified(true);
 
         User savedUser = userRepository.save(user);
 
-        // Call notification-service to send OTP
-        try {
-            Map<String, Object> otpRequest = new HashMap<>();
-            otpRequest.put("to", savedUser.getEmail());
-            otpRequest.put("otp", otp);
+        // Now, synchronously create the user profile in User Service
+        Map<String, Object> profileRequest = new HashMap<>();
+        profileRequest.put("id", savedUser.getId());
+        profileRequest.put("name", savedUser.getName());
+        profileRequest.put("email", savedUser.getEmail());
+        profileRequest.put("role", savedUser.getRole());
 
+        try {
             HttpHeaders headers = new HttpHeaders();
             headers.setContentType(MediaType.APPLICATION_JSON);
-            HttpEntity<Map<String, Object>> entity = new HttpEntity<>(otpRequest, headers);
-
-            restTemplate.postForEntity(notificationServiceUrl + "/api/notify/otp", entity, Void.class);
+            HttpEntity<Map<String, Object>> entity = new HttpEntity<>(profileRequest, headers);
+            
+            restTemplate.postForEntity("http://localhost:8082/api/users", entity, Void.class);
         } catch (Exception e) {
-            // Log warning but don't fail transaction if email sending itself fails in dev mode
-            System.err.println("Warning: failed to send OTP email: " + e.getMessage());
+            throw new RuntimeException("Failed to create user profile in User Service. Registration rolled back: " + e.getMessage(), e);
         }
 
-        return new AuthResponseDTO("Registration successful. OTP sent to your email. Please verify to activate your account.", null);
+        // Send a welcome guideline in-app notification
+        try {
+            Map<String, Object> welcomeRequest = new HashMap<>();
+            welcomeRequest.put("recipient", savedUser.getEmail());
+            welcomeRequest.put("title", "Welcome to LMS Platform! 🎓");
+            welcomeRequest.put("message", "We are excited to have you! Here is a quick guideline to get you started: \n1. Complete your profile details in the Profile tab.\n2. Browse active courses under Browse Courses.\n3. Enroll and navigate to My Courses to start studying!\n4. Take course quizzes and check your score to qualify for a certificate!");
+            welcomeRequest.put("type", "GUIDELINE");
+
+            HttpHeaders notificationHeaders = new HttpHeaders();
+            notificationHeaders.setContentType(MediaType.APPLICATION_JSON);
+            HttpEntity<Map<String, Object>> welcomeEntity = new HttpEntity<>(welcomeRequest, notificationHeaders);
+
+            restTemplate.postForEntity(notificationServiceUrl + "/api/notify/in-app", welcomeEntity, Void.class);
+        } catch (Exception e) {
+            System.err.println("Warning: Failed to send welcome guideline in-app notification: " + e.getMessage());
+        }
+
+        // Generate token and return directly so the frontend logs in the user immediately
+        String token = jwtUtil.generateToken(savedUser.getId(), savedUser.getEmail(), savedUser.getRole());
+        return new AuthResponseDTO("Registration successful.", token);
     }
 
     @Override
@@ -162,6 +177,23 @@ public class AuthServiceImpl implements AuthService {
             throw new RuntimeException("Failed to create user profile in User Service. OTP verification rolled back: " + e.getMessage(), e);
         }
 
+        // Send a welcome guideline in-app notification
+        try {
+            Map<String, Object> welcomeRequest = new HashMap<>();
+            welcomeRequest.put("recipient", savedUser.getEmail());
+            welcomeRequest.put("title", "Welcome to LMS Platform! 🎓");
+            welcomeRequest.put("message", "We are excited to have you! Here is a quick guideline to get you started: \n1. Complete your profile details in the Profile tab.\n2. Browse active courses under Browse Courses.\n3. Enroll and navigate to My Courses to start studying!\n4. Take course quizzes and check your score to qualify for a certificate!");
+            welcomeRequest.put("type", "GUIDELINE");
+
+            HttpHeaders notificationHeaders = new HttpHeaders();
+            notificationHeaders.setContentType(MediaType.APPLICATION_JSON);
+            HttpEntity<Map<String, Object>> welcomeEntity = new HttpEntity<>(welcomeRequest, notificationHeaders);
+
+            restTemplate.postForEntity(notificationServiceUrl + "/api/notify/in-app", welcomeEntity, Void.class);
+        } catch (Exception e) {
+            System.err.println("Warning: Failed to send welcome guideline in-app notification: " + e.getMessage());
+        }
+
         // Generate token
         String token = jwtUtil.generateToken(savedUser.getId(), savedUser.getEmail(), savedUser.getRole());
         return new AuthResponseDTO("Account verified successfully", token);
@@ -181,23 +213,13 @@ public class AuthServiceImpl implements AuthService {
         user.setResetTokenExpiry(LocalDateTime.now().plusMinutes(15));
         userRepository.save(user);
 
-        // Send reset email via notification service
-        try {
-            Map<String, Object> resetRequest = new HashMap<>();
-            resetRequest.put("to", user.getEmail());
-            // Link to the frontend reset-password route
-            resetRequest.put("resetLink", "http://localhost:5173/reset-password?token=" + token);
+        // Output the reset link to the console for local debugging
+        System.out.println("==================================================");
+        System.out.println("DEBUG: PASSWORD RESET LINK FOR " + user.getEmail() + " IS:");
+        System.out.println("http://localhost:5173/reset-password?token=" + token);
+        System.out.println("==================================================");
 
-            HttpHeaders headers = new HttpHeaders();
-            headers.setContentType(MediaType.APPLICATION_JSON);
-            HttpEntity<Map<String, Object>> entity = new HttpEntity<>(resetRequest, headers);
-
-            restTemplate.postForEntity(notificationServiceUrl + "/api/notify/reset-password", entity, Void.class);
-        } catch (Exception e) {
-            System.err.println("Warning: failed to send forgot password email: " + e.getMessage());
-        }
-
-        return new AuthResponseDTO("Password reset link has been sent to your email.", null);
+        return new AuthResponseDTO("Password reset link has been generated. Please check server console logs.", null);
     }
 
     @Override

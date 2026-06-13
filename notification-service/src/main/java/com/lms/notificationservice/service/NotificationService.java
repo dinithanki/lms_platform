@@ -1,7 +1,13 @@
 package com.lms.notificationservice.service;
 
+import com.lms.notificationservice.dto.InAppNotificationRequest;
+import com.lms.notificationservice.model.InAppNotification;
+import java.util.List;
+
 public interface NotificationService {
-    void sendWelcomeEmail(String to, String name);
-    void sendOtpEmail(String to, String otp);
-    void sendResetPasswordEmail(String to, String resetLink);
+    InAppNotification createInAppNotification(InAppNotificationRequest request);
+    List<InAppNotification> getInAppNotifications(String email);
+    long getUnreadCount(String email);
+    void markAsRead(Long id, String email);
+    void markAllAsRead(String email);
 }

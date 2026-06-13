@@ -6,6 +6,7 @@ import authService from "../services/authService";
 import quizService from "../services/quizService";
 import CourseCard from "../components/CourseCard";
 import { Link } from "react-router-dom";
+import notificationService from "../services/notificationService";
 
 const Dashboard = () => {
   const { user } = useAuth();
@@ -29,6 +30,12 @@ const Dashboard = () => {
   // Admin specific State
   const [users, setUsers] = useState([]);
   const [roleUpdateLoading, setRoleUpdateLoading] = useState(null);
+
+  // Admin broadcast State
+  const [broadcastTitle, setBroadcastTitle] = useState("");
+  const [broadcastMsg, setBroadcastMsg] = useState("");
+  const [broadcastType, setBroadcastType] = useState("UPDATE");
+  const [broadcastLoading, setBroadcastLoading] = useState(false);
 
   useEffect(() => {
     fetchDashboardData();
@@ -125,6 +132,28 @@ const Dashboard = () => {
       alert("Failed to update user role.");
     } finally {
       setRoleUpdateLoading(null);
+    }
+  };
+
+  const handleBroadcastSubmit = async (e) => {
+    e.preventDefault();
+    if (!broadcastTitle.trim() || !broadcastMsg.trim()) return;
+    setBroadcastLoading(true);
+    try {
+      await notificationService.createNotification(
+        "ALL",
+        broadcastTitle,
+        broadcastMsg,
+        broadcastType
+      );
+      setBroadcastTitle("");
+      setBroadcastMsg("");
+      alert("Platform-wide update notification broadcasted successfully!");
+    } catch (err) {
+      console.error("Failed to broadcast notification:", err);
+      alert("Failed to broadcast notification. Please try again.");
+    } finally {
+      setBroadcastLoading(false);
     }
   };
 
@@ -483,6 +512,82 @@ const Dashboard = () => {
               <p className="text-xl font-bold text-slate-200 mt-0.5">5 Services</p>
             </div>
           </div>
+        </div>
+
+        {/* Broadcast System Update Panel */}
+        <div className="p-6 bg-slate-900 border border-slate-800 rounded-2xl flex flex-col gap-4">
+          <div className="flex items-center gap-2 pb-2 border-b border-slate-800">
+            <div className="p-2 bg-indigo-500/10 text-indigo-400 rounded-lg">
+              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M11 5.882V19.24a1.76 1.76 0 01-3.417.592l-2.147-6.15M18 13a3 3 0 100-6M5.436 13.683A4.001 4.001 0 017 6h1.832c4.1 0 7.625-1.234 9.168-3v14c-1.543-1.766-5.067-3-9.168-3H7a3.988 3.988 0 01-1.564-.317z" />
+              </svg>
+            </div>
+            <div>
+              <h3 className="text-sm font-bold text-slate-200">Broadcast Platform Notification</h3>
+              <p className="text-[10px] text-slate-500 font-medium">Send a global update message to all users instantly.</p>
+            </div>
+          </div>
+          <form onSubmit={handleBroadcastSubmit} className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-2">
+            <div className="flex flex-col gap-3">
+              <div className="flex flex-col gap-1.5">
+                <label className="text-[10px] font-bold uppercase tracking-widest text-slate-400">Broadcast Title</label>
+                <input
+                  type="text"
+                  value={broadcastTitle}
+                  onChange={(e) => setBroadcastTitle(e.target.value)}
+                  placeholder="e.g., Scheduled System Maintenance or New Feature Release"
+                  className="bg-slate-800 border border-slate-800 focus:border-indigo-500/60 rounded-xl py-2 px-3.5 text-xs text-slate-200 focus:outline-none transition-all duration-200"
+                  required
+                />
+              </div>
+              <div className="flex flex-col gap-1.5">
+                <label className="text-[10px] font-bold uppercase tracking-widest text-slate-400">Notification Type</label>
+                <select
+                  value={broadcastType}
+                  onChange={(e) => setBroadcastType(e.target.value)}
+                  className="bg-slate-800 border border-slate-800 rounded-xl py-2 px-3.5 text-xs text-slate-300 focus:outline-none transition-all duration-200 cursor-pointer"
+                >
+                  <option value="UPDATE">Platform Update</option>
+                  <option value="GUIDELINE">User Guideline</option>
+                  <option value="GENERAL">General Notice</option>
+                </select>
+              </div>
+            </div>
+            <div className="flex flex-col gap-3">
+              <div className="flex flex-col gap-1.5 h-full">
+                <label className="text-[10px] font-bold uppercase tracking-widest text-slate-400">Message Content</label>
+                <textarea
+                  rows="3"
+                  value={broadcastMsg}
+                  onChange={(e) => setBroadcastMsg(e.target.value)}
+                  placeholder="Compose your broadcast message details here..."
+                  className="bg-slate-800 border border-slate-800 focus:border-indigo-500/60 rounded-xl py-2 px-3.5 text-xs text-slate-200 focus:outline-none transition-all duration-200 resize-none h-full"
+                  required
+                />
+              </div>
+            </div>
+            <div className="md:col-span-2 flex justify-end">
+              <button
+                type="submit"
+                disabled={broadcastLoading}
+                className="px-5 py-2.5 bg-indigo-600 hover:bg-indigo-500 active:bg-indigo-700 disabled:bg-slate-800 disabled:text-slate-600 text-white font-semibold text-xs rounded-xl transition-all duration-200 flex items-center gap-2 cursor-pointer shadow-lg shadow-indigo-600/15"
+              >
+                {broadcastLoading ? (
+                  <>
+                    <div className="w-3.5 h-3.5 border-2 border-slate-400 border-t-transparent rounded-full animate-spin"></div>
+                    Broadcasting...
+                  </>
+                ) : (
+                  <>
+                    <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8" />
+                    </svg>
+                    Broadcast Now
+                  </>
+                )}
+              </button>
+            </div>
+          </form>
         </div>
 
         {/* User Management Section */}

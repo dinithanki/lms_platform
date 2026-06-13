@@ -60,42 +60,26 @@ public class EnrollmentServiceImpl implements EnrollmentService {
         enrollment.setCourseId(courseId);
         enrollmentRepository.save(enrollment);
 
-        // Send confirmation email asynchronously/gracefully
+        // Send in-app notification
         try {
             Map<?, ?> userProfile = restTemplate.getForObject(USER_SERVICE_URL + studentId, Map.class);
             if (userProfile != null && userProfile.containsKey("email")) {
                 String studentEmail = (String) userProfile.get("email");
-                String studentName = (String) userProfile.get("name");
-
-                Map<String, Object> emailRequest = new HashMap<>();
-                emailRequest.put("to", studentEmail);
-                emailRequest.put("subject", "Course Enrollment Success - " + course.getTitle());
-                emailRequest.put("message", 
-                    "<div style=\"font-family: 'Segoe UI', Arial, sans-serif; max-width: 600px; margin: 20px auto; background-color: #0f172a; border-radius: 20px; border: 1px solid #1e293b; color: #f3f4f6; overflow: hidden; box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.5);\">" +
-                    "  <div style=\"background: linear-gradient(135deg, #6366f1 0%, #4f46e5 100%); padding: 30px; text-align: center;\">" +
-                    "    <h1 style=\"color: #ffffff; margin: 0; font-size: 24px; font-weight: 800;\">Enrollment Confirmed!</h1>" +
-                    "  </div>" +
-                    "  <div style=\"padding: 30px; line-height: 1.6; color: #cbd5e1;\">" +
-                    "    <p>Dear <strong>" + studentName + "</strong>,</p>" +
-                    "    <p>Congratulations! You have successfully enrolled in the course: <strong style=\"color: #6366f1;\">" + course.getTitle() + "</strong>.</p>" +
-                    "    <p>You can now access all learning materials, lessons, and course quizzes on the platform dashboard.</p>" +
-                    "    <div style=\"text-align: center; margin: 30px 0;\">" +
-                    "      <a href=\"http://localhost:5173/dashboard\" style=\"background-color: #4f46e5; color: #ffffff; padding: 12px 25px; text-decoration: none; border-radius: 10px; font-weight: bold; display: inline-block; box-shadow: 0 4px 6px -1px rgba(79, 70, 229, 0.2);\">Go to Dashboard</a>" +
-                    "    </div>" +
-                    "    <p>If you have any questions, feel free to contact your instructor or course support team.</p>" +
-                    "    <p>Warm regards,<br>The LMS Platform Team</p>" +
-                    "  </div>" +
-                    "</div>"
-                );
 
                 HttpHeaders headers = new HttpHeaders();
                 headers.setContentType(MediaType.APPLICATION_JSON);
-                HttpEntity<Map<String, Object>> entity = new HttpEntity<>(emailRequest, headers);
 
-                restTemplate.postForEntity(NOTIFICATION_SERVICE_URL, entity, Void.class);
+                Map<String, Object> inAppRequest = new HashMap<>();
+                inAppRequest.put("recipient", studentEmail);
+                inAppRequest.put("title", "Course Enrollment Confirmed! 🎓");
+                inAppRequest.put("message", "You have successfully enrolled in the course: " + course.getTitle() + ". You can now access all learning materials and quizzes from your dashboard.");
+                inAppRequest.put("type", "COURSE_ENROLLMENT");
+
+                HttpEntity<Map<String, Object>> inAppEntity = new HttpEntity<>(inAppRequest, headers);
+                restTemplate.postForEntity("http://localhost:8085/api/notify/in-app", inAppEntity, Void.class);
             }
         } catch (Exception e) {
-            System.err.println("Warning: Failed to send course enrollment confirmation email: " + e.getMessage());
+            System.err.println("Warning: Failed to send in-app enrollment notification: " + e.getMessage());
         }
     }
 

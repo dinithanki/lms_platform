@@ -15,15 +15,3 @@ spring:
     properties:
       hibernate:
         format_sql: true
-
-  mail:
-    host: ${SPRING_MAIL_HOST:mock}
-    port: ${SPRING_MAIL_PORT:587}
-    username: ${SPRING_MAIL_USERNAME:mock}
-    password: ${SPRING_MAIL_PASSWORD:mock}
-    properties:
-      mail:
-        smtp:
-          auth: true
-          starttls:
-            enable: true
