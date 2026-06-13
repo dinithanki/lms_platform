@@ -5,42 +5,8 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="6f586ae9-defd-483d-b25c-09243b81dc36" name="Changes" comment="">
-      <change afterPath="$PROJECT_DIR$/auth-service/src/main/java/com/lms/authservice/config/SecurityConfig.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/auth-service/src/main/java/com/lms/authservice/controller/AuthController.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/auth-service/src/main/java/com/lms/authservice/dto/request/LoginRequestDTO.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/auth-service/src/main/java/com/lms/authservice/dto/request/RegisterRequestDTO.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/auth-service/src/main/java/com/lms/authservice/dto/response/AuthResponseDTO.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/auth-service/src/main/java/com/lms/authservice/dto/response/UserResponseDTO.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/auth-service/src/main/java/com/lms/authservice/entity/User.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/auth-service/src/main/java/com/lms/authservice/mapper/UserMapper.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/auth-service/src/main/java/com/lms/authservice/repository/UserRepository.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/auth-service/src/main/java/com/lms/authservice/security/JwtUtil.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/auth-service/src/main/java/com/lms/authservice/service/AuthService.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/auth-service/src/main/java/com/lms/authservice/service/impl/AuthServiceImpl.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/README.md" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/README.md" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/services/api-gateway/Dockerfile" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/services/api-gateway/pom.xml" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/services/auth-service/Dockerfile" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/services/auth-service/pom.xml" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/services/course-service/Dockerfile" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/services/course-service/pom.xml" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/services/enrollment-service/Dockerfile" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/services/enrollment-service/pom.xml" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/services/progress-service/Dockerfile" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/services/progress-service/pom.xml" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/docs/api-specs.md" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/docs/architecture.md" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/docs/database-design.md" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/frontend/README.md" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/frontend/package.json" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/frontend/src/App.jsx" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/frontend/src/main.jsx" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/frontend/vite.config.js" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/infrastructure/README.md" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/infrastructure/docker/docker-compose.yml" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/scripts/README.md" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/shared/README.md" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/auth-service/src/main/java/com/lms/authservice/service/impl/AuthServiceImpl.java" beforeDir="false" afterPath="$PROJECT_DIR$/auth-service/src/main/java/com/lms/authservice/service/impl/AuthServiceImpl.java" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -157,6 +123,8 @@
       <workItem from="1781245625406" duration="3505000" />
       <workItem from="1781261900061" duration="496000" />
       <workItem from="1781262703321" duration="815000" />
+      <workItem from="1781285576104" duration="127000" />
+      <workItem from="1781320460538" duration="436000" />
     </task>
     <servers />
   </component>

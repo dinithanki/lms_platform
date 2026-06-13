@@ -1,0 +1,174 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+    <title>Certificate of Completion</title>
+    <style type="text/css">
+        @page {
+            size: 11in 8.5in; /* Standard Letter Landscape */
+            margin: 0;
+        }
+        body {
+            font-family: 'Georgia', 'Times New Roman', serif;
+            background-color: #f7f9fa;
+            margin: 0;
+            padding: 0;
+            color: #2c3e50;
+        }
+        .cert-container {
+            width: 10in;
+            height: 7.5in;
+            margin: 0.4in auto;
+            background-color: #ffffff;
+            border: 20px solid #1a365d; /* Dark navy border */
+            position: relative;
+            box-sizing: border-box;
+        }
+        .cert-inner-border {
+            border: 4px double #d4af37; /* Double gold border */
+            height: 100%;
+            width: 100%;
+            box-sizing: border-box;
+            padding: 40px;
+            position: relative;
+        }
+        .cert-header {
+            text-align: center;
+            margin-top: 20px;
+        }
+        .gold-seal {
+            color: #d4af37;
+            font-size: 28px;
+            letter-spacing: 4px;
+            font-weight: bold;
+            margin-bottom: 10px;
+        }
+        .cert-title {
+            font-size: 44px;
+            color: #1a365d;
+            font-weight: bold;
+            letter-spacing: 2px;
+            margin: 10px 0;
+            text-transform: uppercase;
+        }
+        .cert-subtitle {
+            font-size: 18px;
+            font-style: italic;
+            color: #7f8c8d;
+            margin-bottom: 30px;
+        }
+        .student-name {
+            font-size: 36px;
+            font-weight: bold;
+            color: #2c3e50;
+            border-bottom: 2px solid #d4af37;
+            display: inline-block;
+            padding-bottom: 5px;
+            margin-bottom: 25px;
+            min-width: 350px;
+            text-align: center;
+        }
+        .cert-text {
+            font-size: 18px;
+            line-height: 1.6;
+            margin: 15px auto;
+            max-width: 650px;
+            text-align: center;
+        }
+        .course-name {
+            font-size: 26px;
+            font-weight: bold;
+            color: #1a365d;
+            margin: 10px 0;
+        }
+        .cert-score {
+            font-size: 18px;
+            font-weight: bold;
+            color: #27ae60;
+            margin-top: 15px;
+        }
+        .cert-footer {
+            margin-top: 60px;
+            width: 100%;
+        }
+        .footer-table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        .footer-table td {
+            width: 33%;
+            vertical-align: bottom;
+            font-size: 14px;
+            color: #7f8c8d;
+        }
+        .left-info {
+            text-align: left;
+            line-height: 1.8;
+        }
+        .center-seal {
+            text-align: center;
+        }
+        .seal-image {
+            width: 80px;
+            height: 80px;
+            display: block;
+            margin: 0 auto;
+        }
+        .right-sig {
+            text-align: center;
+        }
+        .sig-line {
+            border-top: 1px solid #bdc3c7;
+            width: 180px;
+            margin: 0 auto 5px auto;
+        }
+        .sig-title {
+            font-size: 14px;
+            font-weight: bold;
+            color: #2c3e50;
+        }
+    </style>
+</head>
+<body>
+    <div class="cert-container">
+        <div class="cert-inner-border">
+            <div class="cert-header">
+                <div class="gold-seal">LMS ACADEMY</div>
+                <div class="cert-title">Certificate of Completion</div>
+                <div class="cert-subtitle">This certificate is proudly presented to</div>
+            </div>
+
+            <div style="text-align: center;">
+                <div class="student-name" th:text="${studentName}">John Doe</div>
+            </div>
+
+            <div class="cert-text">
+                for successfully meeting all academic requirements and passing the final examinations for the course:
+                <div class="course-name" th:text="${courseName}">Spring Boot Microservices Architect</div>
+                with an overall passing grade of <span th:text="${#numbers.formatDecimal(score, 1, 1)} + '%'">85.0%</span>.
+            </div>
+
+            <div class="cert-footer">
+                <table class="footer-table">
+                    <tr>
+                        <td class="left-info">
+                            <strong>Certificate ID:</strong> <span th:text="${certificateId}">CERT-12345</span><br />
+                            <strong>Date of Issue:</strong> <span th:text="${issueDate}">June 13, 2026</span>
+                        </td>
+                        <td class="center-seal">
+                            <!-- A CSS styled seal since we don't have images -->
+                            <div style="color: #d4af37; font-size: 32px; font-weight: bold;">★ ★ ★</div>
+                            <div style="color: #1a365d; font-size: 11px; letter-spacing: 2px; text-transform: uppercase;">Verified Graduate</div>
+                        </td>
+                        <td class="right-sig">
+                            <div class="sig-line"></div>
+                            <div class="sig-title">Program Director</div>
+                            <div>LMS Academy Certification Board</div>
+                        </td>
+                    </tr>
+                </table>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

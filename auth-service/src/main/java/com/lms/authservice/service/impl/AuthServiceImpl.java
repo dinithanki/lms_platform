@@ -13,9 +13,16 @@ import com.lms.authservice.service.AuthService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.client.RestTemplate;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.MediaType;
+import org.springframework.http.HttpEntity;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 @Service
@@ -30,7 +37,11 @@ public class AuthServiceImpl implements AuthService {
     @Autowired
     private BCryptPasswordEncoder encoder;
 
+    @Autowired
+    private RestTemplate restTemplate;
+
     @Override
+    @Transactional
     public AuthResponseDTO register(RegisterRequestDTO request) {
 
         if (userRepository.findByEmail(request.getEmail()).isPresent()) {
@@ -48,6 +59,25 @@ public class AuthServiceImpl implements AuthService {
         user.setRole(assignedRole);
 
         User savedUser = userRepository.save(user);
+
+        // Synchronously call User Service to create the user profile.
+        // If this HTTP call fails, the transaction is rolled back.
+        Map<String, Object> profileRequest = new HashMap<>();
+        profileRequest.put("id", savedUser.getId());
+        profileRequest.put("name", savedUser.getName());
+        profileRequest.put("email", savedUser.getEmail());
+        profileRequest.put("role", savedUser.getRole());
+
+        try {
+            HttpHeaders headers = new HttpHeaders();
+            headers.setContentType(MediaType.APPLICATION_JSON);
+            HttpEntity<Map<String, Object>> entity = new HttpEntity<>(profileRequest, headers);
+            
+            restTemplate.postForEntity("http://localhost:8082/api/users", entity, Void.class);
+        } catch (Exception e) {
+            throw new RuntimeException("Failed to create user profile in User Service. Registration rolled back: " + e.getMessage(), e);
+        }
+
         String token = jwtUtil.generateToken(savedUser.getId(), savedUser.getEmail(), savedUser.getRole());
 
         return new AuthResponseDTO("User registered successfully", token);
