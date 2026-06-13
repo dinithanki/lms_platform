@@ -11,6 +11,7 @@ const Login = () => {
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
+  const [isUnverified, setIsUnverified] = useState(false);
 
   // Redirect to dashboard or previous location
   const from = location.state?.from?.pathname || "/dashboard";
@@ -18,6 +19,7 @@ const Login = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError("");
+    setIsUnverified(false);
 
     if (!email || !password) {
       setError("Please fill in all fields.");
@@ -30,10 +32,12 @@ const Login = () => {
       navigate(from, { replace: true });
     } catch (err) {
       console.error(err);
-      setError(
-        err.response?.data?.message ||
-          "Authentication failed. Please verify your credentials."
-      );
+      const errMsg = err.response?.data?.message || err.message || "Authentication failed.";
+      setError(errMsg);
+      
+      if (errMsg.includes("verify your email") || errMsg.includes("not verified")) {
+        setIsUnverified(true);
+      }
     } finally {
       setLoading(false);
     }
@@ -74,21 +78,32 @@ const Login = () => {
         {/* Form */}
         <form onSubmit={handleSubmit} className="flex flex-col gap-5">
           {error && (
-            <div className="flex items-start gap-2.5 bg-rose-500/10 border border-rose-500/20 text-rose-300 px-4 py-3 rounded-2xl text-xs leading-relaxed animate-shake">
-              <svg
-                className="w-4 h-4 shrink-0 mt-0.5 text-rose-400"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth="2"
-                  d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
-                />
-              </svg>
-              <span>{error}</span>
+            <div className="flex flex-col gap-2 bg-rose-500/10 border border-rose-500/20 text-rose-300 px-4 py-3 rounded-2xl text-xs leading-relaxed animate-shake">
+              <div className="flex items-start gap-2.5">
+                <svg
+                  className="w-4 h-4 shrink-0 mt-0.5 text-rose-400"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth="2"
+                    d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+                  />
+                </svg>
+                <span>{error}</span>
+              </div>
+              {isUnverified && (
+                <button
+                  type="button"
+                  onClick={() => navigate("/register", { state: { verifyEmail: email } })}
+                  className="text-indigo-400 hover:text-indigo-300 font-bold mt-1 text-left bg-transparent border-none cursor-pointer self-start"
+                >
+                  Click here to verify email and enter OTP &rarr;
+                </button>
+              )}
             </div>
           )}
 
@@ -124,9 +139,17 @@ const Login = () => {
           </div>
 
           <div className="flex flex-col gap-2">
-            <label className="text-[10px] font-bold uppercase tracking-widest text-slate-400 ml-1">
-              Password
-            </label>
+            <div className="flex items-center justify-between ml-1">
+              <label className="text-[10px] font-bold uppercase tracking-widest text-slate-400">
+                Password
+              </label>
+              <Link
+                to="/forgot-password"
+                className="text-[10px] font-semibold text-indigo-400 hover:text-indigo-300 transition-colors"
+              >
+                Forgot Password?
+              </Link>
+            </div>
             <div className="relative">
               <span className="absolute inset-y-0 left-0 flex items-center pl-3.5 text-slate-500">
                 <svg

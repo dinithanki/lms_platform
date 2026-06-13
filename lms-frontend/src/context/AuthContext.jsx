@@ -80,9 +80,31 @@ export const AuthProvider = ({ children }) => {
         const profile = await authService.getMe();
         setUser(profile);
         localStorage.setItem("user", JSON.stringify(profile));
+        return { success: true, profile };
+      }
+      return { success: false, requiresVerification: true, message: data.message };
+    } catch (error) {
+      setUser(null);
+      localStorage.removeItem("token");
+      localStorage.removeItem("user");
+      throw error;
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleVerifyOtp = async (email, otp) => {
+    setLoading(true);
+    try {
+      const data = await authService.verifyOtp(email, otp);
+      if (data.token) {
+        localStorage.setItem("token", data.token);
+        const profile = await authService.getMe();
+        setUser(profile);
+        localStorage.setItem("user", JSON.stringify(profile));
         return profile;
       } else {
-        throw new Error("No token returned after registration.");
+        throw new Error(data.message || "Verification failed.");
       }
     } catch (error) {
       setUser(null);
@@ -110,6 +132,7 @@ export const AuthProvider = ({ children }) => {
     loading,
     login: handleLogin,
     register: handleRegister,
+    verifyOtp: handleVerifyOtp,
     logout: handleLogout,
     updateUserProfileLocal,
   };

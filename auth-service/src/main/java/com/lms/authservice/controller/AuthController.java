@@ -3,6 +3,9 @@ package com.lms.authservice.controller;
 import com.lms.authservice.dto.request.LoginRequestDTO;
 import com.lms.authservice.dto.request.RegisterRequestDTO;
 import com.lms.authservice.dto.request.RoleUpdateRequestDTO;
+import com.lms.authservice.dto.request.VerifyOtpRequestDTO;
+import com.lms.authservice.dto.request.ForgotPasswordRequestDTO;
+import com.lms.authservice.dto.request.ResetPasswordRequestDTO;
 import com.lms.authservice.dto.response.AuthResponseDTO;
 import com.lms.authservice.dto.response.UserResponseDTO;
 import com.lms.authservice.dto.response.ValidateTokenResponseDTO;
@@ -116,6 +119,36 @@ public class AuthController {
             @PathVariable Long userId,
             @RequestBody RoleUpdateRequestDTO request) {
         UserResponseDTO response = authService.updateUserRole(userId, request.getRole());
+        return ResponseEntity.ok(response);
+    }
+
+    @PostMapping("/verify-otp")
+    public ResponseEntity<AuthResponseDTO> verifyOtp(@RequestBody VerifyOtpRequestDTO request) {
+        AuthResponseDTO response = authService.verifyOtp(request.getEmail(), request.getOtp());
+        if (response.getToken() != null) {
+            ResponseCookie cookie = ResponseCookie.from("jwt", response.getToken())
+                    .httpOnly(true)
+                    .secure(false)
+                    .path("/")
+                    .maxAge(24 * 60 * 60)
+                    .sameSite("Lax")
+                    .build();
+            return ResponseEntity.ok()
+                    .header(HttpHeaders.SET_COOKIE, cookie.toString())
+                    .body(response);
+        }
+        return ResponseEntity.ok(response);
+    }
+
+    @PostMapping("/forgot-password")
+    public ResponseEntity<AuthResponseDTO> forgotPassword(@RequestBody ForgotPasswordRequestDTO request) {
+        AuthResponseDTO response = authService.requestForgotPassword(request.getEmail());
+        return ResponseEntity.ok(response);
+    }
+
+    @PostMapping("/reset-password")
+    public ResponseEntity<AuthResponseDTO> resetPassword(@RequestBody ResetPasswordRequestDTO request) {
+        AuthResponseDTO response = authService.resetPassword(request.getToken(), request.getNewPassword());
         return ResponseEntity.ok(response);
     }
 }

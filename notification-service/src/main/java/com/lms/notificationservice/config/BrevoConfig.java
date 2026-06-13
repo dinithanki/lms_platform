@@ -1,0 +1,16 @@
+package com.lms.notificationservice.config;
+
+import lombok.Getter;
+import lombok.Setter;
+import org.springframework.boot.context.properties.ConfigurationProperties;
+import org.springframework.context.annotation.Configuration;
+
+@Getter
+@Setter
+@Configuration
+@ConfigurationProperties(prefix = "brevo")
+public class BrevoConfig {
+    private String apiKey;
+    private String senderName;
+    private String senderEmail;
+}

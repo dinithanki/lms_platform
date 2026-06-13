@@ -39,6 +39,11 @@ spring:
           filters:
             - StripPrefix=1
 
+        - id: notification-service
+          uri: http://localhost:8085
+          predicates:
+            - Path=/api/notify/**
+
 # Log levels for debugging microservice calls through the gateway
 logging:
   level:

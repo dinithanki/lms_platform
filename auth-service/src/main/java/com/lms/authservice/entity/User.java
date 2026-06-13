@@ -23,4 +23,17 @@ public class User {
 
     private String role;
 
+    private boolean verified;
+
+    private String otp;
+
+    @Column(name = "otp_expiry")
+    private java.time.LocalDateTime otpExpiry;
+
+    @Column(name = "reset_token")
+    private String resetToken;
+
+    @Column(name = "reset_token_expiry")
+    private java.time.LocalDateTime resetTokenExpiry;
+
 }

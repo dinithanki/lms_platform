@@ -16,6 +16,21 @@ const authService = {
     return response.data; // Expecting { message, token }
   },
 
+  verifyOtp: async (email, otp) => {
+    const response = await api.post("/api/auth/verify-otp", { email, otp });
+    return response.data; // Expecting { message, token }
+  },
+
+  forgotPassword: async (email) => {
+    const response = await api.post("/api/auth/forgot-password", { email });
+    return response.data; // Expecting { message }
+  },
+
+  resetPassword: async (token, newPassword) => {
+    const response = await api.post("/api/auth/reset-password", { token, newPassword });
+    return response.data; // Expecting { message }
+  },
+
   logout: async () => {
     try {
       await api.post("/api/auth/logout");

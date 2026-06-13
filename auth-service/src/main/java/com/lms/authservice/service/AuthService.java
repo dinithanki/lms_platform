@@ -21,4 +21,10 @@ public interface AuthService {
     List<UserResponseDTO> getAllUsers();
 
     UserResponseDTO getCurrentUser(String email);
+
+    AuthResponseDTO verifyOtp(String email, String otp);
+
+    AuthResponseDTO requestForgotPassword(String email);
+
+    AuthResponseDTO resetPassword(String token, String newPassword);
 }

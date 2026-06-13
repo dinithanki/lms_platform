@@ -3,7 +3,7 @@ import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 
 const Register = () => {
-  const { register } = useAuth();
+  const { register, verifyOtp } = useAuth();
   const navigate = useNavigate();
 
   const [name, setName] = useState("");
@@ -12,6 +12,13 @@ const Register = () => {
   const [role, setRole] = useState("STUDENT"); // Default role
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
+
+  // OTP State
+  const [requiresOtp, setRequiresOtp] = useState(false);
+  const [otp, setOtp] = useState("");
+  const [otpError, setOtpError] = useState("");
+  const [otpLoading, setOtpLoading] = useState(false);
+  const [infoMessage, setInfoMessage] = useState("");
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -29,16 +36,48 @@ const Register = () => {
 
     setLoading(true);
     try {
-      await register(name, email, password, role);
-      navigate("/dashboard");
+      const result = await register(name, email, password, role);
+      if (result.requiresVerification) {
+        setRequiresOtp(true);
+        setInfoMessage(result.message || "OTP code sent to email.");
+      } else {
+        navigate("/dashboard");
+      }
     } catch (err) {
       console.error(err);
       setError(
         err.response?.data?.message ||
+          err.message ||
           "Registration failed. Email may already be in use."
       );
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleOtpSubmit = async (e) => {
+    e.preventDefault();
+    setOtpError("");
+    setOtpLoading(true);
+
+    if (!otp || otp.length !== 6) {
+      setOtpError("Please enter a valid 6-digit code.");
+      setOtpLoading(false);
+      return;
+    }
+
+    try {
+      await verifyOtp(email, otp);
+      navigate("/dashboard");
+    } catch (err) {
+      console.error(err);
+      setOtpError(
+        err.response?.data?.message ||
+          err.message ||
+          "Verification failed. Please check the OTP and try again."
+      );
+    } finally {
+      setOtpLoading(false);
     }
   };
 
@@ -49,60 +88,13 @@ const Register = () => {
       <div className="absolute bottom-1/4 left-1/4 w-96 h-96 bg-indigo-500/10 rounded-full blur-3xl"></div>
 
       <div className="w-full max-w-md bg-slate-900/40 backdrop-blur-xl border border-slate-800 rounded-3xl p-8 shadow-2xl shadow-black/85 z-10">
-        {/* Header */}
-        <div className="flex flex-col items-center mb-6">
-          <div className="flex items-center justify-center w-12 h-12 rounded-2xl bg-gradient-to-tr from-indigo-500 to-indigo-600 shadow-lg shadow-indigo-500/30 text-white mb-4">
-            <svg
-              className="w-7 h-7"
-              fill="none"
-              stroke="currentColor"
-              viewBox="0 0 24 24"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth="2.5"
-                d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"
-              />
-            </svg>
-          </div>
-          <h1 className="text-2xl font-bold text-slate-100 tracking-tight">
-            Create Account
-          </h1>
-          <p className="text-xs text-slate-400 mt-1">
-            Get started with our Learning Management System
-          </p>
-        </div>
-
-        {/* Form */}
-        <form onSubmit={handleSubmit} className="flex flex-col gap-4">
-          {error && (
-            <div className="flex items-start gap-2.5 bg-rose-500/10 border border-rose-500/20 text-rose-300 px-4 py-3 rounded-2xl text-xs leading-relaxed animate-shake">
-              <svg
-                className="w-4 h-4 shrink-0 mt-0.5 text-rose-400"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth="2"
-                  d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
-                />
-              </svg>
-              <span>{error}</span>
-            </div>
-          )}
-
-          <div className="flex flex-col gap-1.5">
-            <label className="text-[10px] font-bold uppercase tracking-widest text-slate-400 ml-1">
-              Full Name
-            </label>
-            <div className="relative">
-              <span className="absolute inset-y-0 left-0 flex items-center pl-3.5 text-slate-500">
+        {requiresOtp ? (
+          /* OTP Screen */
+          <div>
+            <div className="flex flex-col items-center mb-6">
+              <div className="flex items-center justify-center w-12 h-12 rounded-2xl bg-gradient-to-tr from-indigo-500 to-indigo-600 shadow-lg shadow-indigo-500/30 text-white mb-4">
                 <svg
-                  className="w-4 h-4"
+                  className="w-7 h-7"
                   fill="none"
                   stroke="currentColor"
                   viewBox="0 0 24 24"
@@ -110,122 +102,98 @@ const Register = () => {
                   <path
                     strokeLinecap="round"
                     strokeLinejoin="round"
-                    strokeWidth="2"
-                    d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"
-                  />
-                </svg>
-              </span>
-              <input
-                type="text"
-                value={name}
-                onChange={(e) => setName(e.target.value)}
-                className="w-full bg-slate-800/40 border border-slate-800 focus:border-indigo-500/60 focus:bg-slate-800/80 rounded-2xl py-3 pl-11 pr-4 text-sm text-slate-200 placeholder-slate-500 focus:outline-none transition-all duration-200"
-                placeholder="John Doe"
-                required
-              />
-            </div>
-          </div>
-
-          <div className="flex flex-col gap-1.5">
-            <label className="text-[10px] font-bold uppercase tracking-widest text-slate-400 ml-1">
-              Email Address
-            </label>
-            <div className="relative">
-              <span className="absolute inset-y-0 left-0 flex items-center pl-3.5 text-slate-500">
-                <svg
-                  className="w-4 h-4"
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth="2"
-                    d="M16 12a4 4 0 10-8 0 4 4 0 008 0zm0 0v1.5a2.5 2.5 0 005 0V12a9 9 0 10-9 9m4.5-1.206a8.959 8.959 0 01-4.5 1.206"
-                  />
-                </svg>
-              </span>
-              <input
-                type="email"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                className="w-full bg-slate-800/40 border border-slate-800 focus:border-indigo-500/60 focus:bg-slate-800/80 rounded-2xl py-3 pl-11 pr-4 text-sm text-slate-200 placeholder-slate-500 focus:outline-none transition-all duration-200"
-                placeholder="you@example.com"
-                required
-              />
-            </div>
-          </div>
-
-          <div className="flex flex-col gap-1.5">
-            <label className="text-[10px] font-bold uppercase tracking-widest text-slate-400 ml-1">
-              Password
-            </label>
-            <div className="relative">
-              <span className="absolute inset-y-0 left-0 flex items-center pl-3.5 text-slate-500">
-                <svg
-                  className="w-4 h-4"
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth="2"
+                    strokeWidth="2.5"
                     d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"
                   />
                 </svg>
-              </span>
-              <input
-                type="password"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                className="w-full bg-slate-800/40 border border-slate-800 focus:border-indigo-500/60 focus:bg-slate-800/80 rounded-2xl py-3 pl-11 pr-4 text-sm text-slate-200 placeholder-slate-500 focus:outline-none transition-all duration-200"
-                placeholder="Min. 6 characters"
-                required
-              />
+              </div>
+              <h1 className="text-2xl font-bold text-slate-100 tracking-tight">
+                Verify Email
+              </h1>
+              <p className="text-xs text-slate-400 mt-1.5 text-center px-4">
+                We sent a 6-digit verification code to{" "}
+                <span className="text-indigo-400 font-semibold">{email}</span>.
+              </p>
             </div>
-          </div>
 
-          <div className="flex flex-col gap-1.5">
-            <label className="text-[10px] font-bold uppercase tracking-widest text-slate-400 ml-1">
-              Select Role
-            </label>
-            <div className="relative">
-              <span className="absolute inset-y-0 left-0 flex items-center pl-3.5 text-slate-500">
-                <svg
-                  className="w-4 h-4"
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth="2"
-                    d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"
-                  />
-                </svg>
-              </span>
-              <select
-                value={role}
-                onChange={(e) => setRole(e.target.value)}
-                className="w-full bg-slate-805 bg-slate-800 border border-slate-800 focus:border-indigo-500/60 rounded-2xl py-3 pl-11 pr-4 text-sm text-slate-300 focus:outline-none transition-all duration-200 appearance-none cursor-pointer"
+            <form onSubmit={handleOtpSubmit} className="flex flex-col gap-4">
+              {infoMessage && !otpError && (
+                <div className="flex items-start gap-2.5 bg-indigo-500/10 border border-indigo-500/20 text-indigo-300 px-4 py-3 rounded-2xl text-xs leading-relaxed">
+                  <span>{infoMessage}</span>
+                </div>
+              )}
+
+              {otpError && (
+                <div className="flex items-start gap-2.5 bg-rose-500/10 border border-rose-500/20 text-rose-300 px-4 py-3 rounded-2xl text-xs leading-relaxed">
+                  <span>{otpError}</span>
+                </div>
+              )}
+
+              <div className="flex flex-col gap-1.5">
+                <label className="text-[10px] font-bold uppercase tracking-widest text-slate-400 ml-1">
+                  Verification Code
+                </label>
+                <input
+                  type="text"
+                  maxLength={6}
+                  value={otp}
+                  onChange={(e) => setOtp(e.target.value.replace(/\D/g, ""))}
+                  placeholder="Enter 6-digit code"
+                  className="w-full bg-slate-800/40 border border-slate-800 focus:border-indigo-500/60 focus:bg-slate-800/80 rounded-2xl py-3.5 px-4 text-center text-lg font-bold tracking-[0.4em] text-slate-100 placeholder-slate-600 focus:outline-none transition-all duration-200"
+                  required
+                />
+              </div>
+
+              <button
+                type="submit"
+                disabled={otpLoading}
+                className="w-full bg-indigo-600 hover:bg-indigo-500 active:bg-indigo-700 disabled:bg-slate-800 disabled:text-slate-600 text-white font-semibold text-sm rounded-2xl py-3.5 mt-2 transition-all duration-200 flex items-center justify-center gap-2 shadow-lg shadow-indigo-600/10 cursor-pointer"
               >
-                <option value="STUDENT" className="bg-slate-900 text-slate-300">
-                  Student (Learn and Enroll)
-                </option>
-                <option value="INSTRUCTOR" className="bg-slate-900 text-slate-300">
-                  Instructor (Create and Manage)
-                </option>
-                <option value="ADMIN" className="bg-slate-900 text-slate-300">
-                  Administrator (Manage Users & Courses)
-                </option>
-              </select>
-              <span className="absolute inset-y-0 right-0 flex items-center pr-3.5 pointer-events-none text-slate-500">
+                {otpLoading ? (
+                  <>
+                    <div className="w-4 h-4 border-2 border-slate-400 border-t-transparent rounded-full animate-spin"></div>
+                    Verifying...
+                  </>
+                ) : (
+                  "Verify & Sign Up"
+                )}
+              </button>
+            </form>
+
+            <div className="flex flex-col items-center gap-2 mt-6 text-xs">
+              <button
+                type="button"
+                onClick={async () => {
+                  setOtpError("");
+                  setOtp("");
+                  try {
+                    await register(name, email, password, role);
+                    setInfoMessage("Verification code has been resent.");
+                  } catch (err) {
+                    setOtpError("Failed to resend code. Please try again.");
+                  }
+                }}
+                className="text-indigo-400 hover:text-indigo-300 font-semibold transition-colors duration-200 cursor-pointer bg-transparent border-none"
+              >
+                Resend Code
+              </button>
+              <button
+                type="button"
+                onClick={() => setRequiresOtp(false)}
+                className="text-slate-500 hover:text-slate-400 transition-colors duration-200 mt-2 cursor-pointer bg-transparent border-none"
+              >
+                &larr; Back to Registration
+              </button>
+            </div>
+          </div>
+        ) : (
+          /* Original Register Form */
+          <div>
+            {/* Header */}
+            <div className="flex flex-col items-center mb-6">
+              <div className="flex items-center justify-center w-12 h-12 rounded-2xl bg-gradient-to-tr from-indigo-500 to-indigo-600 shadow-lg shadow-indigo-500/30 text-white mb-4">
                 <svg
-                  className="w-4 h-4"
+                  className="w-7 h-7"
                   fill="none"
                   stroke="currentColor"
                   viewBox="0 0 24 24"
@@ -233,40 +201,223 @@ const Register = () => {
                   <path
                     strokeLinecap="round"
                     strokeLinejoin="round"
-                    strokeWidth="2"
-                    d="M19 9l-7 7-7-7"
+                    strokeWidth="2.5"
+                    d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"
                   />
                 </svg>
-              </span>
+              </div>
+              <h1 className="text-2xl font-bold text-slate-100 tracking-tight">
+                Create Account
+              </h1>
+              <p className="text-xs text-slate-400 mt-1">
+                Get started with our Learning Management System
+              </p>
+            </div>
+
+            {/* Form */}
+            <form onSubmit={handleSubmit} className="flex flex-col gap-4">
+              {error && (
+                <div className="flex items-start gap-2.5 bg-rose-500/10 border border-rose-500/20 text-rose-300 px-4 py-3 rounded-2xl text-xs leading-relaxed animate-shake">
+                  <svg
+                    className="w-4 h-4 shrink-0 mt-0.5 text-rose-400"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth="2"
+                      d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+                    />
+                  </svg>
+                  <span>{error}</span>
+                </div>
+              )}
+
+              <div className="flex flex-col gap-1.5">
+                <label className="text-[10px] font-bold uppercase tracking-widest text-slate-400 ml-1">
+                  Full Name
+                </label>
+                <div className="relative">
+                  <span className="absolute inset-y-0 left-0 flex items-center pl-3.5 text-slate-500">
+                    <svg
+                      className="w-4 h-4"
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth="2"
+                        d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"
+                      />
+                    </svg>
+                  </span>
+                  <input
+                    type="text"
+                    value={name}
+                    onChange={(e) => setName(e.target.value)}
+                    className="w-full bg-slate-800/40 border border-slate-800 focus:border-indigo-500/60 focus:bg-slate-800/80 rounded-2xl py-3 pl-11 pr-4 text-sm text-slate-200 placeholder-slate-500 focus:outline-none transition-all duration-200"
+                    placeholder="John Doe"
+                    required
+                  />
+                </div>
+              </div>
+
+              <div className="flex flex-col gap-1.5">
+                <label className="text-[10px] font-bold uppercase tracking-widest text-slate-400 ml-1">
+                  Email Address
+                </label>
+                <div className="relative">
+                  <span className="absolute inset-y-0 left-0 flex items-center pl-3.5 text-slate-500">
+                    <svg
+                      className="w-4 h-4"
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth="2"
+                        d="M16 12a4 4 0 10-8 0 4 4 0 008 0zm0 0v1.5a2.5 2.5 0 005 0V12a9 9 0 10-9 9m4.5-1.206a8.959 8.959 0 01-4.5 1.206"
+                      />
+                    </svg>
+                  </span>
+                  <input
+                    type="email"
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    className="w-full bg-slate-800/40 border border-slate-800 focus:border-indigo-500/60 focus:bg-slate-800/80 rounded-2xl py-3 pl-11 pr-4 text-sm text-slate-200 placeholder-slate-500 focus:outline-none transition-all duration-200"
+                    placeholder="you@example.com"
+                    required
+                  />
+                </div>
+              </div>
+
+              <div className="flex flex-col gap-1.5">
+                <label className="text-[10px] font-bold uppercase tracking-widest text-slate-400 ml-1">
+                  Password
+                </label>
+                <div className="relative">
+                  <span className="absolute inset-y-0 left-0 flex items-center pl-3.5 text-slate-500">
+                    <svg
+                      className="w-4 h-4"
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth="2"
+                        d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"
+                      />
+                    </svg>
+                  </span>
+                  <input
+                    type="password"
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                    className="w-full bg-slate-800/40 border border-slate-800 focus:border-indigo-500/60 focus:bg-slate-800/80 rounded-2xl py-3 pl-11 pr-4 text-sm text-slate-200 placeholder-slate-500 focus:outline-none transition-all duration-200"
+                    placeholder="Min. 6 characters"
+                    required
+                  />
+                </div>
+              </div>
+
+              <div className="flex flex-col gap-1.5">
+                <label className="text-[10px] font-bold uppercase tracking-widest text-slate-400 ml-1">
+                  Select Role
+                </label>
+                <div className="relative">
+                  <span className="absolute inset-y-0 left-0 flex items-center pl-3.5 text-slate-500">
+                    <svg
+                      className="w-4 h-4"
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth="2"
+                        d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"
+                      />
+                    </svg>
+                  </span>
+                  <select
+                    value={role}
+                    onChange={(e) => setRole(e.target.value)}
+                    className="w-full bg-slate-800 border border-slate-800 focus:border-indigo-500/60 rounded-2xl py-3 pl-11 pr-4 text-sm text-slate-300 focus:outline-none transition-all duration-200 appearance-none cursor-pointer"
+                  >
+                    <option
+                      value="STUDENT"
+                      className="bg-slate-900 text-slate-300"
+                    >
+                      Student (Learn and Enroll)
+                    </option>
+                    <option
+                      value="INSTRUCTOR"
+                      className="bg-slate-900 text-slate-300"
+                    >
+                      Instructor (Create and Manage)
+                    </option>
+                    <option
+                      value="ADMIN"
+                      className="bg-slate-900 text-slate-300"
+                    >
+                      Administrator (Manage Users & Courses)
+                    </option>
+                  </select>
+                  <span className="absolute inset-y-0 right-0 flex items-center pr-3.5 pointer-events-none text-slate-500">
+                    <svg
+                      className="w-4 h-4"
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth="2"
+                        d="M19 9l-7 7-7-7"
+                      />
+                    </svg>
+                  </span>
+                </div>
+              </div>
+
+              <button
+                type="submit"
+                disabled={loading}
+                className="w-full bg-indigo-600 hover:bg-indigo-500 active:bg-indigo-700 disabled:bg-slate-800 disabled:text-slate-600 text-white font-semibold text-sm rounded-2xl py-3.5 mt-2 transition-all duration-200 flex items-center justify-center gap-2 shadow-lg shadow-indigo-600/10 cursor-pointer"
+              >
+                {loading ? (
+                  <>
+                    <div className="w-4 h-4 border-2 border-slate-400 border-t-transparent rounded-full animate-spin"></div>
+                    Registering...
+                  </>
+                ) : (
+                  "Sign Up"
+                )}
+              </button>
+            </form>
+
+            {/* Footer */}
+            <div className="flex justify-center mt-5 text-xs text-slate-400">
+              <span>Already have an account?</span>
+              <Link
+                to="/login"
+                className="text-indigo-400 hover:text-indigo-300 font-semibold ml-1.5 transition-colors duration-200"
+              >
+                Sign In
+              </Link>
             </div>
           </div>
-
-          <button
-            type="submit"
-            disabled={loading}
-            className="w-full bg-indigo-600 hover:bg-indigo-500 active:bg-indigo-700 disabled:bg-slate-800 disabled:text-slate-600 text-white font-semibold text-sm rounded-2xl py-3.5 mt-2 transition-all duration-200 flex items-center justify-center gap-2 shadow-lg shadow-indigo-600/10 cursor-pointer"
-          >
-            {loading ? (
-              <>
-                <div className="w-4 h-4 border-2 border-slate-400 border-t-transparent rounded-full animate-spin"></div>
-                Registering...
-              </>
-            ) : (
-              "Sign Up"
-            )}
-          </button>
-        </form>
-
-        {/* Footer */}
-        <div className="flex justify-center mt-5 text-xs text-slate-400">
-          <span>Already have an account?</span>
-          <Link
-            to="/login"
-            className="text-indigo-400 hover:text-indigo-300 font-semibold ml-1.5 transition-colors duration-200"
-          >
-            Sign In
-          </Link>
-        </div>
+        )}
       </div>
     </div>
   );

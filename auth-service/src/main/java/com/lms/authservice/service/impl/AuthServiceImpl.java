@@ -18,7 +18,11 @@ import org.springframework.web.client.RestTemplate;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.http.HttpEntity;
+import org.springframework.beans.factory.annotation.Value;
 
+import java.time.LocalDateTime;
+import java.util.Random;
+import java.util.UUID;
 import java.util.List;
 import java.util.Optional;
 import java.util.HashMap;
@@ -40,6 +44,9 @@ public class AuthServiceImpl implements AuthService {
     @Autowired
     private RestTemplate restTemplate;
 
+    @Value("${notification-service.url:http://localhost:8085}")
+    private String notificationServiceUrl;
+
     @Override
     @Transactional
     public AuthResponseDTO register(RegisterRequestDTO request) {
@@ -57,30 +64,34 @@ public class AuthServiceImpl implements AuthService {
                 ? request.getRole().trim().toUpperCase() 
                 : "USER";
         user.setRole(assignedRole);
+        
+        // Account starts as unverified
+        user.setVerified(false);
+        
+        // Generate a 6-digit OTP
+        String otp = String.format("%06d", new Random().nextInt(1000000));
+        user.setOtp(otp);
+        user.setOtpExpiry(LocalDateTime.now().plusMinutes(5));
 
         User savedUser = userRepository.save(user);
 
-        // Synchronously call User Service to create the user profile.
-        // If this HTTP call fails, the transaction is rolled back.
-        Map<String, Object> profileRequest = new HashMap<>();
-        profileRequest.put("id", savedUser.getId());
-        profileRequest.put("name", savedUser.getName());
-        profileRequest.put("email", savedUser.getEmail());
-        profileRequest.put("role", savedUser.getRole());
-
+        // Call notification-service to send OTP
         try {
+            Map<String, Object> otpRequest = new HashMap<>();
+            otpRequest.put("to", savedUser.getEmail());
+            otpRequest.put("otp", otp);
+
             HttpHeaders headers = new HttpHeaders();
             headers.setContentType(MediaType.APPLICATION_JSON);
-            HttpEntity<Map<String, Object>> entity = new HttpEntity<>(profileRequest, headers);
-            
-            restTemplate.postForEntity("http://localhost:8082/api/users", entity, Void.class);
+            HttpEntity<Map<String, Object>> entity = new HttpEntity<>(otpRequest, headers);
+
+            restTemplate.postForEntity(notificationServiceUrl + "/api/notify/otp", entity, Void.class);
         } catch (Exception e) {
-            throw new RuntimeException("Failed to create user profile in User Service. Registration rolled back: " + e.getMessage(), e);
+            // Log warning but don't fail transaction if email sending itself fails in dev mode
+            System.err.println("Warning: failed to send OTP email: " + e.getMessage());
         }
 
-        String token = jwtUtil.generateToken(savedUser.getId(), savedUser.getEmail(), savedUser.getRole());
-
-        return new AuthResponseDTO("User registered successfully", token);
+        return new AuthResponseDTO("Registration successful. OTP sent to your email. Please verify to activate your account.", null);
     }
 
     @Override
@@ -98,9 +109,119 @@ public class AuthServiceImpl implements AuthService {
             return new AuthResponseDTO("Invalid password", null);
         }
 
+        if (!user.isVerified()) {
+            return new AuthResponseDTO("Account is not verified. Please verify your email first.", null);
+        }
+
         String token = jwtUtil.generateToken(user.getId(), user.getEmail(), user.getRole());
 
         return new AuthResponseDTO("Login successful", token);
+    }
+
+    @Override
+    @Transactional
+    public AuthResponseDTO verifyOtp(String email, String otp) {
+        Optional<User> userOpt = userRepository.findByEmail(email);
+        if (userOpt.isEmpty()) {
+            return new AuthResponseDTO("User not found", null);
+        }
+
+        User user = userOpt.get();
+        if (user.isVerified()) {
+            return new AuthResponseDTO("Account is already verified", null);
+        }
+
+        if (user.getOtp() == null || !user.getOtp().equals(otp)) {
+            return new AuthResponseDTO("Invalid verification code", null);
+        }
+
+        if (user.getOtpExpiry() == null || user.getOtpExpiry().isBefore(LocalDateTime.now())) {
+            return new AuthResponseDTO("Verification code has expired", null);
+        }
+
+        // OTP is valid! Verify user
+        user.setVerified(true);
+        user.setOtp(null);
+        user.setOtpExpiry(null);
+        User savedUser = userRepository.save(user);
+
+        // Now, synchronously create the user profile in User Service
+        Map<String, Object> profileRequest = new HashMap<>();
+        profileRequest.put("id", savedUser.getId());
+        profileRequest.put("name", savedUser.getName());
+        profileRequest.put("email", savedUser.getEmail());
+        profileRequest.put("role", savedUser.getRole());
+
+        try {
+            HttpHeaders headers = new HttpHeaders();
+            headers.setContentType(MediaType.APPLICATION_JSON);
+            HttpEntity<Map<String, Object>> entity = new HttpEntity<>(profileRequest, headers);
+            
+            restTemplate.postForEntity("http://localhost:8082/api/users", entity, Void.class);
+        } catch (Exception e) {
+            throw new RuntimeException("Failed to create user profile in User Service. OTP verification rolled back: " + e.getMessage(), e);
+        }
+
+        // Generate token
+        String token = jwtUtil.generateToken(savedUser.getId(), savedUser.getEmail(), savedUser.getRole());
+        return new AuthResponseDTO("Account verified successfully", token);
+    }
+
+    @Override
+    public AuthResponseDTO requestForgotPassword(String email) {
+        Optional<User> userOpt = userRepository.findByEmail(email);
+        if (userOpt.isEmpty()) {
+            // Security practice: return success even if user not found to prevent user enumeration
+            return new AuthResponseDTO("If the account exists, a password reset link has been sent to your email.", null);
+        }
+
+        User user = userOpt.get();
+        String token = UUID.randomUUID().toString();
+        user.setResetToken(token);
+        user.setResetTokenExpiry(LocalDateTime.now().plusMinutes(15));
+        userRepository.save(user);
+
+        // Send reset email via notification service
+        try {
+            Map<String, Object> resetRequest = new HashMap<>();
+            resetRequest.put("to", user.getEmail());
+            // Link to the frontend reset-password route
+            resetRequest.put("resetLink", "http://localhost:5173/reset-password?token=" + token);
+
+            HttpHeaders headers = new HttpHeaders();
+            headers.setContentType(MediaType.APPLICATION_JSON);
+            HttpEntity<Map<String, Object>> entity = new HttpEntity<>(resetRequest, headers);
+
+            restTemplate.postForEntity(notificationServiceUrl + "/api/notify/reset-password", entity, Void.class);
+        } catch (Exception e) {
+            System.err.println("Warning: failed to send forgot password email: " + e.getMessage());
+        }
+
+        return new AuthResponseDTO("Password reset link has been sent to your email.", null);
+    }
+
+    @Override
+    public AuthResponseDTO resetPassword(String token, String newPassword) {
+        Optional<User> userOpt = userRepository.findAll().stream()
+                .filter(u -> token.equals(u.getResetToken()))
+                .findFirst();
+
+        if (userOpt.isEmpty()) {
+            return new AuthResponseDTO("Invalid password reset token.", null);
+        }
+
+        User user = userOpt.get();
+        if (user.getResetTokenExpiry() == null || user.getResetTokenExpiry().isBefore(LocalDateTime.now())) {
+            return new AuthResponseDTO("Password reset token has expired.", null);
+        }
+
+        // Update password
+        user.setPassword(encoder.encode(newPassword));
+        user.setResetToken(null);
+        user.setResetTokenExpiry(null);
+        userRepository.save(user);
+
+        return new AuthResponseDTO("Password has been reset successfully.", null);
     }
 
     @Override
