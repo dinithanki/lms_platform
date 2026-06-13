@@ -19,14 +19,22 @@ const quizService = {
       quizId,
       answers,
     });
-    return response.data; // QuizResultResponseDTO { quizId, score, passed, attempts }
+    return {
+      ...response.data,
+      passed: response.data.passStatus === "PASS",
+      attempts: response.data.attemptNumber,
+    };
   },
 
   getQuizResults: async (studentId, quizId) => {
     const response = await api.get(`/api/quizzes/result/${studentId}`, {
       params: quizId ? { quizId } : {},
     });
-    return response.data; // List of QuizResultResponseDTO
+    return response.data.map((r) => ({
+      ...r,
+      passed: r.passStatus === "PASS",
+      attempts: r.attemptNumber,
+    }));
   },
 
   createQuiz: async ({ courseId, title, description, published }) => {

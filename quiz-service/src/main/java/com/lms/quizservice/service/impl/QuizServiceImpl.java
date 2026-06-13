@@ -52,6 +52,9 @@ public class QuizServiceImpl implements QuizService {
         if (quizRepository.existsByCourseId(dto.getCourseId())) {
             throw new IllegalStateException("A quiz already exists for course ID " + dto.getCourseId());
         }
+        if (quizRepository.count() >= 10) {
+            throw new IllegalStateException("Admin can only add 10 quizzes.");
+        }
         Quiz quiz = quizMapper.toEntity(dto);
         Quiz savedQuiz = quizRepository.save(quiz);
         return quizMapper.toResponseDTO(savedQuiz);
