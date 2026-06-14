@@ -10,7 +10,7 @@ import notificationService from "../services/notificationService";
 
 const Dashboard = () => {
   const { user } = useAuth();
-  const isTeacherLikeRole = (role) => ["INSTRUCTOR", "TEACHER"].includes(role);
+  const isTeacherLikeRole = (role) => ["INSTRUCTOR", "TEACHER"].includes((role || "").toUpperCase());
 
   // Common State
   const [courses, setCourses] = useState([]);
@@ -211,7 +211,7 @@ const Dashboard = () => {
     return (
       <div className="flex flex-col gap-8 animate-fadeIn">
         {/* Banner greeting */}
-        <div className="p-6 md:p-8 bg-gradient-to-r from-indigo-900/60 via-indigo-950/40 to-slate-900 border border-slate-800 rounded-3xl relative overflow-hidden flex flex-col md:flex-row md:items-center justify-between gap-6">
+        <div className="p-6 md:p-8 bg-linear-to-r from-indigo-900/60 via-indigo-950/40 to-slate-900 border border-slate-800 rounded-3xl relative overflow-hidden flex flex-col md:flex-row md:items-center justify-between gap-6">
           <div className="absolute top-0 right-0 w-80 h-80 bg-indigo-500/5 rounded-full blur-3xl pointer-events-none"></div>
           <div>
             <h1 className="text-xl md:text-2xl font-bold text-slate-100">
@@ -338,7 +338,7 @@ const Dashboard = () => {
     return (
       <div className="flex flex-col gap-8 animate-fadeIn">
         {/* Banner greeting */}
-        <div className="p-6 md:p-8 bg-gradient-to-r from-purple-900/60 via-purple-950/40 to-slate-900 border border-slate-800 rounded-3xl relative overflow-hidden flex flex-col md:flex-row md:items-center justify-between gap-6">
+        <div className="p-6 md:p-8 bg-linear-to-r from-purple-900/60 via-purple-950/40 to-slate-900 border border-slate-800 rounded-3xl relative overflow-hidden flex flex-col md:flex-row md:items-center justify-between gap-6">
           <div className="absolute top-0 right-0 w-80 h-80 bg-purple-500/5 rounded-full blur-3xl pointer-events-none"></div>
           <div>
             <h1 className="text-xl md:text-2xl font-bold text-slate-100">
@@ -514,7 +514,7 @@ const Dashboard = () => {
     return (
       <div className="flex flex-col gap-8 animate-fadeIn">
         {/* Header Greeting */}
-        <div className="p-6 md:p-8 bg-gradient-to-r from-indigo-900/60 via-indigo-950/40 to-slate-900 border border-slate-800 rounded-3xl relative overflow-hidden flex flex-col md:flex-row md:items-center justify-between gap-6">
+        <div className="p-6 md:p-8 bg-linear-to-r from-indigo-900/60 via-indigo-950/40 to-slate-900 border border-slate-800 rounded-3xl relative overflow-hidden flex flex-col md:flex-row md:items-center justify-between gap-6">
           <div className="absolute top-0 right-0 w-80 h-80 bg-indigo-500/5 rounded-full blur-3xl pointer-events-none"></div>
           <div>
             <h1 className="text-xl md:text-2xl font-bold text-slate-100">
@@ -680,7 +680,7 @@ const Dashboard = () => {
                             {item.role}
                           </span>
                         </td>
-                        <td className="px-6 py-4 text-right flex items-center justify-end gap-3 min-h-[50px]">
+                        <td className="px-6 py-4 text-right flex items-center justify-end gap-3 min-h-12.5">
                           {roleUpdateLoading === item.id ? (
                             <div className="w-3.5 h-3.5 border-2 border-indigo-400 border-t-transparent rounded-full animate-spin"></div>
                           ) : (

@@ -2,6 +2,7 @@ package com.lms.courseservice.controller;
 
 import com.lms.courseservice.dto.request.CourseRequestDTO;
 import com.lms.courseservice.dto.response.CourseResponseDTO;
+import com.lms.courseservice.security.Role;
 import com.lms.courseservice.service.CourseService;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -23,7 +24,7 @@ public class CourseController {
             @Valid @RequestBody CourseRequestDTO dto,
             @RequestHeader(value = "X-User-Name", required = false) String username,
             @RequestHeader(value = "X-User-Role", required = false) String role) {
-        if (!"INSTRUCTOR".equalsIgnoreCase(role) && !"ADMIN".equalsIgnoreCase(role)) {
+        if (!Role.isInstructor(role) && !Role.isAdmin(role)) {
             return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
         }
         CourseResponseDTO response = courseService.createCourse(dto, username);
@@ -53,7 +54,7 @@ public class CourseController {
             @Valid @RequestBody CourseRequestDTO dto,
             @RequestHeader(value = "X-User-Name", required = false) String username,
             @RequestHeader(value = "X-User-Role", required = false) String role) {
-        if (!"INSTRUCTOR".equalsIgnoreCase(role) && !"ADMIN".equalsIgnoreCase(role)) {
+        if (!Role.isInstructor(role) && !Role.isAdmin(role)) {
             return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
         }
         CourseResponseDTO response = courseService.updateCourse(id, dto, username, role);
@@ -65,7 +66,7 @@ public class CourseController {
             @PathVariable Long id,
             @RequestHeader(value = "X-User-Name", required = false) String username,
             @RequestHeader(value = "X-User-Role", required = false) String role) {
-        if (!"INSTRUCTOR".equalsIgnoreCase(role) && !"ADMIN".equalsIgnoreCase(role)) {
+        if (!Role.isInstructor(role) && !Role.isAdmin(role)) {
             return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
         }
         courseService.deleteCourse(id, username, role);

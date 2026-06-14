@@ -3,6 +3,16 @@ import authService from "../services/authService";
 
 const AuthContext = createContext(null);
 
+const normalizeRole = (profile) => {
+  if (!profile?.role) {
+    return profile;
+  }
+
+  const normalizedRole =
+    profile.role.toUpperCase() === "TEACHER" ? "INSTRUCTOR" : profile.role;
+  return { ...profile, role: normalizedRole };
+};
+
 export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(() => {
     const cachedUser = localStorage.getItem("user");
@@ -16,7 +26,7 @@ export const AuthProvider = ({ children }) => {
       const token = localStorage.getItem("token");
       if (token) {
         try {
-          const profile = await authService.getMe();
+          const profile = normalizeRole(await authService.getMe());
           setUser(profile);
           localStorage.setItem("user", JSON.stringify(profile));
         } catch (error) {
@@ -54,7 +64,7 @@ export const AuthProvider = ({ children }) => {
       const data = await authService.login(email, password);
       if (data.token) {
         localStorage.setItem("token", data.token);
-        const profile = await authService.getMe();
+        const profile = normalizeRole(await authService.getMe());
         setUser(profile);
         localStorage.setItem("user", JSON.stringify(profile));
         return profile;
@@ -77,12 +87,16 @@ export const AuthProvider = ({ children }) => {
       const data = await authService.register(name, email, password, role);
       if (data.token) {
         localStorage.setItem("token", data.token);
-        const profile = await authService.getMe();
+        const profile = normalizeRole(await authService.getMe());
         setUser(profile);
         localStorage.setItem("user", JSON.stringify(profile));
         return { success: true, profile };
       }
-      return { success: false, requiresVerification: true, message: data.message };
+      return {
+        success: false,
+        requiresVerification: true,
+        message: data.message,
+      };
     } catch (error) {
       setUser(null);
       localStorage.removeItem("token");
@@ -99,7 +113,7 @@ export const AuthProvider = ({ children }) => {
       const data = await authService.verifyOtp(email, otp);
       if (data.token) {
         localStorage.setItem("token", data.token);
-        const profile = await authService.getMe();
+        const profile = normalizeRole(await authService.getMe());
         setUser(profile);
         localStorage.setItem("user", JSON.stringify(profile));
         return profile;

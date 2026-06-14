@@ -133,7 +133,7 @@
       </map>
     </option>
   </component>
-  <component name="RunManager" selected="Spring Boot.QuizServiceApplication">
+  <component name="RunManager" selected="Spring Boot.AuthServiceApplication">
     <configuration default="true" type="JetRunConfigurationType">
       <module name="lms_sb" />
       <method v="2">

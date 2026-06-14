@@ -4,7 +4,7 @@ public enum Role {
     ADMIN, INSTRUCTOR, STUDENT;
 
     public static boolean isInstructor(String role) {
-        return role != null && role.equalsIgnoreCase(INSTRUCTOR.name());
+        return role != null && (role.equalsIgnoreCase(INSTRUCTOR.name()) || role.equalsIgnoreCase("TEACHER"));
     }
 
     public static boolean isAdmin(String role) {

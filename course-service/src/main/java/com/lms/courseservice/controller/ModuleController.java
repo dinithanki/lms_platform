@@ -3,6 +3,7 @@ package com.lms.courseservice.controller;
 import com.lms.courseservice.dto.request.ModuleRequestDTO;
 import com.lms.courseservice.dto.response.ModuleResponseDTO;
 import com.lms.courseservice.dto.response.ProgressResponseDTO;
+import com.lms.courseservice.security.Role;
 import com.lms.courseservice.service.ModuleService;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -24,7 +25,7 @@ public class ModuleController {
             @Valid @RequestBody ModuleRequestDTO dto,
             @RequestHeader(value = "X-User-Name", required = false) String username,
             @RequestHeader(value = "X-User-Role", required = false) String role) {
-        if (!"INSTRUCTOR".equalsIgnoreCase(role) && !"ADMIN".equalsIgnoreCase(role)) {
+        if (!Role.isInstructor(role) && !Role.isAdmin(role)) {
             return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
         }
         ModuleResponseDTO response = moduleService.createModule(id, dto, username, role);
