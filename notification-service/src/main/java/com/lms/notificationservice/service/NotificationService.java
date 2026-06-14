@@ -6,8 +6,12 @@ import java.util.List;
 
 public interface NotificationService {
     InAppNotification createInAppNotification(InAppNotificationRequest request);
+
     List<InAppNotification> getInAppNotifications(String email);
+
     long getUnreadCount(String email);
+
     void markAsRead(Long id, String email);
+
     void markAllAsRead(String email);
 }
