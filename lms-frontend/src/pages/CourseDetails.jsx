@@ -4,6 +4,7 @@ import { useAuth } from "../context/AuthContext";
 import courseService from "../services/courseService";
 import enrollmentService from "../services/enrollmentService";
 import quizService from "../services/quizService";
+import ReactPlayer from "react-player";
 
 const CourseDetails = () => {
   const { id } = useParams();
@@ -36,6 +37,10 @@ const CourseDetails = () => {
   const [latestAttemptResult, setLatestAttemptResult] = useState(null);
   const [downloadingCert, setDownloadingCert] = useState(false);
 
+  // Active Video Player State
+  const [activeModule, setActiveModule] = useState(null);
+  const [isPlaying, setIsPlaying] = useState(false);
+
   // Instructor Module Form
   const [showModuleModal, setShowModuleModal] = useState(false);
   const [modTitle, setModTitle] = useState("");
@@ -61,6 +66,20 @@ const CourseDetails = () => {
   useEffect(() => {
     fetchCourseDetails();
   }, [id, user]);
+
+  // Auto-select first incomplete/available module on load
+  useEffect(() => {
+    if (course?.modules && course.modules.length > 0) {
+      if (!activeModule || !course.modules.some((m) => m.id === activeModule.id)) {
+        const firstIncomplete = course.modules.find(
+          (m) => !(progress?.completedModuleIds?.includes(m.id))
+        );
+        setActiveModule(firstIncomplete || course.modules[0]);
+      }
+    } else {
+      setActiveModule(null);
+    }
+  }, [course, progress]);
 
   const fetchCourseDetails = async () => {
     setLoading(true);
@@ -153,6 +172,31 @@ const CourseDetails = () => {
       alert("Failed to mark module as complete.");
     } finally {
       setCompletingModuleId(null);
+    }
+  };
+
+  // Student Auto-complete and Advance Video Ended
+  const handleVideoEnded = async () => {
+    if (!activeModule) return;
+
+    // If student, mark module as completed automatically
+    const isCompleted =
+      progress && progress.completedModuleIds && progress.completedModuleIds.includes(activeModule.id);
+
+    if (user.role === "STUDENT" && !isCompleted) {
+      await handleCompleteModule(activeModule.id);
+    }
+
+    // Advance to next video in modules array
+    if (course?.modules) {
+      const currentIndex = course.modules.findIndex((m) => m.id === activeModule.id);
+      if (currentIndex !== -1 && currentIndex < course.modules.length - 1) {
+        const nextModule = course.modules[currentIndex + 1];
+        setActiveModule(nextModule);
+        setIsPlaying(true); // Continue playing the next video
+      } else {
+        setIsPlaying(false);
+      }
     }
   };
 
@@ -450,85 +494,170 @@ const CourseDetails = () => {
                   <p className="text-xs text-slate-500">No content modules are set up for this course syllabus yet.</p>
                 </div>
               ) : (
-                <div className="flex flex-col gap-4">
-                  {course.modules.map((mod, index) => {
-                    // Check if module is completed by student
-                    const isCompleted =
-                      progress && progress.completedModuleIds && progress.completedModuleIds.includes(mod.id);
-
-                    return (
-                      <div
-                        key={mod.id}
-                        className="p-5 bg-slate-900 border border-slate-800/80 rounded-2xl hover:border-slate-700/60 transition-all duration-200 flex flex-col sm:flex-row sm:items-center justify-between gap-4"
-                      >
-                        {/* Left description */}
-                        <div className="flex items-start gap-4">
-                          <div className="flex items-center justify-center w-8 h-8 rounded-lg bg-slate-800 border border-slate-700 text-xs font-bold text-indigo-400 shrink-0 mt-0.5">
-                            {index + 1}
-                          </div>
-                          <div>
-                            <h3 className="text-xs font-bold text-slate-200">{mod.title}</h3>
-                            <div className="flex flex-wrap items-center gap-3 mt-1.5 text-[10px] text-slate-500 font-medium">
-                              <a
-                                href={mod.videoUrl}
-                                target="_blank"
-                                rel="noreferrer"
-                                className="flex items-center gap-1 text-indigo-400 hover:text-indigo-300 transition-colors"
-                              >
-                                <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z" />
-                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                                </svg>
-                                Lesson Video
-                              </a>
-                              {mod.resourceUrl && (
-                                <>
-                                  <span className="text-slate-800">•</span>
-                                  <a
-                                    href={mod.resourceUrl}
-                                    target="_blank"
-                                    rel="noreferrer"
-                                    className="flex items-center gap-1 text-slate-400 hover:text-slate-300 transition-colors"
-                                  >
-                                    <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-                                    </svg>
-                                    Study Materials
-                                  </a>
-                                </>
-                              )}
-                            </div>
-                          </div>
+                <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 items-start">
+                  {/* Left Column: Video Player and details (span 2) */}
+                  <div className="lg:col-span-2 flex flex-col gap-4">
+                    {activeModule ? (
+                      <div className="bg-slate-900 border border-slate-800/85 rounded-3xl p-4 md:p-5 flex flex-col gap-4 shadow-xl">
+                        {/* Player Container */}
+                        <div className="relative aspect-video w-full rounded-2xl overflow-hidden bg-slate-950 border border-slate-800/80 group">
+                          <ReactPlayer
+                            src={activeModule.videoUrl}
+                            playing={isPlaying}
+                            controls={true}
+                            width="100%"
+                            height="100%"
+                            onPlay={() => setIsPlaying(true)}
+                            onPause={() => setIsPlaying(false)}
+                            onEnded={handleVideoEnded}
+                            className="absolute top-0 left-0"
+                          />
                         </div>
 
-                        {/* Right student button */}
-                        {user.role === "STUDENT" && (
-                          <div className="shrink-0 self-end sm:self-center">
-                            {isCompleted ? (
-                              <span className="flex items-center gap-1.5 px-3.5 py-1.5 bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 rounded-xl text-[10px] font-bold">
+                        {/* Module Meta and Actions */}
+                        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 pt-2 border-t border-slate-800/60">
+                          <div className="flex flex-col gap-1">
+                            <span className="text-[10px] uppercase font-bold text-indigo-400">
+                              Now Playing • Lesson {course.modules.findIndex(m => m.id === activeModule.id) + 1} of {course.modules.length}
+                            </span>
+                            <h3 className="text-sm font-bold text-slate-100">{activeModule.title}</h3>
+                          </div>
+                          
+                          <div className="flex flex-wrap items-center gap-3">
+                            {/* Materials download */}
+                            {activeModule.resourceUrl && (
+                              <a
+                                href={activeModule.resourceUrl}
+                                target="_blank"
+                                rel="noreferrer"
+                                className="flex items-center gap-1.5 px-4 py-2 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded-xl text-xs font-semibold transition-colors cursor-pointer border border-slate-700/40"
+                              >
+                                <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                                </svg>
+                                Study Materials
+                              </a>
+                            )}
+
+                            {/* Mark Completed (for students) */}
+                            {user.role === "STUDENT" && (
+                              <div>
+                                {progress && progress.completedModuleIds && progress.completedModuleIds.includes(activeModule.id) ? (
+                                  <span className="flex items-center gap-1.5 px-4 py-2 bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 rounded-xl text-xs font-bold">
+                                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="3" d="M5 13l4 4L19 7" />
+                                    </svg>
+                                    Completed
+                                  </span>
+                                ) : (
+                                  <button
+                                    onClick={() => handleCompleteModule(activeModule.id)}
+                                    disabled={completingModuleId === activeModule.id}
+                                    className="px-4 py-2 bg-indigo-600 hover:bg-indigo-500 disabled:bg-slate-850 text-white rounded-xl text-xs font-semibold flex items-center gap-1.5 cursor-pointer shadow-lg shadow-indigo-600/10 transition-all active:scale-95"
+                                  >
+                                    {completingModuleId === activeModule.id ? (
+                                      <div className="w-3.5 h-3.5 border-2 border-slate-400 border-t-transparent rounded-full animate-spin"></div>
+                                    ) : (
+                                      <>
+                                        <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M5 13l4 4L19 7" />
+                                        </svg>
+                                        Mark Completed
+                                      </>
+                                    )}
+                                  </button>
+                                )}
+                              </div>
+                            )}
+                          </div>
+                        </div>
+                      </div>
+                    ) : (
+                      <div className="bg-slate-900 border border-slate-800/80 rounded-3xl p-8 flex flex-col items-center justify-center min-h-[300px] text-center">
+                        <svg className="w-12 h-12 text-slate-600 mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.5" d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z" />
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.5" d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                        </svg>
+                        <p className="text-sm text-slate-400">Select a module from the playlist to start learning.</p>
+                      </div>
+                    )}
+                  </div>
+
+                  {/* Right Column: Playlist (span 1) */}
+                  <div className="bg-slate-900 border border-slate-800/80 rounded-3xl p-4 md:p-5 flex flex-col gap-4 shadow-xl">
+                    <div className="flex items-center justify-between border-b border-slate-800/60 pb-3">
+                      <h3 className="text-xs font-bold uppercase tracking-widest text-slate-300">Course Outline</h3>
+                      {progress && (
+                        <span className="text-[10px] font-bold text-indigo-400 bg-indigo-500/10 px-2 py-0.5 rounded border border-indigo-500/20">
+                          {progress.completedModulesCount}/{progress.totalModulesCount} Done
+                        </span>
+                      )}
+                    </div>
+                    
+                    <div className="flex flex-col gap-2 max-h-[420px] overflow-y-auto pr-1 scrollbar-thin scrollbar-thumb-slate-805 scrollbar-track-transparent">
+                      {course.modules.map((mod, index) => {
+                        const isCompleted = progress && progress.completedModuleIds && progress.completedModuleIds.includes(mod.id);
+                        const isActive = activeModule && activeModule.id === mod.id;
+
+                        return (
+                          <button
+                            key={mod.id}
+                            onClick={() => {
+                              setActiveModule(mod);
+                              setIsPlaying(true);
+                            }}
+                            className={`w-full text-left p-3 rounded-xl border transition-all duration-150 flex items-start gap-3 cursor-pointer ${
+                              isActive
+                                ? "bg-indigo-600/10 border-indigo-500/50 text-slate-100 shadow-inner"
+                                : isCompleted
+                                ? "bg-emerald-950/5 border-emerald-500/10 hover:bg-emerald-950/10 text-slate-300"
+                                : "bg-slate-800/15 border-slate-800/80 hover:bg-slate-800/30 hover:border-slate-700/60 text-slate-400"
+                            }`}
+                          >
+                            {/* Icon / Number indicator */}
+                            <div className={`flex items-center justify-center w-6 h-6 rounded-lg text-[10px] font-bold shrink-0 mt-0.5 ${
+                              isActive
+                                ? "bg-indigo-500 text-white"
+                                : isCompleted
+                                ? "bg-emerald-500/20 text-emerald-400 border border-emerald-500/20"
+                                : "bg-slate-800 text-slate-400 border border-slate-700/50"
+                            }`}>
+                              {isCompleted ? (
                                 <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="3" d="M5 13l4 4L19 7" />
                                 </svg>
-                                Completed
-                              </span>
-                            ) : (
-                              <button
-                                onClick={() => handleCompleteModule(mod.id)}
-                                disabled={completingModuleId === mod.id}
-                                className="px-3.5 py-1.5 bg-slate-800 hover:bg-slate-700/80 active:bg-slate-900 border border-slate-700/50 hover:border-indigo-500/30 text-[10px] font-bold text-slate-300 hover:text-indigo-400 rounded-xl transition-all duration-150 flex items-center gap-1.5 disabled:opacity-50 cursor-pointer"
-                              >
-                                {completingModuleId === mod.id ? (
-                                  <div className="w-3 h-3 border-2 border-indigo-400 border-t-transparent rounded-full animate-spin"></div>
-                                ) : (
-                                  "Mark Completed"
+                              ) : (
+                                index + 1
+                              )}
+                            </div>
+
+                            <div className="flex-1 min-w-0">
+                              <h4 className={`text-xs font-semibold truncate ${
+                                isActive ? "text-indigo-400 font-bold" : isCompleted ? "text-slate-300" : "text-slate-400"
+                              }`}>
+                                {mod.title}
+                              </h4>
+                              
+                              <div className="flex items-center gap-2 mt-1">
+                                {isActive && (
+                                  <span className="flex items-center gap-0.5 text-[9px] uppercase font-bold text-indigo-400 animate-pulse">
+                                    <span className="w-1.5 h-1.5 bg-indigo-500 rounded-full inline-block"></span>
+                                    Playing
+                                  </span>
                                 )}
-                              </button>
-                            )}
-                          </div>
-                        )}
-                      </div>
-                    );
-                  })}
+                                {isCompleted && !isActive && (
+                                  <span className="text-[9px] uppercase font-bold text-emerald-400">Completed</span>
+                                )}
+                                {!isCompleted && !isActive && (
+                                  <span className="text-[9px] font-medium text-slate-500">Video Lesson</span>
+                                )}
+                              </div>
+                            </div>
+                          </button>
+                        );
+                      })}
+                    </div>
+                  </div>
                 </div>
               )}
 
