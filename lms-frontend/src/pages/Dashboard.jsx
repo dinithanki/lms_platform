@@ -157,6 +157,20 @@ const Dashboard = () => {
     }
   };
 
+  const handleDeleteCourse = async (courseId, courseTitle) => {
+    const confirmDelete = window.confirm(`Are you absolutely sure you want to delete the course "${courseTitle}"? This will delete all modules, enrollments, quiz results, and certificates permanently.`);
+    if (!confirmDelete) return;
+
+    try {
+      await courseService.deleteCourse(courseId);
+      alert("Course deleted successfully.");
+      await fetchDashboardData();
+    } catch (err) {
+      console.error("Failed to delete course:", err);
+      alert(err.response?.data?.message || "Failed to delete course.");
+    }
+  };
+
   if (loading) {
     return (
       <div className="flex items-center justify-center min-h-[70vh]">
@@ -672,12 +686,21 @@ const Dashboard = () => {
                       <h4 className="text-xs font-bold text-slate-200 truncate w-44">{c.title}</h4>
                       <p className="text-[10px] text-slate-500 mt-0.5">{c.modules?.length || 0} Modules</p>
                     </div>
-                    <Link
-                      to={`/courses/${c.id}`}
-                      className="px-3 py-1.5 bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white rounded-lg text-[10px] font-semibold transition-colors duration-150"
-                    >
-                      Enter Course
-                    </Link>
+                    <div className="flex items-center gap-2">
+                      <Link
+                        to={`/courses/${c.id}`}
+                        className="px-3 py-1.5 bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white rounded-lg text-[10px] font-semibold transition-colors duration-150"
+                      >
+                        Enter Course
+                      </Link>
+                      <button
+                        onClick={() => handleDeleteCourse(c.id, c.title)}
+                        className="px-3 py-1.5 bg-rose-500/10 hover:bg-rose-500 text-rose-400 hover:text-white border border-rose-500/20 rounded-lg text-[10px] font-semibold transition-all duration-150 cursor-pointer"
+                        title="Delete Course"
+                      >
+                        Delete
+                      </button>
+                    </div>
                   </div>
                 ))}
               </div>

@@ -23,6 +23,18 @@ public class CourseServiceImpl implements CourseService {
     @Autowired
     private CourseMapper courseMapper;
 
+    @Autowired
+    private com.lms.courseservice.repository.EnrollmentRepository enrollmentRepository;
+
+    @Autowired
+    private com.lms.courseservice.repository.CertificateRepository certificateRepository;
+
+    @Autowired
+    private com.lms.courseservice.repository.QuizResultRepository quizResultRepository;
+
+    @Autowired
+    private com.lms.courseservice.repository.ModuleProgressRepository moduleProgressRepository;
+
     @Override
     @Transactional
     public CourseResponseDTO createCourse(CourseRequestDTO dto) {
@@ -51,5 +63,31 @@ public class CourseServiceImpl implements CourseService {
     public Course getCourseEntityById(Long id) {
         return courseRepository.findById(id)
                 .orElseThrow(() -> new CourseNotFoundException("Course with ID " + id + " not found"));
+    }
+
+    @Override
+    @Transactional
+    public void deleteCourse(Long id) {
+        Course course = getCourseEntityById(id);
+
+        // Clean up certificates
+        certificateRepository.deleteByCourseId(id);
+
+        // Clean up quiz results
+        quizResultRepository.deleteByCourseId(id);
+
+        // Clean up module progress
+        List<Long> moduleIds = course.getModules().stream()
+                .map(com.lms.courseservice.entity.Module::getId)
+                .collect(Collectors.toList());
+        if (!moduleIds.isEmpty()) {
+            moduleProgressRepository.deleteByModuleIdIn(moduleIds);
+        }
+
+        // Clean up enrollments
+        enrollmentRepository.deleteByCourseId(id);
+
+        // Delete the course
+        courseRepository.delete(course);
     }
 }

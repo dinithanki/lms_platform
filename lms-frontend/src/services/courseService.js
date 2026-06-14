@@ -43,6 +43,11 @@ const courseService = {
     });
     return response.data; // ProgressResponseDTO { progressPercent, completedModulesCount, totalModulesCount }
   },
+
+  deleteCourse: async (id) => {
+    const response = await api.delete(`/api/courses/${id}`);
+    return response.data;
+  },
 };
 
 export default courseService;

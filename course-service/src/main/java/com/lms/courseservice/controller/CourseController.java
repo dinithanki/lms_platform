@@ -35,4 +35,15 @@ public class CourseController {
         List<CourseResponseDTO> response = courseService.getAllCourses();
         return ResponseEntity.ok(response);
     }
+
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Void> deleteCourse(
+            @PathVariable Long id,
+            @RequestHeader(value = "X-User-Role", required = false) String role) {
+        if (!"ADMIN".equalsIgnoreCase(role)) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
+        }
+        courseService.deleteCourse(id);
+        return ResponseEntity.noContent().build();
+    }
 }
