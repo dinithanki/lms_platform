@@ -26,6 +26,8 @@ public class CourseMapper {
         dto.setId(course.getId());
         dto.setTitle(course.getTitle());
         dto.setDescription(course.getDescription());
+        dto.setCreatedBy(course.getCreatedBy());
+        dto.setCreatedAt(course.getCreatedAt());
         return dto;
     }
 }

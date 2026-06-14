@@ -7,19 +7,22 @@
     <list default="true" id="6f586ae9-defd-483d-b25c-09243b81dc36" name="Changes" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/course-service/src/main/java/com/lms/courseservice/controller/CourseController.java" beforeDir="false" afterPath="$PROJECT_DIR$/course-service/src/main/java/com/lms/courseservice/controller/CourseController.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/course-service/src/main/java/com/lms/courseservice/repository/CertificateRepository.java" beforeDir="false" afterPath="$PROJECT_DIR$/course-service/src/main/java/com/lms/courseservice/repository/CertificateRepository.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/course-service/src/main/java/com/lms/courseservice/dto/response/CourseResponseDTO.java" beforeDir="false" afterPath="$PROJECT_DIR$/course-service/src/main/java/com/lms/courseservice/dto/response/CourseResponseDTO.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/course-service/src/main/java/com/lms/courseservice/entity/Course.java" beforeDir="false" afterPath="$PROJECT_DIR$/course-service/src/main/java/com/lms/courseservice/entity/Course.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/course-service/src/main/java/com/lms/courseservice/mapper/CourseMapper.java" beforeDir="false" afterPath="$PROJECT_DIR$/course-service/src/main/java/com/lms/courseservice/mapper/CourseMapper.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/course-service/src/main/java/com/lms/courseservice/repository/CourseRepository.java" beforeDir="false" afterPath="$PROJECT_DIR$/course-service/src/main/java/com/lms/courseservice/repository/CourseRepository.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/course-service/src/main/java/com/lms/courseservice/repository/EnrollmentRepository.java" beforeDir="false" afterPath="$PROJECT_DIR$/course-service/src/main/java/com/lms/courseservice/repository/EnrollmentRepository.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/course-service/src/main/java/com/lms/courseservice/repository/ModuleProgressRepository.java" beforeDir="false" afterPath="$PROJECT_DIR$/course-service/src/main/java/com/lms/courseservice/repository/ModuleProgressRepository.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/course-service/src/main/java/com/lms/courseservice/repository/QuizResultRepository.java" beforeDir="false" afterPath="$PROJECT_DIR$/course-service/src/main/java/com/lms/courseservice/repository/QuizResultRepository.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/course-service/src/main/java/com/lms/courseservice/service/CourseService.java" beforeDir="false" afterPath="$PROJECT_DIR$/course-service/src/main/java/com/lms/courseservice/service/CourseService.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/course-service/src/main/java/com/lms/courseservice/service/impl/CourseServiceImpl.java" beforeDir="false" afterPath="$PROJECT_DIR$/course-service/src/main/java/com/lms/courseservice/service/impl/CourseServiceImpl.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/lms-frontend/src/pages/Dashboard.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/lms-frontend/src/pages/Dashboard.jsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/lms-frontend/src/services/courseService.js" beforeDir="false" afterPath="$PROJECT_DIR$/lms-frontend/src/services/courseService.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/lms-frontend/src/components/CourseCard.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/lms-frontend/src/components/CourseCard.jsx" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
     <option name="LAST_RESOLUTION" value="IGNORE" />
+  </component>
+  <component name="EmbeddingIndexingInfo">
+    <option name="cachedIndexableFilesCount" value="226" />
   </component>
   <component name="FileTemplateManagerImpl">
     <option name="RECENT_TEMPLATES">
@@ -47,6 +50,13 @@
   <component name="KubernetesApiProvider">{
   &quot;isMigrated&quot;: true
 }</component>
+  <component name="MavenImportPreferences">
+    <option name="generalSettings">
+      <MavenGeneralSettings>
+        <option name="mavenHomeTypeForPersistence" value="WRAPPER" />
+      </MavenGeneralSettings>
+    </option>
+  </component>
   <component name="McpProjectServerCommands">
     <commands />
     <urls />
@@ -70,7 +80,12 @@
     &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
     &quot;RunOnceActivity.git.unshallow&quot;: &quot;true&quot;,
     &quot;RunOnceActivity.typescript.service.memoryLimit.init&quot;: &quot;true&quot;,
+    &quot;Spring Boot.ApiGatewayApplication.executor&quot;: &quot;Run&quot;,
     &quot;Spring Boot.AuthServiceApplication.executor&quot;: &quot;Run&quot;,
+    &quot;Spring Boot.CourseServiceApplication.executor&quot;: &quot;Run&quot;,
+    &quot;Spring Boot.NotificationServiceApplication.executor&quot;: &quot;Run&quot;,
+    &quot;Spring Boot.QuizServiceApplication.executor&quot;: &quot;Run&quot;,
+    &quot;Spring Boot.UserServiceApplication.executor&quot;: &quot;Run&quot;,
     &quot;com.intellij.ml.llm.matterhorn.ej.ui.settings.DefaultModelSelectionForGA.v1&quot;: &quot;true&quot;,
     &quot;git-widget-placeholder&quot;: &quot;main&quot;,
     &quot;ignore.virus.scanning.warn.message&quot;: &quot;true&quot;,
@@ -82,11 +97,38 @@
     &quot;node.js.selected.package.eslint&quot;: &quot;(autodetect)&quot;,
     &quot;node.js.selected.package.tslint&quot;: &quot;(autodetect)&quot;,
     &quot;nodejs_package_manager_path&quot;: &quot;npm&quot;,
+    &quot;run.configurations.included.in.services&quot;: &quot;true&quot;,
     &quot;to.speed.mode.migration.done&quot;: &quot;true&quot;,
     &quot;vue.rearranger.settings.migration&quot;: &quot;true&quot;
   }
 }</component>
-  <component name="RunManager">
+  <component name="RunDashboard">
+    <option name="configurationTypes">
+      <set>
+        <option value="KtorApplicationConfigurationType" />
+        <option value="MicronautRunConfigurationType" />
+        <option value="QuarkusRunConfigurationType" />
+        <option value="SpringBootApplicationConfigurationType" />
+      </set>
+    </option>
+    <option name="configurationStatuses">
+      <map>
+        <entry key="SpringBootApplicationConfigurationType">
+          <value>
+            <map>
+              <entry key="ApiGatewayApplication" value="STOPPED" />
+              <entry key="AuthServiceApplication" value="STOPPED" />
+              <entry key="CourseServiceApplication" value="STOPPED" />
+              <entry key="NotificationServiceApplication" value="STOPPED" />
+              <entry key="QuizServiceApplication" value="STOPPED" />
+              <entry key="UserServiceApplication" value="STOPPED" />
+            </map>
+          </value>
+        </entry>
+      </map>
+    </option>
+  </component>
+  <component name="RunManager" selected="Spring Boot.UserServiceApplication">
     <configuration default="true" type="JetRunConfigurationType">
       <module name="lms_sb" />
       <method v="2">
@@ -98,11 +140,48 @@
       <option name="filePath" />
       <method v="2" />
     </configuration>
+    <configuration name="ApiGatewayApplication" type="SpringBootApplicationConfigurationType" factoryName="Spring Boot" nameIsGenerated="true">
+      <module name="api-gateway" />
+      <option name="SPRING_BOOT_MAIN_CLASS" value="com.lms.apigateway.ApiGatewayApplication" />
+      <method v="2">
+        <option name="Make" enabled="true" />
+      </method>
+    </configuration>
     <configuration name="AuthServiceApplication" type="SpringBootApplicationConfigurationType" factoryName="Spring Boot" nameIsGenerated="true">
-      <option name="ALTERNATIVE_JRE_PATH" value="17" />
-      <option name="ALTERNATIVE_JRE_PATH_ENABLED" value="true" />
       <option name="FRAME_DEACTIVATION_UPDATE_POLICY" value="UpdateClassesAndResources" />
+      <module name="auth-service" />
       <option name="SPRING_BOOT_MAIN_CLASS" value="com.lms.authservice.AuthServiceApplication" />
+      <method v="2">
+        <option name="Make" enabled="true" />
+      </method>
+    </configuration>
+    <configuration name="CourseServiceApplication" type="SpringBootApplicationConfigurationType" factoryName="Spring Boot" nameIsGenerated="true">
+      <module name="course-service" />
+      <option name="SPRING_BOOT_MAIN_CLASS" value="com.lms.courseservice.CourseServiceApplication" />
+      <method v="2">
+        <option name="Make" enabled="true" />
+      </method>
+    </configuration>
+    <configuration name="NotificationServiceApplication" type="SpringBootApplicationConfigurationType" factoryName="Spring Boot" nameIsGenerated="true">
+      <option name="FRAME_DEACTIVATION_UPDATE_POLICY" value="UpdateClassesAndResources" />
+      <module name="notification-service" />
+      <option name="SPRING_BOOT_MAIN_CLASS" value="com.lms.notificationservice.NotificationServiceApplication" />
+      <method v="2">
+        <option name="Make" enabled="true" />
+      </method>
+    </configuration>
+    <configuration name="QuizServiceApplication" type="SpringBootApplicationConfigurationType" factoryName="Spring Boot" nameIsGenerated="true">
+      <option name="FRAME_DEACTIVATION_UPDATE_POLICY" value="UpdateClassesAndResources" />
+      <module name="quiz-service" />
+      <option name="SPRING_BOOT_MAIN_CLASS" value="com.lms.quizservice.QuizServiceApplication" />
+      <method v="2">
+        <option name="Make" enabled="true" />
+      </method>
+    </configuration>
+    <configuration name="UserServiceApplication" type="SpringBootApplicationConfigurationType" factoryName="Spring Boot" nameIsGenerated="true">
+      <option name="FRAME_DEACTIVATION_UPDATE_POLICY" value="UpdateClassesAndResources" />
+      <module name="user-service" />
+      <option name="SPRING_BOOT_MAIN_CLASS" value="com.lms.userservice.UserServiceApplication" />
       <extension name="net.ashald.envfile">
         <option name="IS_ENABLED" value="false" />
         <option name="IS_SUBST" value="false" />
@@ -117,6 +196,14 @@
         <option name="Make" enabled="true" />
       </method>
     </configuration>
+    <list>
+      <item itemvalue="Spring Boot.ApiGatewayApplication" />
+      <item itemvalue="Spring Boot.AuthServiceApplication" />
+      <item itemvalue="Spring Boot.CourseServiceApplication" />
+      <item itemvalue="Spring Boot.NotificationServiceApplication" />
+      <item itemvalue="Spring Boot.QuizServiceApplication" />
+      <item itemvalue="Spring Boot.UserServiceApplication" />
+    </list>
   </component>
   <component name="SharedIndexes">
     <attachedChunks>
@@ -152,6 +239,9 @@
       <workItem from="1781349862386" duration="1735000" />
       <workItem from="1781401173391" duration="36000" />
       <workItem from="1781401217216" duration="33000" />
+      <workItem from="1781406747911" duration="1912000" />
+      <workItem from="1781408743176" duration="600000" />
+      <workItem from="1781412532707" duration="432000" />
     </task>
     <servers />
   </component>

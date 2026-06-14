@@ -26,6 +26,17 @@ public class Course {
     @Column(columnDefinition = "TEXT")
     private String description;
 
+    @Column(name = "created_by")
+    private String createdBy;
+
+    @Column(name = "created_at", updatable = false)
+    private java.time.LocalDateTime createdAt;
+
+    @PrePersist
+    protected void onCreate() {
+        createdAt = java.time.LocalDateTime.now();
+    }
+
     @OneToMany(mappedBy = "course", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Module> modules = new ArrayList<>();
 }

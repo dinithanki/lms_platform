@@ -19,8 +19,14 @@ public class CourseController {
     private CourseService courseService;
 
     @PostMapping
-    public ResponseEntity<CourseResponseDTO> createCourse(@Valid @RequestBody CourseRequestDTO dto) {
-        CourseResponseDTO response = courseService.createCourse(dto);
+    public ResponseEntity<CourseResponseDTO> createCourse(
+            @Valid @RequestBody CourseRequestDTO dto,
+            @RequestHeader(value = "X-User-Name", required = false) String username,
+            @RequestHeader(value = "X-User-Role", required = false) String role) {
+        if (!"TEACHER".equalsIgnoreCase(role) && !"INSTRUCTOR".equalsIgnoreCase(role) && !"ADMIN".equalsIgnoreCase(role)) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
+        }
+        CourseResponseDTO response = courseService.createCourse(dto, username);
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
 
@@ -31,8 +37,10 @@ public class CourseController {
     }
 
     @GetMapping
-    public ResponseEntity<List<CourseResponseDTO>> getAllCourses() {
-        List<CourseResponseDTO> response = courseService.getAllCourses();
+    public ResponseEntity<List<CourseResponseDTO>> getAllCourses(
+            @RequestHeader(value = "X-User-Name", required = false) String username,
+            @RequestHeader(value = "X-User-Role", required = false) String role) {
+        List<CourseResponseDTO> response = courseService.getAllCourses(username, role);
         return ResponseEntity.ok(response);
     }
 

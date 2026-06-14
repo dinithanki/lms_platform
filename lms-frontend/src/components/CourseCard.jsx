@@ -1,18 +1,37 @@
-import React from "react";
 import { Link } from "react-router-dom";
 
-const CourseCard = ({ course, isEnrolled, progress, onEnroll, isEnrolling, userRole }) => {
-  // Truncate course description for cleaner grids
+const CourseCard = ({
+  course,
+  isEnrolled,
+  progress,
+  onEnroll,
+  isEnrolling,
+  userRole,
+}) => {
   const truncateText = (text, maxLength = 120) => {
     if (!text) return "No description available.";
-    return text.length > maxLength ? `${text.substring(0, maxLength)}...` : text;
+    return text.length > maxLength
+      ? `${text.substring(0, maxLength)}...`
+      : text;
+  };
+
+  const canShowInsights = ["ADMIN", "TEACHER", "INSTRUCTOR"].includes(userRole);
+
+  const formatCreatedAt = (value) => {
+    if (!value) return "N/A";
+
+    const date = new Date(value);
+    if (Number.isNaN(date.getTime())) return "N/A";
+
+    return new Intl.DateTimeFormat(undefined, {
+      dateStyle: "medium",
+      timeStyle: "short",
+    }).format(date);
   };
 
   return (
     <div className="bg-slate-900 border border-slate-800 rounded-2xl overflow-hidden hover:border-slate-700/80 transition-all duration-300 hover:-translate-y-1 hover:shadow-xl hover:shadow-black/30 flex flex-col justify-between h-full group">
-      {/* Course Banner Overlay */}
       <div className="h-32 bg-gradient-to-br from-indigo-900/60 to-purple-950/60 p-5 flex flex-col justify-between border-b border-slate-800/60 relative overflow-hidden">
-        {/* Glow effect */}
         <div className="absolute top-0 right-0 w-24 h-24 bg-indigo-500/10 rounded-full blur-2xl group-hover:bg-indigo-500/20 transition-all duration-300"></div>
 
         <span className="text-[10px] uppercase font-bold tracking-widest px-2.5 py-1 bg-slate-950/80 text-indigo-400 border border-indigo-400/20 rounded-full w-fit">
@@ -23,13 +42,11 @@ const CourseCard = ({ course, isEnrolled, progress, onEnroll, isEnrolling, userR
         </h3>
       </div>
 
-      {/* Description & Details */}
       <div className="p-5 flex-1 flex flex-col justify-between gap-4">
         <p className="text-xs text-slate-400 leading-relaxed">
           {truncateText(course.description)}
         </p>
 
-        {/* Modules Count & Badges */}
         <div className="flex items-center justify-between text-[11px] text-slate-500 font-medium border-t border-slate-800/40 pt-3">
           <span className="flex items-center gap-1">
             <svg
@@ -55,12 +72,51 @@ const CourseCard = ({ course, isEnrolled, progress, onEnroll, isEnrolling, userR
           )}
         </div>
 
-        {/* Progress Bar (Visible only to students enrolled in the course) */}
+        {canShowInsights && (
+          <div className="flex flex-col gap-2.5 bg-gradient-to-br from-slate-950/70 to-slate-900/50 p-3.5 rounded-2xl border border-slate-800/70 text-[11px] text-slate-400 mt-1 shadow-inner shadow-black/20">
+            <div className="flex justify-between items-center gap-3">
+              <span className="text-slate-500 font-medium">Created by</span>
+              <span className="text-slate-200 font-semibold truncate max-w-[150px] text-right">
+                {course.createdBy || "System / Staff"}
+              </span>
+            </div>
+            <div className="flex justify-between items-center gap-3">
+              <span className="text-slate-500 font-medium">Created on</span>
+              <span className="text-slate-200 font-semibold text-right">
+                {formatCreatedAt(course.createdAt)}
+              </span>
+            </div>
+            <div className="flex justify-between items-center gap-3 border-t border-slate-800/40 pt-2 mt-0.5">
+              <span className="text-slate-500 font-medium flex items-center gap-1.5">
+                <svg
+                  className="w-3.5 h-3.5 text-indigo-400"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth="2.5"
+                    d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a3 3 0 11-6 0z"
+                  />
+                </svg>
+                Enrolled students
+              </span>
+              <span className="text-indigo-300 font-bold text-xs bg-gradient-to-r from-indigo-500/20 to-cyan-500/20 px-2.5 py-0.5 rounded-full border border-indigo-500/20">
+                {course.enrolledStudentsCount || 0}
+              </span>
+            </div>
+          </div>
+        )}
+
         {isEnrolled && progress !== undefined && (
           <div className="flex flex-col gap-1.5 mt-1 bg-slate-800/20 p-2.5 rounded-xl border border-slate-800/40">
             <div className="flex justify-between items-center text-[10px]">
               <span className="text-slate-400 font-medium">Your Progress</span>
-              <span className="font-bold text-indigo-400">{Math.round(progress)}%</span>
+              <span className="font-bold text-indigo-400">
+                {Math.round(progress)}%
+              </span>
             </div>
             <div className="w-full h-1.5 bg-slate-800 rounded-full overflow-hidden">
               <div
@@ -71,7 +127,6 @@ const CourseCard = ({ course, isEnrolled, progress, onEnroll, isEnrolling, userR
           </div>
         )}
 
-        {/* Card Actions */}
         <div className="flex gap-2.5 mt-2">
           {userRole === "STUDENT" && !isEnrolled ? (
             <button
@@ -93,7 +148,9 @@ const CourseCard = ({ course, isEnrolled, progress, onEnroll, isEnrolling, userR
               to={`/courses/${course.id}`}
               className="flex-grow text-center py-2 text-xs font-semibold text-slate-300 hover:text-white bg-slate-800 hover:bg-slate-700/80 border border-slate-700/50 rounded-xl transition-all duration-200"
             >
-              {isEnrolled || userRole !== "STUDENT" ? "Enter Course" : "View Details"}
+              {isEnrolled || userRole !== "STUDENT"
+                ? "Enter Course"
+                : "View Details"}
             </Link>
           )}
         </div>

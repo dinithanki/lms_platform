@@ -37,24 +37,39 @@ public class CourseServiceImpl implements CourseService {
 
     @Override
     @Transactional
-    public CourseResponseDTO createCourse(CourseRequestDTO dto) {
+    public CourseResponseDTO createCourse(CourseRequestDTO dto, String createdBy) {
         Course course = courseMapper.toEntity(dto);
+        course.setCreatedBy(createdBy);
         Course savedCourse = courseRepository.save(course);
-        return courseMapper.toResponseDTO(savedCourse);
+        CourseResponseDTO response = courseMapper.toResponseDTO(savedCourse);
+        response.setEnrolledStudentsCount(0L);
+        return response;
     }
 
     @Override
     @Transactional(readOnly = true)
     public CourseResponseDTO getCourseById(Long id) {
         Course course = getCourseEntityById(id);
-        return courseMapper.toResponseDTO(course);
+        CourseResponseDTO response = courseMapper.toResponseDTO(course);
+        response.setEnrolledStudentsCount(enrollmentRepository.countByCourseId(id));
+        return response;
     }
 
     @Override
     @Transactional(readOnly = true)
-    public List<CourseResponseDTO> getAllCourses() {
-        return courseRepository.findAll().stream()
-                .map(courseMapper::toResponseDTO)
+    public List<CourseResponseDTO> getAllCourses(String username, String role) {
+        List<Course> courses;
+        if ("TEACHER".equalsIgnoreCase(role) || "INSTRUCTOR".equalsIgnoreCase(role)) {
+            courses = courseRepository.findByCreatedBy(username);
+        } else {
+            courses = courseRepository.findAll();
+        }
+        return courses.stream()
+                .map(course -> {
+                    CourseResponseDTO dto = courseMapper.toResponseDTO(course);
+                    dto.setEnrolledStudentsCount(enrollmentRepository.countByCourseId(course.getId()));
+                    return dto;
+                })
                 .collect(Collectors.toList());
     }
 
