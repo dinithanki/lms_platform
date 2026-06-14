@@ -57,10 +57,29 @@ public class ModuleServiceImpl implements ModuleService {
     }
 
     @Override
+    @Transactional
+    public ModuleResponseDTO createModule(Long courseId, ModuleRequestDTO dto, String username, String role) {
+        Course course = courseService.getCourseEntityById(courseId, username, role);
+        Module module = moduleMapper.toEntity(dto);
+        module.setCourse(course);
+        Module savedModule = moduleRepository.save(module);
+        return moduleMapper.toResponseDTO(savedModule);
+    }
+
+    @Override
     @Transactional(readOnly = true)
     public List<ModuleResponseDTO> getModulesByCourseId(Long courseId) {
         // Just verify if course exists
         courseService.getCourseEntityById(courseId);
+        return moduleRepository.findByCourseId(courseId).stream()
+                .map(moduleMapper::toResponseDTO)
+                .collect(Collectors.toList());
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public List<ModuleResponseDTO> getModulesByCourseId(Long courseId, String username, String role) {
+        courseService.getCourseEntityById(courseId, username, role);
         return moduleRepository.findByCourseId(courseId).stream()
                 .map(moduleMapper::toResponseDTO)
                 .collect(Collectors.toList());
@@ -122,6 +141,50 @@ public class ModuleServiceImpl implements ModuleService {
         boolean quizUnlocked = (completedModules == totalModules) && (totalModules > 0);
 
         // Check if quiz is passed (score >= 60% and attempts <= 5)
+        boolean quizPassed = false;
+        Optional<QuizResult> quizResultOpt = quizResultRepository.findByStudentIdAndCourseId(studentId, courseId);
+        if (quizResultOpt.isPresent()) {
+            QuizResult quizResult = quizResultOpt.get();
+            if (quizResult.getScore() >= 60.0 && quizResult.getAttempts() <= 5) {
+                quizPassed = true;
+            }
+        }
+
+        boolean courseCompleted = quizUnlocked && quizPassed;
+
+        ProgressResponseDTO dto = new ProgressResponseDTO();
+        dto.setStudentId(studentId);
+        dto.setCourseId(courseId);
+        dto.setCompletedModulesCount(completedModules);
+        dto.setTotalModulesCount(totalModules);
+        dto.setProgressPercentage(progressPercentage);
+        dto.setQuizUnlocked(quizUnlocked);
+        dto.setCourseCompleted(courseCompleted);
+
+        return dto;
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public ProgressResponseDTO getCourseProgress(Long courseId, Long studentId, String username, String role) {
+        courseService.getCourseEntityById(courseId, username, role);
+
+        if (!enrollmentRepository.existsByStudentIdAndCourseId(studentId, courseId)) {
+            throw new EnrollmentException("Student must enroll in the course to view progress.");
+        }
+
+        List<Module> modules = moduleRepository.findByCourseId(courseId);
+        long totalModules = modules.size();
+
+        long completedModules = 0;
+        if (totalModules > 0) {
+            List<Long> moduleIds = modules.stream().map(Module::getId).collect(Collectors.toList());
+            completedModules = moduleProgressRepository.countByStudentIdAndModuleIdInAndCompletedTrue(studentId, moduleIds);
+        }
+
+        double progressPercentage = ProgressCalculator.calculatePercentage(completedModules, totalModules);
+        boolean quizUnlocked = (completedModules == totalModules) && (totalModules > 0);
+
         boolean quizPassed = false;
         Optional<QuizResult> quizResultOpt = quizResultRepository.findByStudentIdAndCourseId(studentId, courseId);
         if (quizResultOpt.isPresent()) {

@@ -21,14 +21,22 @@ public class ModuleController {
     @PostMapping("/courses/{id}/modules")
     public ResponseEntity<ModuleResponseDTO> createModule(
             @PathVariable Long id,
-            @Valid @RequestBody ModuleRequestDTO dto) {
-        ModuleResponseDTO response = moduleService.createModule(id, dto);
+            @Valid @RequestBody ModuleRequestDTO dto,
+            @RequestHeader(value = "X-User-Name", required = false) String username,
+            @RequestHeader(value = "X-User-Role", required = false) String role) {
+        if (!"INSTRUCTOR".equalsIgnoreCase(role) && !"ADMIN".equalsIgnoreCase(role)) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
+        }
+        ModuleResponseDTO response = moduleService.createModule(id, dto, username, role);
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
 
     @GetMapping("/courses/{id}/modules")
-    public ResponseEntity<List<ModuleResponseDTO>> getModulesByCourseId(@PathVariable Long id) {
-        List<ModuleResponseDTO> response = moduleService.getModulesByCourseId(id);
+    public ResponseEntity<List<ModuleResponseDTO>> getModulesByCourseId(
+            @PathVariable Long id,
+            @RequestHeader(value = "X-User-Name", required = false) String username,
+            @RequestHeader(value = "X-User-Role", required = false) String role) {
+        List<ModuleResponseDTO> response = moduleService.getModulesByCourseId(id, username, role);
         return ResponseEntity.ok(response);
     }
 
@@ -43,8 +51,10 @@ public class ModuleController {
     @GetMapping("/courses/{id}/progress")
     public ResponseEntity<ProgressResponseDTO> getCourseProgress(
             @PathVariable Long id,
-            @RequestParam Long studentId) {
-        ProgressResponseDTO response = moduleService.getCourseProgress(id, studentId);
+            @RequestParam Long studentId,
+            @RequestHeader(value = "X-User-Name", required = false) String username,
+            @RequestHeader(value = "X-User-Role", required = false) String role) {
+        ProgressResponseDTO response = moduleService.getCourseProgress(id, studentId, username, role);
         return ResponseEntity.ok(response);
     }
 }

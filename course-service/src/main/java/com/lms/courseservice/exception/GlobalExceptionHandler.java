@@ -54,6 +54,16 @@ public class GlobalExceptionHandler {
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(error);
     }
 
+    @ExceptionHandler(CourseAccessDeniedException.class)
+    public ResponseEntity<Map<String, Object>> handleCourseAccessDenied(CourseAccessDeniedException ex) {
+        Map<String, Object> error = new HashMap<>();
+        error.put("timestamp", LocalDateTime.now());
+        error.put("status", HttpStatus.FORBIDDEN.value());
+        error.put("error", "Forbidden");
+        error.put("message", ex.getMessage());
+        return ResponseEntity.status(HttpStatus.FORBIDDEN).body(error);
+    }
+
     @ExceptionHandler(MethodArgumentNotValidException.class)
     public ResponseEntity<Map<String, Object>> handleValidationExceptions(MethodArgumentNotValidException ex) {
         Map<String, Object> error = new HashMap<>();

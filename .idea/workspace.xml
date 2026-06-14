@@ -7,14 +7,19 @@
     <list default="true" id="6f586ae9-defd-483d-b25c-09243b81dc36" name="Changes" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/course-service/src/main/java/com/lms/courseservice/controller/CourseController.java" beforeDir="false" afterPath="$PROJECT_DIR$/course-service/src/main/java/com/lms/courseservice/controller/CourseController.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/course-service/src/main/java/com/lms/courseservice/controller/ModuleController.java" beforeDir="false" afterPath="$PROJECT_DIR$/course-service/src/main/java/com/lms/courseservice/controller/ModuleController.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/course-service/src/main/java/com/lms/courseservice/dto/request/CourseRequestDTO.java" beforeDir="false" afterPath="$PROJECT_DIR$/course-service/src/main/java/com/lms/courseservice/dto/request/CourseRequestDTO.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/course-service/src/main/java/com/lms/courseservice/dto/response/CourseResponseDTO.java" beforeDir="false" afterPath="$PROJECT_DIR$/course-service/src/main/java/com/lms/courseservice/dto/response/CourseResponseDTO.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/course-service/src/main/java/com/lms/courseservice/entity/Course.java" beforeDir="false" afterPath="$PROJECT_DIR$/course-service/src/main/java/com/lms/courseservice/entity/Course.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/course-service/src/main/java/com/lms/courseservice/exception/GlobalExceptionHandler.java" beforeDir="false" afterPath="$PROJECT_DIR$/course-service/src/main/java/com/lms/courseservice/exception/GlobalExceptionHandler.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/course-service/src/main/java/com/lms/courseservice/mapper/CourseMapper.java" beforeDir="false" afterPath="$PROJECT_DIR$/course-service/src/main/java/com/lms/courseservice/mapper/CourseMapper.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/course-service/src/main/java/com/lms/courseservice/repository/CourseRepository.java" beforeDir="false" afterPath="$PROJECT_DIR$/course-service/src/main/java/com/lms/courseservice/repository/CourseRepository.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/course-service/src/main/java/com/lms/courseservice/repository/EnrollmentRepository.java" beforeDir="false" afterPath="$PROJECT_DIR$/course-service/src/main/java/com/lms/courseservice/repository/EnrollmentRepository.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/course-service/src/main/java/com/lms/courseservice/service/CourseService.java" beforeDir="false" afterPath="$PROJECT_DIR$/course-service/src/main/java/com/lms/courseservice/service/CourseService.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/course-service/src/main/java/com/lms/courseservice/service/ModuleService.java" beforeDir="false" afterPath="$PROJECT_DIR$/course-service/src/main/java/com/lms/courseservice/service/ModuleService.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/course-service/src/main/java/com/lms/courseservice/service/impl/CourseServiceImpl.java" beforeDir="false" afterPath="$PROJECT_DIR$/course-service/src/main/java/com/lms/courseservice/service/impl/CourseServiceImpl.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/lms-frontend/src/components/CourseCard.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/lms-frontend/src/components/CourseCard.jsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/course-service/src/main/java/com/lms/courseservice/service/impl/ModuleServiceImpl.java" beforeDir="false" afterPath="$PROJECT_DIR$/course-service/src/main/java/com/lms/courseservice/service/impl/ModuleServiceImpl.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/lms-frontend/src/pages/Dashboard.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/lms-frontend/src/pages/Dashboard.jsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/lms-frontend/src/services/courseService.js" beforeDir="false" afterPath="$PROJECT_DIR$/lms-frontend/src/services/courseService.js" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -128,7 +133,7 @@
       </map>
     </option>
   </component>
-  <component name="RunManager" selected="Spring Boot.UserServiceApplication">
+  <component name="RunManager" selected="Spring Boot.QuizServiceApplication">
     <configuration default="true" type="JetRunConfigurationType">
       <module name="lms_sb" />
       <method v="2">
@@ -242,6 +247,7 @@
       <workItem from="1781406747911" duration="1912000" />
       <workItem from="1781408743176" duration="600000" />
       <workItem from="1781412532707" duration="432000" />
+      <workItem from="1781413059680" duration="1799000" />
     </task>
     <servers />
   </component>

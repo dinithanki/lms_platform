@@ -13,4 +13,7 @@ public class CourseRequestDTO {
 
     @Size(max = 1000, message = "Course description must be at most 1000 characters")
     private String description;
+
+    // Optional flag to publish the course (only allowed for instructors/admins)
+    private Boolean published;
 }

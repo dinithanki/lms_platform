@@ -11,4 +11,5 @@ public class CourseResponseDTO {
     private String createdBy;
     private LocalDateTime createdAt;
     private long enrolledStudentsCount;
+    private boolean published;
 }

@@ -10,6 +10,7 @@ import notificationService from "../services/notificationService";
 
 const Dashboard = () => {
   const { user } = useAuth();
+  const isTeacherLikeRole = (role) => ["INSTRUCTOR", "TEACHER"].includes(role);
 
   // Common State
   const [courses, setCourses] = useState([]);
@@ -26,6 +27,7 @@ const Dashboard = () => {
   const [newCourseTitle, setNewCourseTitle] = useState("");
   const [newCourseDesc, setNewCourseDesc] = useState("");
   const [courseSubmitLoading, setCourseSubmitLoading] = useState(false);
+  const [editingCourse, setEditingCourse] = useState(null);
 
   // Admin specific State
   const [users, setUsers] = useState([]);
@@ -97,16 +99,35 @@ const Dashboard = () => {
     }
   };
 
-  // Instructor create course handler
-  const handleCreateCourse = async (e) => {
+  const openCreateCourseModal = () => {
+    setEditingCourse(null);
+    setNewCourseTitle("");
+    setNewCourseDesc("");
+    setShowCreateModal(true);
+  };
+
+  const openEditCourseModal = (course) => {
+    setEditingCourse(course);
+    setNewCourseTitle(course.title || "");
+    setNewCourseDesc(course.description || "");
+    setShowCreateModal(true);
+  };
+
+  // Instructor create/update course handler
+  const handleCourseSubmit = async (e) => {
     e.preventDefault();
     if (!newCourseTitle.trim()) return;
 
     setCourseSubmitLoading(true);
     try {
-      await courseService.createCourse(newCourseTitle, newCourseDesc);
+      if (editingCourse) {
+        await courseService.updateCourse(editingCourse.id, newCourseTitle, newCourseDesc);
+      } else {
+        await courseService.createCourse(newCourseTitle, newCourseDesc);
+      }
       setNewCourseTitle("");
       setNewCourseDesc("");
+      setEditingCourse(null);
       setShowCreateModal(false);
       // Refresh course list
       const allCourses = await courseService.getAllCourses();
@@ -313,7 +334,7 @@ const Dashboard = () => {
   }
 
   // RENDER INSTRUCTOR DASHBOARD
-  if (user.role === "INSTRUCTOR") {
+  if (isTeacherLikeRole(user.role)) {
     return (
       <div className="flex flex-col gap-8 animate-fadeIn">
         {/* Banner greeting */}
@@ -329,7 +350,7 @@ const Dashboard = () => {
           </div>
           <div>
             <button
-              onClick={() => setShowCreateModal(true)}
+              onClick={openCreateCourseModal}
               className="px-5 py-2.5 bg-indigo-600 hover:bg-indigo-500 text-slate-100 rounded-xl text-xs font-semibold shadow-lg shadow-indigo-600/10 hover:scale-[1.02] active:scale-95 transition-all duration-200 flex items-center gap-2 cursor-pointer"
             >
               <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -386,7 +407,7 @@ const Dashboard = () => {
             <div className="p-10 border border-dashed border-slate-800 bg-slate-900/20 text-center rounded-2xl">
               <p className="text-sm text-slate-400">No courses created yet.</p>
               <button
-                onClick={() => setShowCreateModal(true)}
+                onClick={openCreateCourseModal}
                 className="mt-4 px-4 py-2 bg-indigo-600 hover:bg-indigo-500 text-white rounded-xl text-xs font-semibold cursor-pointer"
               >
                 Create your first course
@@ -400,6 +421,9 @@ const Dashboard = () => {
                   course={course}
                   isEnrolled={false}
                   userRole={user.role}
+                  canManageCourse={true}
+                  onEditCourse={openEditCourseModal}
+                  onDeleteCourse={(item) => handleDeleteCourse(item.id, item.title)}
                 />
               ))}
             </div>
@@ -409,12 +433,23 @@ const Dashboard = () => {
         {/* Create Course Modal */}
         {showCreateModal && (
           <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
-            <div className="fixed inset-0 bg-slate-950/80 backdrop-blur-sm" onClick={() => setShowCreateModal(false)}></div>
+            <div
+              className="fixed inset-0 bg-slate-950/80 backdrop-blur-sm"
+              onClick={() => {
+                setShowCreateModal(false);
+                setEditingCourse(null);
+              }}
+            ></div>
             <div className="w-full max-w-md bg-slate-900 border border-slate-800 rounded-3xl p-6 shadow-2xl z-10 animate-scaleIn">
               <div className="flex justify-between items-center mb-5 border-b border-slate-800/60 pb-3">
-                <h3 className="text-base font-bold text-slate-100">Create New Course</h3>
+                <h3 className="text-base font-bold text-slate-100">
+                  {editingCourse ? "Edit Course" : "Create New Course"}
+                </h3>
                 <button
-                  onClick={() => setShowCreateModal(false)}
+                  onClick={() => {
+                    setShowCreateModal(false);
+                    setEditingCourse(null);
+                  }}
                   className="p-1.5 text-slate-500 hover:text-slate-300 rounded-full hover:bg-slate-800"
                 >
                   <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -423,7 +458,7 @@ const Dashboard = () => {
                 </button>
               </div>
 
-              <form onSubmit={handleCreateCourse} className="flex flex-col gap-4">
+              <form onSubmit={handleCourseSubmit} className="flex flex-col gap-4">
                 <div className="flex flex-col gap-1.5">
                   <label className="text-[10px] font-bold uppercase tracking-widest text-slate-400 ml-1">
                     Course Title
@@ -460,10 +495,10 @@ const Dashboard = () => {
                   {courseSubmitLoading ? (
                     <>
                       <div className="w-3.5 h-3.5 border-2 border-slate-400 border-t-transparent rounded-full animate-spin"></div>
-                      Creating...
+                      {editingCourse ? "Saving..." : "Creating..."}
                     </>
                   ) : (
-                    "Create Course"
+                    editingCourse ? "Save Changes" : "Create Course"
                   )}
                 </button>
               </form>

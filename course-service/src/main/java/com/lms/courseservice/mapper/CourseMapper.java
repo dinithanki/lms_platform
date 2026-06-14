@@ -15,6 +15,9 @@ public class CourseMapper {
         Course course = new Course();
         course.setTitle(dto.getTitle());
         course.setDescription(dto.getDescription());
+        if (dto.getPublished() != null) {
+            course.setPublished(dto.getPublished());
+        }
         return course;
     }
 
@@ -28,6 +31,7 @@ public class CourseMapper {
         dto.setDescription(course.getDescription());
         dto.setCreatedBy(course.getCreatedBy());
         dto.setCreatedAt(course.getCreatedAt());
+        dto.setPublished(course.isPublished());
         return dto;
     }
 }

@@ -15,11 +15,22 @@ api.interceptors.request.use(
     if (token) {
       config.headers.Authorization = `Bearer ${token}`;
     }
+    // Attach simple user identity headers for downstream microservices
+    const userJson = localStorage.getItem("user");
+    if (userJson) {
+      try {
+        const user = JSON.parse(userJson);
+        if (user?.name) config.headers["X-User-Name"] = user.name;
+        if (user?.role) config.headers["X-User-Role"] = user.role;
+      } catch (e) {
+        // ignore parse errors
+      }
+    }
     return config;
   },
   (error) => {
     return Promise.reject(error);
-  }
+  },
 );
 
 // Add a response interceptor to handle errors globally
@@ -39,7 +50,7 @@ api.interceptors.response.use(
       }
     }
     return Promise.reject(error);
-  }
+  },
 );
 
 export default api;

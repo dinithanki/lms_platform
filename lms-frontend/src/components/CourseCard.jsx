@@ -15,7 +15,7 @@ const CourseCard = ({
       : text;
   };
 
-  const canShowInsights = ["ADMIN", "TEACHER", "INSTRUCTOR"].includes(userRole);
+  const canShowInsights = ["ADMIN", "INSTRUCTOR"].includes(userRole);
 
   const formatCreatedAt = (value) => {
     if (!value) return "N/A";

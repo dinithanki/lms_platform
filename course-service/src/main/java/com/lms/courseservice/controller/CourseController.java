@@ -23,7 +23,7 @@ public class CourseController {
             @Valid @RequestBody CourseRequestDTO dto,
             @RequestHeader(value = "X-User-Name", required = false) String username,
             @RequestHeader(value = "X-User-Role", required = false) String role) {
-        if (!"TEACHER".equalsIgnoreCase(role) && !"INSTRUCTOR".equalsIgnoreCase(role) && !"ADMIN".equalsIgnoreCase(role)) {
+        if (!"INSTRUCTOR".equalsIgnoreCase(role) && !"ADMIN".equalsIgnoreCase(role)) {
             return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
         }
         CourseResponseDTO response = courseService.createCourse(dto, username);
@@ -31,8 +31,11 @@ public class CourseController {
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<CourseResponseDTO> getCourseById(@PathVariable Long id) {
-        CourseResponseDTO response = courseService.getCourseById(id);
+    public ResponseEntity<CourseResponseDTO> getCourseById(
+            @PathVariable Long id,
+            @RequestHeader(value = "X-User-Name", required = false) String username,
+            @RequestHeader(value = "X-User-Role", required = false) String role) {
+        CourseResponseDTO response = courseService.getCourseById(id, username, role);
         return ResponseEntity.ok(response);
     }
 
@@ -44,14 +47,28 @@ public class CourseController {
         return ResponseEntity.ok(response);
     }
 
+    @PutMapping("/{id}")
+    public ResponseEntity<CourseResponseDTO> updateCourse(
+            @PathVariable Long id,
+            @Valid @RequestBody CourseRequestDTO dto,
+            @RequestHeader(value = "X-User-Name", required = false) String username,
+            @RequestHeader(value = "X-User-Role", required = false) String role) {
+        if (!"INSTRUCTOR".equalsIgnoreCase(role) && !"ADMIN".equalsIgnoreCase(role)) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
+        }
+        CourseResponseDTO response = courseService.updateCourse(id, dto, username, role);
+        return ResponseEntity.ok(response);
+    }
+
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteCourse(
             @PathVariable Long id,
+            @RequestHeader(value = "X-User-Name", required = false) String username,
             @RequestHeader(value = "X-User-Role", required = false) String role) {
-        if (!"ADMIN".equalsIgnoreCase(role)) {
+        if (!"INSTRUCTOR".equalsIgnoreCase(role) && !"ADMIN".equalsIgnoreCase(role)) {
             return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
         }
-        courseService.deleteCourse(id);
+        courseService.deleteCourse(id, username, role);
         return ResponseEntity.noContent().build();
     }
 }
