@@ -80,8 +80,8 @@ public class CourseServiceImpl implements CourseService {
         } else if (Role.isInstructor(role)) {
             courses = StringUtils.hasText(username) ? courseRepository.findByCreatedBy(username) : List.of();
         } else {
-            // students and anonymous see only published courses
-            courses = courseRepository.findByPublishedTrue();
+            // students and anonymous see all courses
+            courses = courseRepository.findAll();
         }
         return courses.stream()
                 .map(course -> {
@@ -116,11 +116,8 @@ public class CourseServiceImpl implements CourseService {
             throw new CourseAccessDeniedException("You can only access your own course.");
         }
 
-        // Students and unauthenticated users can view only published courses
-        if (course.isPublished()) {
-            return course;
-        }
-        throw new CourseAccessDeniedException("Course is not published.");
+        // Students and unauthenticated users can view all courses
+        return course;
     }
 
     @Override

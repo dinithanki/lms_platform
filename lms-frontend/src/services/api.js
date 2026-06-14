@@ -1,5 +1,13 @@
 import axios from "axios";
 
+const normalizeRole = (role) => {
+  if (!role) {
+    return "";
+  }
+
+  return role.toUpperCase() === "TEACHER" ? "INSTRUCTOR" : role;
+};
+
 const api = axios.create({
   baseURL: "http://localhost:8080",
   withCredentials: true,
@@ -21,7 +29,8 @@ api.interceptors.request.use(
       try {
         const user = JSON.parse(userJson);
         if (user?.name) config.headers["X-User-Name"] = user.name;
-        if (user?.role) config.headers["X-User-Role"] = user.role;
+        if (user?.role)
+          config.headers["X-User-Role"] = normalizeRole(user.role);
       } catch (e) {
         // ignore parse errors
       }

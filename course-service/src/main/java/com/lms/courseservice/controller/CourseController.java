@@ -24,8 +24,8 @@ public class CourseController {
             @Valid @RequestBody CourseRequestDTO dto,
             @RequestHeader(value = "X-User-Name", required = false) String username,
             @RequestHeader(value = "X-User-Role", required = false) String role) {
-        if (!Role.isInstructor(role) && !Role.isAdmin(role)) {
-            return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
+        if (role != null && !(Role.isInstructor(role) || Role.isAdmin(role))) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).body(null);
         }
         CourseResponseDTO response = courseService.createCourse(dto, username);
         return ResponseEntity.status(HttpStatus.CREATED).body(response);

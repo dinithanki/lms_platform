@@ -18,7 +18,7 @@ import java.util.function.Function;
 public class JwtUtil {
 
     // Default signing key for development/mock. Overridable via application properties.
-    @Value("${jwt.secret:defaultSecretKeyForLmsProjectGatewayDevOnlySecretKeys32BytesMin!}")
+    @Value("${jwt.secret:mysecretkeymysecretkeymysecretkey123456}")
     private String secret;
 
     public boolean validateToken(String token) {
@@ -105,6 +105,9 @@ public class JwtUtil {
                 String payload = new String(Base64.getUrlDecoder().decode(parts[1]));
                 if (payload.contains("\"role\":\"ADMIN\"") || payload.contains("ADMIN")) {
                     return "ADMIN";
+                }
+                if (payload.contains("\"role\":\"INSTRUCTOR\"") || payload.contains("INSTRUCTOR")) {
+                    return "INSTRUCTOR";
                 }
             }
         } catch (Exception ignored) {}

@@ -16,7 +16,7 @@ const normalizeRole = (profile) => {
 export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(() => {
     const cachedUser = localStorage.getItem("user");
-    return cachedUser ? JSON.parse(cachedUser) : null;
+    return cachedUser ? normalizeRole(JSON.parse(cachedUser)) : null;
   });
   const [loading, setLoading] = useState(true);
 
@@ -136,8 +136,9 @@ export const AuthProvider = ({ children }) => {
   };
 
   const updateUserProfileLocal = (updatedUser) => {
-    setUser(updatedUser);
-    localStorage.setItem("user", JSON.stringify(updatedUser));
+    const normalizedUser = normalizeRole(updatedUser);
+    setUser(normalizedUser);
+    localStorage.setItem("user", JSON.stringify(normalizedUser));
   };
 
   const value = {

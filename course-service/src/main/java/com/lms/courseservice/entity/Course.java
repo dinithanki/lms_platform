@@ -40,6 +40,6 @@ public class Course {
     @OneToMany(mappedBy = "course", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Module> modules = new ArrayList<>();
 
-    @Column(name = "published", nullable = false)
+    @Column(name = "published", nullable = false, columnDefinition = "boolean default false")
     private boolean published = false;
 }

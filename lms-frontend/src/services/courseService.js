@@ -1,5 +1,13 @@
 import api from "./api";
 
+const normalizeRole = (role) => {
+  if (!role) {
+    return "";
+  }
+
+  return role.toUpperCase() === "TEACHER" ? "INSTRUCTOR" : role;
+};
+
 const getUserHeaders = () => {
   try {
     const cachedUser = localStorage.getItem("user");
@@ -10,7 +18,7 @@ const getUserHeaders = () => {
     const user = JSON.parse(cachedUser);
     return {
       "X-User-Name": user?.email || user?.name || "",
-      "X-User-Role": user?.role || "",
+      "X-User-Role": normalizeRole(user?.role),
     };
   } catch {
     return {};
