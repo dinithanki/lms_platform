@@ -14,8 +14,10 @@ public class ModuleMapper {
         }
         Module module = new Module();
         module.setTitle(dto.getTitle());
+        module.setDescription(dto.getDescription());
         module.setVideoUrl(dto.getVideoUrl());
         module.setResourceUrl(dto.getResourceUrl());
+        module.setSequenceOrder(dto.getSequenceOrder() != null ? dto.getSequenceOrder() : 0);
         return module;
     }
 
@@ -27,8 +29,22 @@ public class ModuleMapper {
         dto.setId(module.getId());
         dto.setCourseId(module.getCourse() != null ? module.getCourse().getId() : null);
         dto.setTitle(module.getTitle());
+        dto.setDescription(module.getDescription());
         dto.setVideoUrl(module.getVideoUrl());
         dto.setResourceUrl(module.getResourceUrl());
         return dto;
+    }
+
+    public void updateEntityFromDto(ModuleRequestDTO dto, Module module) {
+        if (dto == null || module == null) {
+            return;
+        }
+        module.setTitle(dto.getTitle());
+        module.setDescription(dto.getDescription());
+        module.setVideoUrl(dto.getVideoUrl());
+        module.setResourceUrl(dto.getResourceUrl());
+        if (dto.getSequenceOrder() != null) {
+            module.setSequenceOrder(dto.getSequenceOrder());
+        }
     }
 }

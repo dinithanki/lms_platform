@@ -156,4 +156,14 @@ public class ModuleServiceImpl implements ModuleService {
         long completedModules = moduleProgressRepository.countByStudentIdAndModuleIdInAndCompletedTrue(studentId, moduleIds);
         return completedModules == modules.size();
     }
+
+    @Override
+    @Transactional
+    public ModuleResponseDTO updateModule(Long moduleId, ModuleRequestDTO dto) {
+        Module module = moduleRepository.findById(moduleId)
+                .orElseThrow(() -> new IllegalArgumentException("Module with ID " + moduleId + " not found"));
+        moduleMapper.updateEntityFromDto(dto, module);
+        Module updatedModule = moduleRepository.save(module);
+        return moduleMapper.toResponseDTO(updatedModule);
+    }
 }

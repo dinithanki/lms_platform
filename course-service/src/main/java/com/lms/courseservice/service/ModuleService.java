@@ -11,4 +11,5 @@ public interface ModuleService {
     void completeModule(Long moduleId, Long studentId);
     ProgressResponseDTO getCourseProgress(Long courseId, Long studentId);
     boolean areAllModulesCompleted(Long courseId, Long studentId);
+    ModuleResponseDTO updateModule(Long moduleId, ModuleRequestDTO dto);
 }

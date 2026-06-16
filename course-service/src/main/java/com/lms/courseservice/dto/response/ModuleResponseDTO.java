@@ -7,6 +7,7 @@ public class ModuleResponseDTO {
     private Long id;
     private Long courseId;
     private String title;
+    private String description;
     private String videoUrl;
     private String resourceUrl;
 }

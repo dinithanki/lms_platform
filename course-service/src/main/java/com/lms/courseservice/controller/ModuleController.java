@@ -47,4 +47,12 @@ public class ModuleController {
         ProgressResponseDTO response = moduleService.getCourseProgress(id, studentId);
         return ResponseEntity.ok(response);
     }
+
+    @PutMapping("/modules/{id}")
+    public ResponseEntity<ModuleResponseDTO> updateModule(
+            @PathVariable Long id,
+            @Valid @RequestBody ModuleRequestDTO dto) {
+        ModuleResponseDTO response = moduleService.updateModule(id, dto);
+        return ResponseEntity.ok(response);
+    }
 }

@@ -21,11 +21,17 @@ public class Module {
     @Column(nullable = false)
     private String title;
 
+    @Column(columnDefinition = "TEXT")
+    private String description;
+
     @Column(name = "video_url", nullable = false)
     private String videoUrl;
 
     @Column(name = "resource_url")
     private String resourceUrl;
+
+    @Column(name = "sequence_order", nullable = false)
+    private Integer sequenceOrder;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "course_id", nullable = false)

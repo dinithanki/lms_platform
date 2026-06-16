@@ -10,8 +10,12 @@ public class ModuleRequestDTO {
     @NotBlank(message = "Module title is required")
     private String title;
 
+    private String description;
+
     @NotBlank(message = "Video URL is required")
     private String videoUrl;
 
     private String resourceUrl;
+
+    private Integer sequenceOrder;
 }
