@@ -38,6 +38,10 @@ public class UserServiceImpl implements UserService {
         if (userRepository.findById(dto.getId()).isPresent()) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Profile already exists with id: " + dto.getId());
         }
+        
+        if (userRepository.findByEmail(dto.getEmail()).isPresent()) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Email already in use: " + dto.getEmail());
+        }
 
         User user = new User();
         user.setId(dto.getId());
@@ -115,6 +119,8 @@ public class UserServiceImpl implements UserService {
             String authServiceUrl = "http://localhost:8081/api/auth/users/" + id + "/role";
 
             restTemplate.exchange(authServiceUrl, HttpMethod.PUT, requestEntity, Void.class);
+        } catch (org.springframework.web.client.HttpStatusCodeException e) {
+            throw new ResponseStatusException(e.getStatusCode(), "Auth Service error: " + e.getResponseBodyAsString(), e);
         } catch (Exception e) {
             throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Failed to sync role update with Auth Service: " + e.getMessage(), e);
         }

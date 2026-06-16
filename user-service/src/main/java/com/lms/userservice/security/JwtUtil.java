@@ -43,13 +43,20 @@ public class JwtUtil {
     public Long extractUserId(String token) {
         Claims claims = extractAllClaims(token);
         Object id = claims.get("id");
-        if (id instanceof Integer) {
-            return ((Integer) id).longValue();
+        if (id == null) {
+            return null;
         }
-        if (id instanceof Long) {
-            return (Long) id;
+        if (id instanceof Number) {
+            return ((Number) id).longValue();
         }
-        return claims.get("id", Long.class);
+        if (id instanceof String) {
+            try {
+                return Long.parseLong((String) id);
+            } catch (NumberFormatException e) {
+                return null;
+            }
+        }
+        return null;
     }
 
     public String extractRole(String token) {

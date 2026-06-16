@@ -74,13 +74,18 @@ public class FileStorageService {
     }
 
     public void deleteFile(Long userId) {
-        try {
-            Optional<Path> filePathOpt = findFileByUserId(userId);
-            if (filePathOpt.isPresent()) {
-                Files.deleteIfExists(filePathOpt.get());
-            }
+        String prefix = "profile-" + userId + ".";
+        try (Stream<Path> files = Files.list(this.fileStorageLocation)) {
+            files.filter(p -> p.getFileName().toString().startsWith(prefix))
+                 .forEach(p -> {
+                     try {
+                         Files.deleteIfExists(p);
+                     } catch (IOException e) {
+                         throw new RuntimeException("Could not delete file: " + p, e);
+                     }
+                 });
         } catch (IOException ex) {
-            throw new RuntimeException("Could not delete file for user " + userId, ex);
+            throw new RuntimeException("Could not list files for user " + userId, ex);
         }
     }
 

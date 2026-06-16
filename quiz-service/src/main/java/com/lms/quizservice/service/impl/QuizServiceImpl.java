@@ -49,11 +49,11 @@ public class QuizServiceImpl implements QuizService {
     @Override
     @Transactional
     public QuizResponseDTO createQuiz(QuizRequestDTO dto) {
+        if (dto.getCourseId() == null) {
+            throw new IllegalArgumentException("Course ID must not be null");
+        }
         if (quizRepository.existsByCourseId(dto.getCourseId())) {
             throw new IllegalStateException("A quiz already exists for course ID " + dto.getCourseId());
-        }
-        if (quizRepository.count() >= 10) {
-            throw new IllegalStateException("Admin can only add 10 quizzes.");
         }
         Quiz quiz = quizMapper.toEntity(dto);
         Quiz savedQuiz = quizRepository.save(quiz);
@@ -66,6 +66,10 @@ public class QuizServiceImpl implements QuizService {
         Quiz quiz = quizRepository.findById(id)
                 .orElseThrow(() -> new QuizNotFoundException("Quiz with ID " + id + " not found"));
         
+        if (dto.getCourseId() == null) {
+            throw new IllegalArgumentException("Course ID must not be null");
+        }
+
         // Ensure that courseId can't be changed to one that already has a quiz (unless it's the same course)
         if (!quiz.getCourseId().equals(dto.getCourseId()) && quizRepository.existsByCourseId(dto.getCourseId())) {
             throw new IllegalStateException("A quiz already exists for course ID " + dto.getCourseId());
