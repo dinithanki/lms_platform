@@ -4,6 +4,7 @@ import { useAuth } from "../context/AuthContext";
 import courseService from "../services/courseService";
 import enrollmentService from "../services/enrollmentService";
 import quizService from "../services/quizService";
+import StudentVideoPlayer from "../components/StudentVideoPlayer";
 
 const CourseDetails = () => {
   const { id } = useParams();
@@ -35,6 +36,9 @@ const CourseDetails = () => {
   const [quizSubmitLoading, setQuizSubmitLoading] = useState(false);
   const [latestAttemptResult, setLatestAttemptResult] = useState(null);
   const [downloadingCert, setDownloadingCert] = useState(false);
+
+  // Active Selected Module for Student Player
+  const [selectedModule, setSelectedModule] = useState(null);
 
   // Instructor Module Form
   const [showModuleModal, setShowModuleModal] = useState(false);
@@ -105,6 +109,12 @@ const CourseDetails = () => {
           if (enrolled) {
             const prog = await courseService.getCourseProgress(id, user.id);
             setProgress(prog);
+
+            // Set initial active module for student
+            if (modules && modules.length > 0) {
+              const incomplete = modules.find((m) => !prog.completedModuleIds || !prog.completedModuleIds.includes(m.id));
+              setSelectedModule(incomplete || modules[0]);
+            }
           }
         } else {
           // Instructors and Admins see details directly
@@ -173,6 +183,14 @@ const CourseDetails = () => {
       const data = await courseService.getCourseById(id);
       const modules = await courseService.getModules(id);
       setCourse({ ...data, modules });
+
+      // Update selectedModule status in-place if it was the completed module
+      if (selectedModule && selectedModule.id === moduleId) {
+        const updatedMod = modules.find((m) => m.id === moduleId);
+        if (updatedMod) {
+          setSelectedModule(updatedMod);
+        }
+      }
     } catch (err) {
       console.error(err);
       alert("Failed to mark module as complete.");
@@ -479,7 +497,140 @@ const CourseDetails = () => {
                 <div className="p-8 border border-dashed border-slate-800 bg-slate-900/10 text-center rounded-2xl">
                   <p className="text-xs text-slate-500">No content modules are set up for this course syllabus yet.</p>
                 </div>
+              ) : user.role === "STUDENT" ? (
+                /* STUDENT SPLIT VIEW */
+                <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                  {/* Left Column: Player & Active Lesson Card */}
+                  <div className="lg:col-span-2 flex flex-col gap-4">
+                    <div className="p-5 bg-slate-900 border border-slate-800 rounded-3xl flex flex-col gap-4">
+                      {selectedModule ? (
+                        <>
+                          <StudentVideoPlayer
+                            videoUrl={selectedModule.videoUrl}
+                            lessonTitle={selectedModule.title}
+                            user={user}
+                            isEnrolled={isEnrolled}
+                          />
+
+                          {/* Extra info/actions for selected lesson */}
+                          <div className="flex flex-wrap items-center justify-between gap-4 mt-2 pt-4 border-t border-slate-800/80">
+                            {/* Materials and details */}
+                            <div className="flex items-center gap-4">
+                              {selectedModule.resourceUrl ? (
+                                <a
+                                  href={selectedModule.resourceUrl}
+                                  target="_blank"
+                                  rel="noreferrer"
+                                  className="flex items-center gap-1.5 text-xs text-indigo-400 hover:text-indigo-300 font-semibold transition-colors"
+                                >
+                                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                                  </svg>
+                                  Download Study Materials
+                                </a>
+                              ) : (
+                                <span className="text-xs text-slate-500 font-medium">No study materials linked</span>
+                              )}
+                            </div>
+
+                            {/* Mark Completed inline */}
+                            <div className="shrink-0">
+                              {progress && progress.completedModuleIds && progress.completedModuleIds.includes(selectedModule.id) ? (
+                                <span className="flex items-center gap-1.5 px-4 py-2 bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 rounded-xl text-xs font-bold">
+                                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="3" d="M5 13l4 4L19 7" />
+                                  </svg>
+                                  Completed
+                                </span>
+                              ) : (
+                                <button
+                                  onClick={() => handleCompleteModule(selectedModule.id)}
+                                  disabled={completingModuleId === selectedModule.id}
+                                  className="px-4 py-2 bg-indigo-600 hover:bg-indigo-500 text-white rounded-xl text-xs font-semibold flex items-center gap-1.5 disabled:opacity-50 cursor-pointer shadow-lg shadow-indigo-600/10"
+                                >
+                                  {completingModuleId === selectedModule.id ? (
+                                    <div className="w-3.5 h-3.5 border-2 border-slate-350 border-t-transparent rounded-full animate-spin"></div>
+                                  ) : (
+                                    "Mark Completed"
+                                  )}
+                                </button>
+                              )}
+                            </div>
+                          </div>
+                        </>
+                      ) : (
+                        <div className="text-center p-8 text-xs text-slate-500">
+                          Select a lesson from the list to start watching.
+                        </div>
+                      )}
+                    </div>
+                  </div>
+
+                  {/* Right Column: Lessons list */}
+                  <div className="lg:col-span-1 flex flex-col gap-3 max-h-[600px] overflow-y-auto pr-1">
+                    <h3 className="text-xs font-bold uppercase tracking-wider text-slate-500 mb-1">
+                      Course Lectures
+                    </h3>
+                    {course.modules.map((mod, index) => {
+                      const isCompleted =
+                        progress && progress.completedModuleIds && progress.completedModuleIds.includes(mod.id);
+                      const isSelected = selectedModule && selectedModule.id === mod.id;
+
+                      return (
+                        <div
+                          key={mod.id}
+                          onClick={() => setSelectedModule(mod)}
+                          className={`p-4 rounded-xl border transition-all duration-200 flex items-start gap-3 cursor-pointer ${
+                            isSelected
+                              ? "bg-indigo-600/10 border-indigo-500/50 hover:border-indigo-500/60"
+                              : "bg-slate-900 border-slate-800/80 hover:border-slate-700/60"
+                          }`}
+                        >
+                          <div className={`flex items-center justify-center w-7 h-7 rounded-lg text-xs font-bold shrink-0 mt-0.5 ${
+                            isSelected
+                              ? "bg-indigo-600 text-white"
+                              : isCompleted
+                              ? "bg-emerald-500/10 text-emerald-400 border border-emerald-500/20"
+                              : "bg-slate-800 border border-slate-700 text-indigo-400"
+                          }`}>
+                            {isCompleted ? (
+                              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="3" d="M5 13l4 4L19 7" />
+                              </svg>
+                            ) : (
+                              index + 1
+                            )}
+                          </div>
+
+                          <div className="flex-1 min-w-0">
+                            <h4 className={`text-xs font-bold truncate ${
+                              isSelected ? "text-indigo-300" : "text-slate-200"
+                            }`}>
+                              {mod.title}
+                            </h4>
+                            <div className="flex items-center gap-2 mt-1 text-[10px] text-slate-500 font-medium">
+                              <span className="flex items-center gap-0.5">
+                                <svg className="w-2.5 h-2.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z" />
+                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                </svg>
+                                Video
+                              </span>
+                              {mod.resourceUrl && (
+                                <>
+                                  <span>•</span>
+                                  <span>Materials</span>
+                                </>
+                              )}
+                            </div>
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
+                </div>
               ) : (
+                /* INSTRUCTOR / ADMIN VIEW (UNCHANGED) */
                 <div className="flex flex-col gap-4">
                   {course.modules.map((mod, index) => {
                     // Check if module is completed by student
@@ -505,7 +656,7 @@ const CourseDetails = () => {
                                 rel="noreferrer"
                                 className="flex items-center gap-1 text-indigo-400 hover:text-indigo-300 transition-colors"
                               >
-                                <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z" />
                                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                                 </svg>

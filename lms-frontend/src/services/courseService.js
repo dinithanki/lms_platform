@@ -41,7 +41,10 @@ const courseService = {
     const response = await api.get(`/api/courses/${courseId}/progress`, {
       params: { studentId },
     });
-    return response.data; // ProgressResponseDTO { progressPercent, completedModulesCount, totalModulesCount }
+    if (response.data && response.data.progressPercentage !== undefined) {
+      response.data.progressPercent = response.data.progressPercentage;
+    }
+    return response.data;
   },
 
   updateModule: async (moduleId, { title, videoUrl, resourceUrl }) => {
