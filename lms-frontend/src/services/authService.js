@@ -41,6 +41,11 @@ const authService = {
     const response = await api.put(`/api/auth/users/${userId}/role`, { role });
     return response.data; // Expecting updated UserResponseDTO
   },
+
+  deleteUser: async (userId) => {
+    const response = await api.delete(`/api/auth/users/${userId}`);
+    return response.data;
+  },
 };
 
 export default authService;

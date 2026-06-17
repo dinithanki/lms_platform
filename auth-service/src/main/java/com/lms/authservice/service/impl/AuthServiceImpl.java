@@ -18,6 +18,7 @@ import org.springframework.web.client.RestTemplate;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpMethod;
 
 import java.util.List;
 import java.util.Optional;
@@ -139,5 +140,27 @@ public class AuthServiceImpl implements AuthService {
         User user = userRepository.findByEmail(email)
                 .orElseThrow(() -> new RuntimeException("User not found with email: " + email));
         return UserMapper.toDTO(user);
+    }
+
+    @Override
+    @Transactional
+    public void deleteUser(Long userId, String authHeader) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new RuntimeException("User not found with id: " + userId));
+
+        // Call User Service to delete the user profile.
+        try {
+            HttpHeaders headers = new HttpHeaders();
+            if (authHeader != null) {
+                headers.set("Authorization", authHeader);
+            }
+            HttpEntity<Void> requestEntity = new HttpEntity<>(headers);
+            String userServiceUrl = "http://localhost:8082/api/users/" + userId;
+            restTemplate.exchange(userServiceUrl, HttpMethod.DELETE, requestEntity, Void.class);
+        } catch (Exception e) {
+            throw new RuntimeException("Failed to delete user profile in User Service. Deletion rolled back: " + e.getMessage(), e);
+        }
+
+        userRepository.delete(user);
     }
 }

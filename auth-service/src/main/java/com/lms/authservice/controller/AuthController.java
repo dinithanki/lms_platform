@@ -118,4 +118,12 @@ public class AuthController {
         UserResponseDTO response = authService.updateUserRole(userId, request.getRole());
         return ResponseEntity.ok(response);
     }
+
+    @DeleteMapping("/users/{userId}")
+    public ResponseEntity<Void> deleteUser(
+            @PathVariable Long userId,
+            @RequestHeader(value = HttpHeaders.AUTHORIZATION, required = false) String authHeader) {
+        authService.deleteUser(userId, authHeader);
+        return ResponseEntity.noContent().build();
+    }
 }

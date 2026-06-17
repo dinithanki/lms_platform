@@ -29,6 +29,7 @@ const Dashboard = () => {
   // Admin specific State
   const [users, setUsers] = useState([]);
   const [roleUpdateLoading, setRoleUpdateLoading] = useState(null);
+  const [userDeleteLoading, setUserDeleteLoading] = useState(null);
 
   useEffect(() => {
     fetchDashboardData();
@@ -125,6 +126,25 @@ const Dashboard = () => {
       alert("Failed to update user role.");
     } finally {
       setRoleUpdateLoading(null);
+    }
+  };
+
+  // Admin delete user handler
+  const handleDeleteUser = async (userId, userName) => {
+    if (!window.confirm(`Are you sure you want to permanently delete user "${userName}"? This will also delete their profile.`)) {
+      return;
+    }
+    setUserDeleteLoading(userId);
+    try {
+      await authService.deleteUser(userId);
+      // Refresh user list
+      const allUsers = await authService.getAllUsers();
+      setUsers(allUsers);
+    } catch (err) {
+      console.error("Failed to delete user", err);
+      alert(err.response?.data?.message || "Failed to delete user. Please try again.");
+    } finally {
+      setUserDeleteLoading(null);
     }
   };
 
@@ -533,13 +553,28 @@ const Dashboard = () => {
                             <select
                               value={item.role}
                               onChange={(e) => handleRoleChange(item.id, e.target.value)}
-                              disabled={item.email === user.email} // Prevent changing self role
+                              disabled={item.email === user.email || userDeleteLoading === item.id} // Prevent changing self role or while deleting
                               className="bg-slate-850 border border-slate-800 bg-slate-800 rounded-lg py-1 px-2.5 text-slate-300 focus:outline-none focus:border-indigo-500 transition-colors duration-150 text-[11px] cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
                             >
                               <option value="STUDENT">Make Student</option>
                               <option value="INSTRUCTOR">Make Instructor</option>
                               <option value="ADMIN">Make Admin</option>
                             </select>
+                          )}
+
+                          {userDeleteLoading === item.id ? (
+                            <div className="w-3.5 h-3.5 border-2 border-rose-500 border-t-transparent rounded-full animate-spin"></div>
+                          ) : (
+                            <button
+                              onClick={() => handleDeleteUser(item.id, item.name)}
+                              disabled={item.email === user.email || roleUpdateLoading === item.id}
+                              className="p-1.5 bg-rose-500/10 hover:bg-rose-500/20 text-rose-400 disabled:opacity-30 disabled:hover:bg-rose-500/10 rounded-lg transition-colors duration-150 cursor-pointer"
+                              title="Delete User"
+                            >
+                              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                              </svg>
+                            </button>
                           )}
                         </td>
                       </tr>

@@ -21,4 +21,6 @@ public interface AuthService {
     List<UserResponseDTO> getAllUsers();
 
     UserResponseDTO getCurrentUser(String email);
+
+    void deleteUser(Long userId, String authHeader);
 }
