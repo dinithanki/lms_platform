@@ -35,4 +35,10 @@ public class CourseController {
         List<CourseResponseDTO> response = courseService.getAllCourses();
         return ResponseEntity.ok(response);
     }
+
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Void> deleteCourse(@PathVariable Long id) {
+        courseService.deleteCourse(id);
+        return ResponseEntity.noContent().build();
+    }
 }

@@ -148,6 +148,38 @@ const Dashboard = () => {
     }
   };
 
+  // Admin delete course handler
+  const handleDeleteCourse = async (courseId, courseTitle) => {
+    if (
+      !window.confirm(
+        `Are you sure you want to permanently delete course "${courseTitle}"? This will delete all modules, progress, enrollments, quiz results, certificates, and the quiz associated with this course.`
+      )
+    ) {
+      return;
+    }
+    try {
+      // Try to delete the quiz associated with this course if it exists
+      try {
+        const quiz = await quizService.getQuizByCourseId(courseId);
+        if (quiz && quiz.id) {
+          await quizService.deleteQuiz(quiz.id);
+        }
+      } catch (quizErr) {
+        // Quiz might not exist, which is fine
+        console.log("No quiz to delete or error deleting quiz:", quizErr.message || quizErr);
+      }
+
+      // Delete the course
+      await courseService.deleteCourse(courseId);
+      alert("Course successfully deleted.");
+      // Refresh dashboard data
+      await fetchDashboardData();
+    } catch (err) {
+      console.error("Failed to delete course", err);
+      alert(err.response?.data?.message || "Failed to delete course. Please try again.");
+    }
+  };
+
   if (loading) {
     return (
       <div className="flex items-center justify-center min-h-[70vh]">
@@ -602,12 +634,23 @@ const Dashboard = () => {
                       <h4 className="text-xs font-bold text-slate-200 truncate w-44">{c.title}</h4>
                       <p className="text-[10px] text-slate-500 mt-0.5">{c.modules?.length || 0} Modules</p>
                     </div>
-                    <Link
-                      to={`/courses/${c.id}`}
-                      className="px-3 py-1.5 bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white rounded-lg text-[10px] font-semibold transition-colors duration-150"
-                    >
-                      Enter Course
-                    </Link>
+                    <div className="flex items-center gap-2">
+                      <Link
+                        to={`/courses/${c.id}`}
+                        className="px-3 py-1.5 bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white rounded-lg text-[10px] font-semibold transition-colors duration-150"
+                      >
+                        Enter Course
+                      </Link>
+                      <button
+                        onClick={() => handleDeleteCourse(c.id, c.title)}
+                        className="p-1.5 bg-rose-500/10 hover:bg-rose-500/20 active:bg-rose-500/30 text-rose-400 rounded-lg transition-colors duration-150 cursor-pointer border border-rose-500/20"
+                        title="Delete Course"
+                      >
+                        <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                        </svg>
+                      </button>
+                    </div>
                   </div>
                 ))}
               </div>

@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import { useAuth } from "../context/AuthContext";
 import courseService from "../services/courseService";
 import enrollmentService from "../services/enrollmentService";
+import quizService from "../services/quizService";
 import CourseCard from "../components/CourseCard";
 
 const Courses = () => {
@@ -61,6 +62,37 @@ const Courses = () => {
       alert(err.response?.data?.message || "Failed to enroll in the course.");
     } finally {
       setEnrollLoadingMap((prev) => ({ ...prev, [courseId]: false }));
+    }
+  };
+
+  const handleDeleteCourse = async (courseId, courseTitle) => {
+    if (
+      !window.confirm(
+        `Are you sure you want to permanently delete course "${courseTitle}"? This will delete all modules, progress, enrollments, quiz results, certificates, and the quiz associated with this course.`
+      )
+    ) {
+      return;
+    }
+
+    try {
+      // Try to delete the quiz associated with this course if it exists
+      try {
+        const quiz = await quizService.getQuizByCourseId(courseId);
+        if (quiz && quiz.id) {
+          await quizService.deleteQuiz(quiz.id);
+        }
+      } catch (quizErr) {
+        // Quiz might not exist, which is fine
+        console.log("No quiz to delete or error deleting quiz:", quizErr.message || quizErr);
+      }
+
+      // Delete the course
+      await courseService.deleteCourse(courseId);
+      alert("Course successfully deleted.");
+      fetchCoursesAndEnrollment();
+    } catch (err) {
+      console.error("Failed to delete course:", err);
+      alert(err.response?.data?.message || "Failed to delete the course. Please try again.");
     }
   };
 
@@ -145,6 +177,7 @@ const Courses = () => {
               onEnroll={handleEnroll}
               isEnrolling={enrollLoadingMap[course.id]}
               userRole={user?.role}
+              onDelete={handleDeleteCourse}
             />
           ))}
         </div>

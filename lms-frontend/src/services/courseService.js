@@ -55,6 +55,11 @@ const courseService = {
     });
     return response.data;
   },
+
+  deleteCourse: async (id) => {
+    const response = await api.delete(`/api/courses/${id}`);
+    return response.data;
+  },
 };
 
 export default courseService;

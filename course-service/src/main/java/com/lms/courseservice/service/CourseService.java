@@ -10,4 +10,5 @@ public interface CourseService {
     CourseResponseDTO getCourseById(Long id);
     List<CourseResponseDTO> getAllCourses();
     Course getCourseEntityById(Long id);
+    void deleteCourse(Long id);
 }

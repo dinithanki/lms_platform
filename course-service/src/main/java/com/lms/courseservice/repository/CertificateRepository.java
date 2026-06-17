@@ -10,4 +10,5 @@ import java.util.Optional;
 public interface CertificateRepository extends JpaRepository<Certificate, Long> {
     Optional<Certificate> findByStudentIdAndCourseId(Long studentId, Long courseId);
     List<Certificate> findByStudentId(Long studentId);
+    void deleteByCourseId(Long courseId);
 }

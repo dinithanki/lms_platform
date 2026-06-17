@@ -8,4 +8,5 @@ import java.util.Optional;
 @Repository
 public interface QuizResultRepository extends JpaRepository<QuizResult, Long> {
     Optional<QuizResult> findByStudentIdAndCourseId(Long studentId, Long courseId);
+    void deleteByCourseId(Long courseId);
 }
