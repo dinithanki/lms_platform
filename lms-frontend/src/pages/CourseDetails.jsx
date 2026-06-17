@@ -506,6 +506,7 @@ const CourseDetails = () => {
                       {selectedModule ? (
                         <>
                           <StudentVideoPlayer
+                            key={selectedModule.id}
                             videoUrl={selectedModule.videoUrl}
                             lessonTitle={selectedModule.title}
                             user={user}
