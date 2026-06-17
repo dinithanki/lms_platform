@@ -22,6 +22,9 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     @Autowired
     private JwtUtil jwtUtil;
 
+    @Autowired
+    private com.lms.userservice.repository.UserRepository userRepository;
+
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
             throws ServletException, IOException {
@@ -51,9 +54,14 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             if (jwtUtil.validateToken(token)) {
                 Long id = jwtUtil.extractUserId(token);
                 String email = jwtUtil.extractEmail(token);
-                String role = jwtUtil.extractRole(token);
 
-                if (email != null && role != null && id != null) {
+                if (email != null && id != null) {
+                    final String finalToken = token;
+                    // Fetch fresh role from DB to reflect updates immediately
+                    String role = userRepository.findById(id)
+                            .map(com.lms.userservice.entity.User::getRole)
+                            .orElseGet(() -> jwtUtil.extractRole(finalToken));
+
                     SimpleGrantedAuthority authority = new SimpleGrantedAuthority("ROLE_" + role.toUpperCase());
                     
                     UserPrincipal principal = new UserPrincipal(id, email, role);

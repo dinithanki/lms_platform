@@ -111,7 +111,11 @@ public class UserController {
     public ResponseEntity<UserProfileResponseDTO> updateUserRole(
             @PathVariable Long id,
             @Valid @RequestBody RoleUpdateRequestDTO dto,
+            @AuthenticationPrincipal UserPrincipal principal,
             @RequestHeader(value = HttpHeaders.AUTHORIZATION, required = false) String authHeader) {
+        if (principal != null && principal.getId().equals(id)) {
+            throw new org.springframework.web.server.ResponseStatusException(HttpStatus.BAD_REQUEST, "Users cannot modify their own roles.");
+        }
         User user = userService.updateUserRole(id, dto.getRole(), authHeader);
         return ResponseEntity.ok(convertToDTO(user));
     }

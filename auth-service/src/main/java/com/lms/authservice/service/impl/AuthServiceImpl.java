@@ -54,10 +54,7 @@ public class AuthServiceImpl implements AuthService {
         user.setEmail(request.getEmail());
         user.setPassword(encoder.encode(request.getPassword()));
         
-        String assignedRole = request.getRole() != null && !request.getRole().trim().isEmpty() 
-                ? request.getRole().trim().toUpperCase() 
-                : "USER";
-        user.setRole(assignedRole);
+        user.setRole("STUDENT");
 
         User savedUser = userRepository.save(user);
 
@@ -123,6 +120,16 @@ public class AuthServiceImpl implements AuthService {
     public UserResponseDTO updateUserRole(Long userId, String role) {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new RuntimeException("User not found with id: " + userId));
+
+        // Enforce: Users cannot modify their own roles.
+        org.springframework.security.core.Authentication auth = org.springframework.security.core.context.SecurityContextHolder.getContext().getAuthentication();
+        if (auth != null && auth.getPrincipal() instanceof String) {
+            String callerEmail = (String) auth.getPrincipal();
+            if (user.getEmail().equalsIgnoreCase(callerEmail)) {
+                throw new org.springframework.web.server.ResponseStatusException(org.springframework.http.HttpStatus.BAD_REQUEST, "Users cannot modify their own roles.");
+            }
+        }
+
         user.setRole(role.trim().toUpperCase());
         User updatedUser = userRepository.save(user);
         return UserMapper.toDTO(updatedUser);

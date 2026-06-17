@@ -188,58 +188,6 @@ const Register = () => {
             </div>
           </div>
 
-          <div className="flex flex-col gap-1.5">
-            <label className="text-[10px] font-bold uppercase tracking-widest text-slate-400 ml-1">
-              Select Role
-            </label>
-            <div className="relative">
-              <span className="absolute inset-y-0 left-0 flex items-center pl-3.5 text-slate-500">
-                <svg
-                  className="w-4 h-4"
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth="2"
-                    d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"
-                  />
-                </svg>
-              </span>
-              <select
-                value={role}
-                onChange={(e) => setRole(e.target.value)}
-                className="w-full bg-slate-805 bg-slate-800 border border-slate-800 focus:border-indigo-500/60 rounded-2xl py-3 pl-11 pr-4 text-sm text-slate-300 focus:outline-none transition-all duration-200 appearance-none cursor-pointer"
-              >
-                <option value="STUDENT" className="bg-slate-900 text-slate-300">
-                  Student (Learn and Enroll)
-                </option>
-                <option value="INSTRUCTOR" className="bg-slate-900 text-slate-300">
-                  Instructor (Create and Manage)
-                </option>
-                <option value="ADMIN" className="bg-slate-900 text-slate-300">
-                  Administrator (Manage Users & Courses)
-                </option>
-              </select>
-              <span className="absolute inset-y-0 right-0 flex items-center pr-3.5 pointer-events-none text-slate-500">
-                <svg
-                  className="w-4 h-4"
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth="2"
-                    d="M19 9l-7 7-7-7"
-                  />
-                </svg>
-              </span>
-            </div>
-          </div>
 
           <button
             type="submit"
