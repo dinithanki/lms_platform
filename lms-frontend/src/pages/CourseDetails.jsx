@@ -1018,58 +1018,64 @@ const CourseDetails = () => {
                 </div>
               )}
 
-              {/* INSTRUCTOR WORKFLOW */}
-              {user.role === "INSTRUCTOR" && (
+              {/* ADMIN / INSTRUCTOR WORKFLOW */}
+              {(user.role === "INSTRUCTOR" || user.role === "ADMIN") && (
                 <div className="flex flex-col gap-6">
                   {/* Quiz Details or Creation form */}
                   {!quiz ? (
-                    <div className="p-6 bg-slate-900 border border-slate-800 rounded-2xl max-w-md">
-                      <h3 className="text-sm font-bold uppercase tracking-widest text-slate-400 mb-4">Set Up Final Quiz</h3>
-                      <form onSubmit={handleCreateQuiz} className="flex flex-col gap-4">
-                        <div className="flex flex-col gap-1.5">
-                          <label className="text-[10px] font-bold uppercase tracking-widest text-slate-400 ml-1">
-                            Quiz Title
-                          </label>
-                          <input
-                            type="text"
-                            value={quizTitle}
-                            onChange={(e) => setQuizTitle(e.target.value)}
-                            className="w-full bg-slate-800/40 border border-slate-800 focus:border-indigo-500/60 rounded-xl py-2.5 px-3.5 text-sm text-slate-200 placeholder-slate-500 focus:outline-none transition-all duration-200"
-                            placeholder="e.g. React Certification Exam"
-                            required
-                          />
-                        </div>
+                    user.role === "INSTRUCTOR" ? (
+                      <div className="p-6 bg-slate-900 border border-slate-800 rounded-2xl max-w-md">
+                        <h3 className="text-sm font-bold uppercase tracking-widest text-slate-400 mb-4">Set Up Final Quiz</h3>
+                        <form onSubmit={handleCreateQuiz} className="flex flex-col gap-4">
+                          <div className="flex flex-col gap-1.5">
+                            <label className="text-[10px] font-bold uppercase tracking-widest text-slate-400 ml-1">
+                              Quiz Title
+                            </label>
+                            <input
+                              type="text"
+                              value={quizTitle}
+                              onChange={(e) => setQuizTitle(e.target.value)}
+                              className="w-full bg-slate-800/40 border border-slate-800 focus:border-indigo-500/60 rounded-xl py-2.5 px-3.5 text-sm text-slate-200 placeholder-slate-500 focus:outline-none transition-all duration-200"
+                              placeholder="e.g. React Certification Exam"
+                              required
+                            />
+                          </div>
 
-                        <div className="flex flex-col gap-1.5">
-                          <label className="text-[10px] font-bold uppercase tracking-widest text-slate-400 ml-1">
-                            Quiz Description
-                          </label>
-                          <textarea
-                            rows="3"
-                            value={quizDesc}
-                            onChange={(e) => setQuizDesc(e.target.value)}
-                            className="w-full bg-slate-800/40 border border-slate-800 focus:border-indigo-500/60 rounded-xl py-2.5 px-3.5 text-sm text-slate-200 placeholder-slate-500 focus:outline-none transition-all duration-200 resize-none"
-                            placeholder="Provide details about passing score, attempts limit, and exam rules..."
-                            required
-                          />
-                        </div>
+                          <div className="flex flex-col gap-1.5">
+                            <label className="text-[10px] font-bold uppercase tracking-widest text-slate-400 ml-1">
+                              Quiz Description
+                            </label>
+                            <textarea
+                              rows="3"
+                              value={quizDesc}
+                              onChange={(e) => setQuizDesc(e.target.value)}
+                              className="w-full bg-slate-800/40 border border-slate-800 focus:border-indigo-500/60 rounded-xl py-2.5 px-3.5 text-sm text-slate-200 placeholder-slate-500 focus:outline-none transition-all duration-200 resize-none"
+                              placeholder="Provide details about passing score, attempts limit, and exam rules..."
+                              required
+                            />
+                          </div>
 
-                        <button
-                          type="submit"
-                          disabled={quizSubmitLoadingInst}
-                          className="w-full py-2.5 bg-indigo-600 hover:bg-indigo-500 active:bg-indigo-700 text-white font-semibold text-xs rounded-xl flex items-center justify-center gap-2 cursor-pointer"
-                        >
-                          {quizSubmitLoadingInst ? (
-                            <>
-                              <div className="w-3.5 h-3.5 border-2 border-slate-400 border-t-transparent rounded-full animate-spin"></div>
-                              Creating Quiz Template...
-                            </>
-                          ) : (
-                            "Create Quiz Template"
-                          )}
-                        </button>
-                      </form>
-                    </div>
+                          <button
+                            type="submit"
+                            disabled={quizSubmitLoadingInst}
+                            className="w-full py-2.5 bg-indigo-600 hover:bg-indigo-500 active:bg-indigo-700 text-white font-semibold text-xs rounded-xl flex items-center justify-center gap-2 cursor-pointer"
+                          >
+                            {quizSubmitLoadingInst ? (
+                              <>
+                                <div className="w-3.5 h-3.5 border-2 border-slate-400 border-t-transparent rounded-full animate-spin"></div>
+                                Creating Quiz Template...
+                              </>
+                            ) : (
+                              "Create Quiz Template"
+                            )}
+                          </button>
+                        </form>
+                      </div>
+                    ) : (
+                      <div className="p-8 bg-slate-900 border border-slate-800 rounded-2xl text-center">
+                        <p className="text-xs text-slate-400">No final quiz has been set up for this course syllabus yet.</p>
+                      </div>
+                    )
                   ) : (
                     /* Quiz details and Question manager */
                     <div className="flex flex-col gap-6">
@@ -1089,7 +1095,7 @@ const CourseDetails = () => {
                           <p className="text-xs text-slate-400 mt-1">{quiz.description}</p>
                         </div>
 
-                        {!quiz.published && (
+                        {user.role === "INSTRUCTOR" && !quiz.published && (
                           <button
                             onClick={handlePublishQuiz}
                             disabled={quizQuestions.length === 0}
@@ -1106,15 +1112,17 @@ const CourseDetails = () => {
                           <h4 className="text-xs font-bold uppercase tracking-widest text-slate-500">
                             Questions List ({quizQuestions.length})
                           </h4>
-                          <button
-                            onClick={() => setShowQuestionModal(true)}
-                            className="px-3.5 py-1.5 bg-indigo-600 hover:bg-indigo-500 text-white rounded-xl text-[10px] font-bold transition-all duration-150 flex items-center gap-1 cursor-pointer"
-                          >
-                            <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M12 4v16m8-8H4" />
-                            </svg>
-                            Add Question
-                          </button>
+                          {user.role === "INSTRUCTOR" && (
+                            <button
+                              onClick={() => setShowQuestionModal(true)}
+                              className="px-3.5 py-1.5 bg-indigo-600 hover:bg-indigo-500 text-white rounded-xl text-[10px] font-bold transition-all duration-150 flex items-center gap-1 cursor-pointer"
+                            >
+                              <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M12 4v16m8-8H4" />
+                              </svg>
+                              Add Question
+                            </button>
+                          )}
                         </div>
 
                         {quizQuestions.length === 0 ? (
@@ -1125,14 +1133,16 @@ const CourseDetails = () => {
                           <div className="flex flex-col gap-4">
                             {quizQuestions.map((q, idx) => (
                               <div key={q.id} className="p-5 bg-slate-900 border border-slate-800/80 rounded-2xl flex flex-col gap-4 relative">
-                                <button
-                                  onClick={() => handleDeleteQuestion(q.id)}
-                                  className="absolute top-4 right-4 text-slate-500 hover:text-rose-400 p-1 rounded-lg hover:bg-slate-850"
-                                >
-                                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-                                  </svg>
-                                </button>
+                                {user.role === "INSTRUCTOR" && (
+                                  <button
+                                    onClick={() => handleDeleteQuestion(q.id)}
+                                    className="absolute top-4 right-4 text-slate-500 hover:text-rose-400 p-1 rounded-lg hover:bg-slate-850"
+                                  >
+                                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                                    </svg>
+                                  </button>
+                                )}
 
                                 <div>
                                   <span className="text-[10px] font-bold text-indigo-400 uppercase">Question {idx + 1}</span>
@@ -1168,7 +1178,7 @@ const CourseDetails = () => {
                       </div>
 
                       {/* Create Question Modal */}
-                      {showQuestionModal && (
+                      {user.role === "INSTRUCTOR" && showQuestionModal && (
                         <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
                           <div className="fixed inset-0 bg-slate-950/80 backdrop-blur-sm" onClick={() => setShowQuestionModal(false)}></div>
                           <div className="w-full max-w-md bg-slate-900 border border-slate-800 rounded-3xl p-6 shadow-2xl z-10 animate-scaleIn">
