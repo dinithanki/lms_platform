@@ -38,10 +38,35 @@ const CourseDetails = () => {
 
   // Instructor Module Form
   const [showModuleModal, setShowModuleModal] = useState(false);
+  const [editingModule, setEditingModule] = useState(null);
   const [modTitle, setModTitle] = useState("");
   const [modVideo, setModVideo] = useState("");
   const [modResource, setModResource] = useState("");
   const [modSubmitLoading, setModSubmitLoading] = useState(false);
+
+  const handleOpenCreateModule = () => {
+    setEditingModule(null);
+    setModTitle("");
+    setModVideo("");
+    setModResource("");
+    setShowModuleModal(true);
+  };
+
+  const handleOpenEditModule = (mod) => {
+    setEditingModule(mod);
+    setModTitle(mod.title);
+    setModVideo(mod.videoUrl);
+    setModResource(mod.resourceUrl || "");
+    setShowModuleModal(true);
+  };
+
+  const handleCloseModuleModal = () => {
+    setShowModuleModal(false);
+    setEditingModule(null);
+    setModTitle("");
+    setModVideo("");
+    setModResource("");
+  };
 
   // Instructor Quiz Form
   const [quizTitle, setQuizTitle] = useState("");
@@ -208,29 +233,34 @@ const CourseDetails = () => {
     }
   };
 
-  // Instructor Create Module
-  const handleCreateModule = async (e) => {
+  // Instructor Save Module (Create/Update)
+  const handleSaveModule = async (e) => {
     e.preventDefault();
     if (!modTitle.trim() || !modVideo.trim()) return;
 
     setModSubmitLoading(true);
     try {
-      await courseService.createModule(id, {
-        title: modTitle,
-        videoUrl: modVideo,
-        resourceUrl: modResource,
-      });
-      setModTitle("");
-      setModVideo("");
-      setModResource("");
-      setShowModuleModal(false);
+      if (editingModule) {
+        await courseService.updateModule(editingModule.id, {
+          title: modTitle,
+          videoUrl: modVideo,
+          resourceUrl: modResource,
+        });
+      } else {
+        await courseService.createModule(id, {
+          title: modTitle,
+          videoUrl: modVideo,
+          resourceUrl: modResource,
+        });
+      }
+      handleCloseModuleModal();
       // Reload course
       const data = await courseService.getCourseById(id);
       const modules = await courseService.getModules(id);
       setCourse({ ...data, modules });
     } catch (err) {
       console.error(err);
-      alert("Failed to create module.");
+      alert(editingModule ? "Failed to update module." : "Failed to create module.");
     } finally {
       setModSubmitLoading(false);
     }
@@ -433,7 +463,7 @@ const CourseDetails = () => {
                 <h2 className="text-sm font-bold uppercase tracking-widest text-slate-400">Lessons & Content</h2>
                 {user.role === "INSTRUCTOR" && (
                   <button
-                    onClick={() => setShowModuleModal(true)}
+                    onClick={handleOpenCreateModule}
                     className="px-4 py-2 bg-indigo-600 hover:bg-indigo-500 text-white rounded-xl text-xs font-semibold transition-all duration-200 flex items-center gap-1.5 cursor-pointer"
                   >
                     <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -526,21 +556,38 @@ const CourseDetails = () => {
                             )}
                           </div>
                         )}
+
+                        {/* Right instructor edit button */}
+                        {user.role === "INSTRUCTOR" && (
+                          <div className="shrink-0 self-end sm:self-center">
+                            <button
+                              onClick={() => handleOpenEditModule(mod)}
+                              className="px-3.5 py-1.5 bg-slate-800 hover:bg-slate-700/80 active:bg-slate-900 border border-slate-700/50 hover:border-indigo-500/30 text-[10px] font-bold text-indigo-400 hover:text-indigo-300 rounded-xl transition-all duration-150 flex items-center gap-1.5 cursor-pointer"
+                            >
+                              <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                              </svg>
+                              Edit Module
+                            </button>
+                          </div>
+                        )}
                       </div>
                     );
                   })}
                 </div>
               )}
 
-              {/* Create Module Modal */}
+              {/* Create/Edit Module Modal */}
               {showModuleModal && (
                 <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
-                  <div className="fixed inset-0 bg-slate-950/80 backdrop-blur-sm" onClick={() => setShowModuleModal(false)}></div>
+                  <div className="fixed inset-0 bg-slate-950/80 backdrop-blur-sm" onClick={handleCloseModuleModal}></div>
                   <div className="w-full max-w-md bg-slate-900 border border-slate-800 rounded-3xl p-6 shadow-2xl z-10 animate-scaleIn">
                     <div className="flex justify-between items-center mb-5 border-b border-slate-800/60 pb-3">
-                      <h3 className="text-base font-bold text-slate-100">Add Lesson Module</h3>
+                      <h3 className="text-base font-bold text-slate-100">
+                        {editingModule ? "Edit Lesson Module" : "Add Lesson Module"}
+                      </h3>
                       <button
-                        onClick={() => setShowModuleModal(false)}
+                        onClick={handleCloseModuleModal}
                         className="p-1.5 text-slate-500 hover:text-slate-300 rounded-full hover:bg-slate-800"
                       >
                         <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -549,7 +596,7 @@ const CourseDetails = () => {
                       </button>
                     </div>
 
-                    <form onSubmit={handleCreateModule} className="flex flex-col gap-4">
+                    <form onSubmit={handleSaveModule} className="flex flex-col gap-4">
                       <div className="flex flex-col gap-1.5">
                         <label className="text-[10px] font-bold uppercase tracking-widest text-slate-400 ml-1">
                           Module Title
@@ -599,10 +646,10 @@ const CourseDetails = () => {
                         {modSubmitLoading ? (
                           <>
                             <div className="w-3.5 h-3.5 border-2 border-slate-400 border-t-transparent rounded-full animate-spin"></div>
-                            Adding Module...
+                            {editingModule ? "Saving Module..." : "Adding Module..."}
                           </>
                         ) : (
-                          "Add Module"
+                          editingModule ? "Save Changes" : "Add Module"
                         )}
                       </button>
                     </form>

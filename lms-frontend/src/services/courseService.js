@@ -43,6 +43,15 @@ const courseService = {
     });
     return response.data; // ProgressResponseDTO { progressPercent, completedModulesCount, totalModulesCount }
   },
+
+  updateModule: async (moduleId, { title, videoUrl, resourceUrl }) => {
+    const response = await api.put(`/api/modules/${moduleId}`, {
+      title,
+      videoUrl,
+      resourceUrl,
+    });
+    return response.data;
+  },
 };
 
 export default courseService;
