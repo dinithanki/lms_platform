@@ -132,6 +132,21 @@ public class AuthServiceImpl implements AuthService {
 
         user.setRole(role.trim().toUpperCase());
         User updatedUser = userRepository.save(user);
+
+        // Sync the new role to User Service so its JWT filter reads the correct value.
+        try {
+            HttpHeaders headers = new HttpHeaders();
+            headers.setContentType(MediaType.APPLICATION_JSON);
+            Map<String, String> body = new HashMap<>();
+            body.put("role", role.trim().toUpperCase());
+            HttpEntity<Map<String, String>> requestEntity = new HttpEntity<>(body, headers);
+            String userServiceUrl = "http://localhost:8082/api/users/" + userId + "/role/sync";
+            restTemplate.exchange(userServiceUrl, HttpMethod.PUT, requestEntity, Void.class);
+        } catch (Exception e) {
+            // Log but don't abort — auth-service DB is already updated
+            System.err.println("Warning: Failed to sync role update to User Service for user id " + userId + ": " + e.getMessage());
+        }
+
         return UserMapper.toDTO(updatedUser);
     }
 
@@ -164,8 +179,16 @@ public class AuthServiceImpl implements AuthService {
             HttpEntity<Void> requestEntity = new HttpEntity<>(headers);
             String userServiceUrl = "http://localhost:8082/api/users/" + userId;
             restTemplate.exchange(userServiceUrl, HttpMethod.DELETE, requestEntity, Void.class);
+        } catch (org.springframework.web.client.HttpClientErrorException.NotFound e) {
+            // 404: profile doesn't exist in User Service (data inconsistency or already deleted).
+            // Treat as "already gone" — still proceed to delete from auth DB.
+            System.err.println("Warning: User profile not found in User Service for id " + userId + " — proceeding with auth record deletion.");
+        } catch (org.springframework.web.client.HttpStatusCodeException e) {
+            // Any other HTTP error (403, 500, etc.) from User Service — abort deletion.
+            throw new RuntimeException("User Service rejected deletion for user id " + userId
+                    + " [" + e.getStatusCode() + "]: " + e.getResponseBodyAsString(), e);
         } catch (Exception e) {
-            throw new RuntimeException("Failed to delete user profile in User Service. Deletion rolled back: " + e.getMessage(), e);
+            throw new RuntimeException("Failed to reach User Service to delete user profile for id " + userId + ": " + e.getMessage(), e);
         }
 
         userRepository.delete(user);

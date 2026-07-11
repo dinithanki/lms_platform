@@ -16,6 +16,7 @@ public interface UserService {
     User updateUser(Long id, UserUpdateRequestDTO dto, UserPrincipal principal);
     void deleteUser(Long id);
     User updateUserRole(Long id, String role, String authHeader);
+    User syncUserRole(Long id, String role); // Internal sync — no cross-service callback
     User updateProfileImage(Long id, MultipartFile file, UserPrincipal principal);
     Resource getProfileImage(Long id);
 }

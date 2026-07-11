@@ -12,13 +12,10 @@ import org.springframework.core.io.Resource;
 import org.springframework.http.*;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.client.RestTemplate;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.server.ResponseStatusException;
 
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 @Service
 public class UserServiceImpl implements UserService {
@@ -28,9 +25,6 @@ public class UserServiceImpl implements UserService {
 
     @Autowired
     private FileStorageService fileStorageService;
-
-    @Autowired
-    private RestTemplate restTemplate;
 
     @Override
     @Transactional
@@ -103,29 +97,16 @@ public class UserServiceImpl implements UserService {
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "User profile not found with id: " + id));
 
         user.setRole(role.trim().toUpperCase());
-        User updatedUser = userRepository.save(user);
+        return userRepository.save(user);
+    }
 
-        try {
-            HttpHeaders headers = new HttpHeaders();
-            headers.setContentType(MediaType.APPLICATION_JSON);
-            if (authHeader != null) {
-                headers.set("Authorization", authHeader);
-            }
-
-            Map<String, String> body = new HashMap<>();
-            body.put("role", role.trim().toUpperCase());
-
-            HttpEntity<Map<String, String>> requestEntity = new HttpEntity<>(body, headers);
-            String authServiceUrl = "http://localhost:8081/api/auth/users/" + id + "/role";
-
-            restTemplate.exchange(authServiceUrl, HttpMethod.PUT, requestEntity, Void.class);
-        } catch (org.springframework.web.client.HttpStatusCodeException e) {
-            throw new ResponseStatusException(e.getStatusCode(), "Auth Service error: " + e.getResponseBodyAsString(), e);
-        } catch (Exception e) {
-            throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Failed to sync role update with Auth Service: " + e.getMessage(), e);
-        }
-
-        return updatedUser;
+    @Override
+    @Transactional
+    public User syncUserRole(Long id, String role) {
+        User user = userRepository.findById(id)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "User profile not found with id: " + id));
+        user.setRole(role.trim().toUpperCase());
+        return userRepository.save(user);
     }
 
     @Override

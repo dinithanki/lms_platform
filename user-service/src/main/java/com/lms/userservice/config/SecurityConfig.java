@@ -24,6 +24,7 @@ public class SecurityConfig {
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers(HttpMethod.POST, "/api/users").permitAll() // Called by Auth Service after registration
                         .requestMatchers(HttpMethod.GET, "/api/users/*/profile-picture").permitAll() // Serve profile picture publicly
+                        .requestMatchers(HttpMethod.PUT, "/api/users/*/role/sync").permitAll() // Internal sync from Auth Service
                         .requestMatchers("/error").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/users").hasRole("ADMIN") // Get all users
                         .requestMatchers(HttpMethod.DELETE, "/api/users/*").hasRole("ADMIN") // Delete user

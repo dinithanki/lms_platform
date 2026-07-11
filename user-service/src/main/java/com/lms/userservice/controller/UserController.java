@@ -120,6 +120,18 @@ public class UserController {
         return ResponseEntity.ok(convertToDTO(user));
     }
 
+    /**
+     * Internal sync endpoint — called by auth-service to push role changes into user-service DB.
+     * Does NOT call back to auth-service (no circular loop).
+     */
+    @PutMapping("/{id}/role/sync")
+    public ResponseEntity<UserProfileResponseDTO> syncUserRole(
+            @PathVariable Long id,
+            @Valid @RequestBody RoleUpdateRequestDTO dto) {
+        User user = userService.syncUserRole(id, dto.getRole());
+        return ResponseEntity.ok(convertToDTO(user));
+    }
+
     private UserProfileResponseDTO convertToDTO(User user) {
         UserProfileResponseDTO dto = new UserProfileResponseDTO();
         dto.setId(user.getId());
