@@ -1,164 +1,56 @@
-import React, { useState, useEffect } from "react";
-import { useAuth } from "../context/AuthContext";
-import userService from "../services/userService";
-import quizService from "../services/quizService";
-import courseService from "../services/courseService";
+import React, { useEffect } from "react";
+import { useAuth } from "../store/authStore";
+import useProfileStore from "../store/profileStore";
 
 const Profile = () => {
   const { user, updateUserProfileLocal } = useAuth();
-
-  // Profile Form State
-  const [profile, setProfile] = useState(null);
-  const [name, setName] = useState("");
-  const [phone, setPhone] = useState("");
-  const [bio, setBio] = useState("");
-  const [loading, setLoading] = useState(true);
-  const [saveLoading, setSaveLoading] = useState(false);
-  const [message, setMessage] = useState({ type: "", text: "" });
-
-  // Profile Picture upload state
-  const [selectedFile, setSelectedFile] = useState(null);
-  const [uploadLoading, setUploadLoading] = useState(false);
-  const [profileImgUrl, setProfileImgUrl] = useState(null);
-
-  // Student Certificates state
-  const [certificates, setCertificates] = useState([]);
-  const [certificatesLoading, setCertificatesLoading] = useState(false);
-  const [certCourses, setCertCourses] = useState({});
-  const [downloadingCertId, setDownloadingCertId] = useState(null);
+  const {
+    profile,
+    profileImgUrl,
+    loading,
+    saveLoading,
+    uploadLoading,
+    message,
+    name,
+    phone,
+    bio,
+    selectedFile,
+    certificates,
+    certCourses,
+    certificatesLoading,
+    downloadingCertId,
+    fetchProfileAndData,
+    saveProfile,
+    uploadProfilePicture,
+    downloadCertificate,
+    setName,
+    setPhone,
+    setBio,
+    setSelectedFile,
+  } = useProfileStore();
 
   useEffect(() => {
-    fetchProfileAndData();
+    fetchProfileAndData(user);
   }, [user]);
 
-  const fetchProfileAndData = async () => {
-    if (!user) return;
-    setLoading(true);
-    setMessage({ type: "", text: "" });
-    try {
-      // Fetch profile
-      const data = await userService.getProfile();
-      setProfile(data);
-      setName(data.name || "");
-      setPhone(data.phone || "");
-      setBio(data.bio || "");
-
-      // Handle profile picture
-      if (data.profileImageUrl) {
-        setProfileImgUrl(userService.getProfilePictureUrl(data.id));
-      } else {
-        setProfileImgUrl(null);
-      }
-
-      // If student, fetch certificates
-      if (user.role === "STUDENT") {
-        fetchStudentCertificates(data.id);
-      }
-    } catch (err) {
-      console.error(err);
-      setMessage({
-        type: "error",
-        text: "Failed to load profile details. Ensure user-service is active.",
-      });
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const fetchStudentCertificates = async (studentId) => {
-    setCertificatesLoading(true);
-    try {
-      const certs = await quizService.getCertificatesByStudent(studentId);
-      setCertificates(certs);
-
-      // Resolve course titles
-      const courseMap = {};
-      for (const cert of certs) {
-        try {
-          const c = await courseService.getCourseById(cert.courseId);
-          courseMap[cert.courseId] = c.title;
-        } catch (e) {
-          courseMap[cert.courseId] = `Course ID: #${cert.courseId}`;
-        }
-      }
-      setCertCourses(courseMap);
-    } catch (err) {
-      console.error("Failed to load certificates:", err);
-    } finally {
-      setCertificatesLoading(false);
-    }
-  };
-
-  // Save changes handler
-  const handleSaveProfile = async (e) => {
+  const handleSaveProfile = (e) => {
     e.preventDefault();
-    if (!name.trim()) return;
-
-    setSaveLoading(true);
-    setMessage({ type: "", text: "" });
-    try {
-      const updated = await userService.updateProfile(profile.id, name, phone, bio);
-      setProfile(updated);
-      // Update Context user state so headers/names update globally
-      updateUserProfileLocal({
-        ...user,
-        name: updated.name,
-      });
-      setMessage({ type: "success", text: "Profile updated successfully!" });
-    } catch (err) {
-      console.error(err);
-      setMessage({ type: "error", text: "Failed to update profile details." });
-    } finally {
-      setSaveLoading(false);
-    }
+    saveProfile(updateUserProfileLocal, user);
   };
 
-  // Picture Upload handler
   const handleFileChange = (e) => {
     if (e.target.files && e.target.files[0]) {
       setSelectedFile(e.target.files[0]);
     }
   };
 
-  const handleUploadPicture = async (e) => {
+  const handleUploadPicture = (e) => {
     e.preventDefault();
-    if (!selectedFile) return;
-
-    setUploadLoading(true);
-    setMessage({ type: "", text: "" });
-    try {
-      const updated = await userService.uploadProfilePicture(profile.id, selectedFile);
-      setProfile(updated);
-      setSelectedFile(null);
-      // Refresh image url with timestamp to bust browser cache
-      setProfileImgUrl(`${userService.getProfilePictureUrl(updated.id)}?t=${Date.now()}`);
-      setMessage({ type: "success", text: "Profile picture uploaded successfully!" });
-    } catch (err) {
-      console.error(err);
-      setMessage({ type: "error", text: "Failed to upload image. Verify size and format." });
-    } finally {
-      setUploadLoading(false);
-    }
+    uploadProfilePicture();
   };
 
-  // Download certificate helper
-  const handleDownloadCert = async (courseId, title) => {
-    setDownloadingCertId(courseId);
-    try {
-      const blob = await quizService.getCertificatePdfBlob(profile.id, courseId);
-      const url = window.URL.createObjectURL(new Blob([blob]));
-      const link = document.createElement("a");
-      link.href = url;
-      link.setAttribute("download", `certificate_${title.replace(/\s+/g, "_")}.pdf`);
-      document.body.appendChild(link);
-      link.click();
-      link.parentNode.removeChild(link);
-    } catch (err) {
-      console.error(err);
-      alert("Failed to download certificate.");
-    } finally {
-      setDownloadingCertId(null);
-    }
+  const handleDownloadCert = (courseId, title) => {
+    downloadCertificate(courseId, title);
   };
 
   if (loading) {
@@ -189,17 +81,17 @@ const Profile = () => {
               />
             ) : (
               <div className="w-28 h-28 rounded-full bg-gradient-to-tr from-indigo-500 to-purple-600 text-white font-bold text-3xl flex items-center justify-center shadow-lg shadow-indigo-600/10">
-                {profile.name?.charAt(0).toUpperCase() || "U"}
+                {profile?.name?.charAt(0).toUpperCase() || "U"}
               </div>
             )}
           </div>
 
-          <h2 className="text-base font-bold text-slate-200 mt-4">{profile.name}</h2>
+          <h2 className="text-base font-bold text-slate-200 mt-4">{profile?.name}</h2>
           <span className="text-[10px] uppercase font-bold tracking-widest text-slate-500 mt-0.5">
-            {profile.role}
+            {profile?.role}
           </span>
           <p className="text-xs text-slate-400 mt-3 leading-relaxed">
-            {profile.bio || "No biography provided yet."}
+            {profile?.bio || "No biography provided yet."}
           </p>
 
           {/* Upload image form */}
@@ -272,7 +164,7 @@ const Profile = () => {
                 </label>
                 <input
                   type="email"
-                  value={profile.email}
+                  value={profile?.email || ""}
                   disabled
                   className="w-full bg-slate-950/40 border border-slate-900 rounded-xl py-2.5 px-3.5 text-slate-500 focus:outline-none cursor-not-allowed"
                 />
@@ -320,7 +212,7 @@ const Profile = () => {
         </div>
 
         {/* Student Certificates section */}
-        {user.role === "STUDENT" && (
+        {user?.role === "STUDENT" && (
           <div className="p-6 bg-slate-900 border border-slate-800 rounded-3xl shadow-xl shadow-black/5">
             <h3 className="text-sm font-bold uppercase tracking-widest text-slate-400 mb-4 pb-2 border-b border-slate-800/60">
               Earned Certifications

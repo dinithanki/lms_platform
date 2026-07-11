@@ -1,49 +1,25 @@
-import React, { useState, useEffect } from "react";
-import { useAuth } from "../context/AuthContext";
-import enrollmentService from "../services/enrollmentService";
-import courseService from "../services/courseService";
+import React, { useEffect } from "react";
+import { useAuth } from "../store/authStore";
+import useCourseStore from "../store/courseStore";
 import CourseCard from "../components/CourseCard";
 import { Link } from "react-router-dom";
 
 const MyCourses = () => {
   const { user } = useAuth();
-  const [courses, setCourses] = useState([]);
-  const [studentProgress, setStudentProgress] = useState({});
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState("");
-  const [searchTerm, setSearchTerm] = useState("");
+  const {
+    enrolledCourses: courses,
+    studentProgress,
+    loading,
+    error,
+    fetchCoursesAndEnrollment,
+  } = useCourseStore();
+
+  // Local UI-only state (not worth a store)
+  const [searchTerm, setSearchTerm] = React.useState("");
 
   useEffect(() => {
-    fetchEnrolledCourses();
+    fetchCoursesAndEnrollment(user);
   }, [user]);
-
-  const fetchEnrolledCourses = async () => {
-    if (!user) return;
-    setLoading(true);
-    setError("");
-    try {
-      const enrolled = await enrollmentService.getEnrolledCourses(user.id);
-      setCourses(enrolled);
-
-      // Fetch progress for each enrolled course
-      const progressMap = {};
-      for (const c of enrolled) {
-        try {
-          const prog = await courseService.getCourseProgress(c.id, user.id);
-          progressMap[c.id] = prog.progressPercent;
-        } catch (e) {
-          console.error(`Failed to get progress for course ${c.id}`, e);
-          progressMap[c.id] = 0;
-        }
-      }
-      setStudentProgress(progressMap);
-    } catch (err) {
-      console.error("Failed to load enrolled courses:", err);
-      setError("Unable to retrieve your enrolled courses. Please try again.");
-    } finally {
-      setLoading(false);
-    }
-  };
 
   const filteredCourses = courses.filter(
     (c) =>

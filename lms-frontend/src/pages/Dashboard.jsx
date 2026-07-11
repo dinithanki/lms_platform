@@ -1,8 +1,7 @@
-import React, { useState, useEffect } from "react";
-import { useAuth } from "../context/AuthContext";
-import courseService from "../services/courseService";
-import enrollmentService from "../services/enrollmentService";
-import authService from "../services/authService";
+import React, { useEffect } from "react";
+import { useAuth } from "../store/authStore";
+import useCourseStore from "../store/courseStore";
+import useDashboardStore from "../store/dashboardStore";
 import quizService from "../services/quizService";
 import CourseCard from "../components/CourseCard";
 import { Link } from "react-router-dom";
@@ -10,26 +9,40 @@ import { Link } from "react-router-dom";
 const Dashboard = () => {
   const { user } = useAuth();
 
-  // Common State
-  const [courses, setCourses] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState("");
+  // Course store
+  const {
+    courses,
+    enrolledCourses,
+    studentProgress,
+    loading,
+    error,
+    fetchCoursesAndEnrollment,
+    enrollStudent,
+    createCourse,
+    deleteCourse,
+  } = useCourseStore();
 
-  // Student specific State
-  const [enrolledCourses, setEnrolledCourses] = useState([]);
-  const [studentProgress, setStudentProgress] = useState({});
-  const [certificatesCount, setCertificatesCount] = useState(0);
+  // Dashboard/admin store
+  const {
+    users,
+    roleUpdateLoading,
+    userDeleteLoading,
+    showCreateModal,
+    newCourseTitle,
+    newCourseDesc,
+    courseSubmitLoading,
+    fetchUsers,
+    updateUserRole,
+    deleteUser,
+    openCreateModal,
+    closeCreateModal,
+    setNewCourseTitle,
+    setNewCourseDesc,
+    setCourseSubmitLoading,
+  } = useDashboardStore();
 
-  // Instructor specific State
-  const [showCreateModal, setShowCreateModal] = useState(false);
-  const [newCourseTitle, setNewCourseTitle] = useState("");
-  const [newCourseDesc, setNewCourseDesc] = useState("");
-  const [courseSubmitLoading, setCourseSubmitLoading] = useState(false);
-
-  // Admin specific State
-  const [users, setUsers] = useState([]);
-  const [roleUpdateLoading, setRoleUpdateLoading] = useState(null);
-  const [userDeleteLoading, setUserDeleteLoading] = useState(null);
+  // Certificate count — student only (derived from enrolled courses + quiz store)
+  const [certificatesCount, setCertificatesCount] = React.useState(0);
 
   useEffect(() => {
     fetchDashboardData();
@@ -37,145 +50,73 @@ const Dashboard = () => {
 
   const fetchDashboardData = async () => {
     if (!user) return;
-    setLoading(true);
-    setError("");
-    try {
-      // 1. Fetch courses (needed by all roles)
-      const allCourses = await courseService.getAllCourses();
-      setCourses(allCourses);
+    await fetchCoursesAndEnrollment(user);
 
-      // 2. Fetch role-specific details
-      if (user.role === "STUDENT") {
-        // Fetch enrolled courses
-        const enrolled = await enrollmentService.getEnrolledCourses(user.id);
-        setEnrolledCourses(enrolled);
+    if (user.role === "ADMIN") {
+      await fetchUsers();
+    }
 
-        // Fetch certificates
-        const certificates = await quizService.getCertificatesByStudent(user.id);
-        setCertificatesCount(certificates?.length || 0);
-
-        // Fetch progress for each enrolled course
-        const progressMap = {};
-        for (const c of enrolled) {
-          try {
-            const prog = await courseService.getCourseProgress(c.id, user.id);
-            progressMap[c.id] = prog.progressPercent;
-          } catch (e) {
-            console.error(`Failed to get progress for course ${c.id}`, e);
-            progressMap[c.id] = 0;
-          }
-        }
-        setStudentProgress(progressMap);
-      } else if (user.role === "ADMIN") {
-        // Fetch all users
-        const allUsers = await authService.getAllUsers();
-        setUsers(allUsers);
+    if (user.role === "STUDENT") {
+      try {
+        const certs = await quizService.getCertificatesByStudent(user.id);
+        setCertificatesCount(certs?.length || 0);
+      } catch {
+        setCertificatesCount(0);
       }
-    } catch (err) {
-      console.error("Dashboard data fetch error:", err);
-      setError("Failed to load dashboard data. Please try again.");
-    } finally {
-      setLoading(false);
     }
   };
 
-  // Student enroll handler
+  // Student enroll
   const handleEnroll = async (courseId) => {
     try {
-      await enrollmentService.enrollStudent(courseId, user.id);
-      // Reload dashboard data to show enrollment updates
-      await fetchDashboardData();
+      await enrollStudent(courseId, user);
     } catch (err) {
-      console.error("Enrollment failed:", err);
       alert(err.response?.data?.message || "Failed to enroll in the course.");
     }
   };
 
-  // Instructor create course handler
+  // Instructor create course
   const handleCreateCourse = async (e) => {
     e.preventDefault();
     if (!newCourseTitle.trim()) return;
-
     setCourseSubmitLoading(true);
     try {
-      await courseService.createCourse(newCourseTitle, newCourseDesc);
-      setNewCourseTitle("");
-      setNewCourseDesc("");
-      setShowCreateModal(false);
-      // Refresh course list
-      const allCourses = await courseService.getAllCourses();
-      setCourses(allCourses);
+      await createCourse(newCourseTitle, newCourseDesc);
+      closeCreateModal();
     } catch (err) {
-      console.error("Failed to create course", err);
       alert("Failed to create course. Please try again.");
     } finally {
       setCourseSubmitLoading(false);
     }
   };
 
-  // Admin update user role handler
+  // Admin update role
   const handleRoleChange = async (userId, newRole) => {
-    setRoleUpdateLoading(userId);
     try {
-      await authService.updateUserRole(userId, newRole);
-      // Refresh user list
-      const allUsers = await authService.getAllUsers();
-      setUsers(allUsers);
-    } catch (err) {
-      console.error("Failed to update role", err);
+      await updateUserRole(userId, newRole);
+    } catch {
       alert("Failed to update user role.");
-    } finally {
-      setRoleUpdateLoading(null);
     }
   };
 
-  // Admin delete user handler
+  // Admin delete user
   const handleDeleteUser = async (userId, userName) => {
-    if (!window.confirm(`Are you sure you want to permanently delete user "${userName}"? This will also delete their profile.`)) {
-      return;
-    }
-    setUserDeleteLoading(userId);
+    if (!window.confirm(`Are you sure you want to permanently delete user "${userName}"? This will also delete their profile.`)) return;
     try {
-      await authService.deleteUser(userId);
-      // Refresh user list
-      const allUsers = await authService.getAllUsers();
-      setUsers(allUsers);
+      await deleteUser(userId);
     } catch (err) {
-      console.error("Failed to delete user", err);
       alert(err.response?.data?.message || "Failed to delete user. Please try again.");
-    } finally {
-      setUserDeleteLoading(null);
     }
   };
 
-  // Admin delete course handler
+  // Admin/instructor delete course
   const handleDeleteCourse = async (courseId, courseTitle) => {
-    if (
-      !window.confirm(
-        `Are you sure you want to permanently delete course "${courseTitle}"? This will delete all modules, progress, enrollments, quiz results, certificates, and the quiz associated with this course.`
-      )
-    ) {
-      return;
-    }
+    if (!window.confirm(`Are you sure you want to permanently delete course "${courseTitle}"?`)) return;
     try {
-      // Try to delete the quiz associated with this course if it exists
-      try {
-        const quiz = await quizService.getQuizByCourseId(courseId);
-        if (quiz && quiz.id) {
-          await quizService.deleteQuiz(quiz.id);
-        }
-      } catch (quizErr) {
-        // Quiz might not exist, which is fine
-        console.log("No quiz to delete or error deleting quiz:", quizErr.message || quizErr);
-      }
-
-      // Delete the course
-      await courseService.deleteCourse(courseId);
+      await deleteCourse(courseId);
       alert("Course successfully deleted.");
-      // Refresh dashboard data
       await fetchDashboardData();
     } catch (err) {
-      console.error("Failed to delete course", err);
       alert(err.response?.data?.message || "Failed to delete course. Please try again.");
     }
   };
@@ -191,35 +132,30 @@ const Dashboard = () => {
     );
   }
 
-  // RENDER STUDENT DASHBOARD
+  // ─── STUDENT DASHBOARD ────────────────────────────────────────────────────
   if (user.role === "STUDENT") {
     const enrolledIds = enrolledCourses.map((c) => c.id);
     const availableCourses = courses.filter((c) => !enrolledIds.includes(c.id));
 
     return (
       <div className="flex flex-col gap-8 animate-fadeIn">
-        {/* Banner greeting */}
+        {/* Banner */}
         <div className="p-6 md:p-8 bg-gradient-to-r from-indigo-900/60 via-indigo-950/40 to-slate-900 border border-slate-800 rounded-3xl relative overflow-hidden flex flex-col md:flex-row md:items-center justify-between gap-6">
           <div className="absolute top-0 right-0 w-80 h-80 bg-indigo-500/5 rounded-full blur-3xl pointer-events-none"></div>
           <div>
-            <h1 className="text-xl md:text-2xl font-bold text-slate-100">
-              Welcome to your Learning Space!
-            </h1>
+            <h1 className="text-xl md:text-2xl font-bold text-slate-100">Welcome to your Learning Space!</h1>
             <p className="text-xs text-slate-400 mt-1.5 max-w-xl leading-relaxed">
               Track your course progression, finish active syllabus modules, and challenge yourself with final quizzes to obtain downloadable certificates!
             </p>
           </div>
           <div className="flex items-center gap-3">
-            <Link
-              to="/courses"
-              className="px-5 py-2.5 bg-indigo-600 hover:bg-indigo-500 text-slate-100 rounded-xl text-xs font-semibold shadow-lg shadow-indigo-600/10 transition-all duration-200"
-            >
+            <Link to="/courses" className="px-5 py-2.5 bg-indigo-600 hover:bg-indigo-500 text-slate-100 rounded-xl text-xs font-semibold shadow-lg shadow-indigo-600/10 transition-all duration-200">
               Explore Catalog
             </Link>
           </div>
         </div>
 
-        {/* Quick Stats Grid */}
+        {/* Stats Grid */}
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-5">
           <div className="p-5 bg-slate-900 border border-slate-800 rounded-2xl flex items-center gap-4">
             <div className="p-3 bg-indigo-500/10 text-indigo-400 rounded-xl">
@@ -256,48 +192,35 @@ const Dashboard = () => {
           </div>
         </div>
 
-        {/* Enrolled Courses Section */}
+        {/* Enrolled Courses */}
         <div>
           <div className="flex items-center justify-between mb-4">
             <h2 className="text-sm font-bold uppercase tracking-widest text-slate-400">My Active Courses</h2>
             {enrolledCourses.length > 0 && (
-              <Link to="/my-courses" className="text-xs text-indigo-400 hover:text-indigo-300 font-semibold">
-                View All
-              </Link>
+              <Link to="/my-courses" className="text-xs text-indigo-400 hover:text-indigo-300 font-semibold">View All</Link>
             )}
           </div>
           {enrolledCourses.length === 0 ? (
             <div className="p-10 border border-dashed border-slate-800 bg-slate-900/20 text-center rounded-2xl">
               <p className="text-sm text-slate-400">You are not enrolled in any courses yet.</p>
-              <Link
-                to="/courses"
-                className="inline-block mt-4 px-4 py-2 bg-indigo-600 hover:bg-indigo-505 hover:bg-indigo-500 text-white rounded-xl text-xs font-semibold"
-              >
+              <Link to="/courses" className="inline-block mt-4 px-4 py-2 bg-indigo-600 hover:bg-indigo-500 text-white rounded-xl text-xs font-semibold">
                 Enroll in your first course
               </Link>
             </div>
           ) : (
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
               {enrolledCourses.slice(0, 3).map((course) => (
-                <CourseCard
-                  key={course.id}
-                  course={course}
-                  isEnrolled={true}
-                  progress={studentProgress[course.id]}
-                  userRole={user.role}
-                />
+                <CourseCard key={course.id} course={course} isEnrolled={true} progress={studentProgress[course.id]} userRole={user.role} />
               ))}
             </div>
           )}
         </div>
 
-        {/* Available courses */}
+        {/* Available Courses */}
         <div>
           <div className="flex items-center justify-between mb-4">
             <h2 className="text-sm font-bold uppercase tracking-widest text-slate-400">Available Courses To Explore</h2>
-            <Link to="/courses" className="text-xs text-indigo-400 hover:text-indigo-300 font-semibold">
-              View Catalog
-            </Link>
+            <Link to="/courses" className="text-xs text-indigo-400 hover:text-indigo-300 font-semibold">View Catalog</Link>
           </div>
           {availableCourses.length === 0 ? (
             <div className="p-6 text-center text-xs text-slate-500 bg-slate-900 border border-slate-800 rounded-2xl">
@@ -306,13 +229,7 @@ const Dashboard = () => {
           ) : (
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
               {availableCourses.slice(0, 3).map((course) => (
-                <CourseCard
-                  key={course.id}
-                  course={course}
-                  isEnrolled={false}
-                  onEnroll={handleEnroll}
-                  userRole={user.role}
-                />
+                <CourseCard key={course.id} course={course} isEnrolled={false} onEnroll={handleEnroll} userRole={user.role} />
               ))}
             </div>
           )}
@@ -321,24 +238,22 @@ const Dashboard = () => {
     );
   }
 
-  // RENDER INSTRUCTOR DASHBOARD
+  // ─── INSTRUCTOR DASHBOARD ─────────────────────────────────────────────────
   if (user.role === "INSTRUCTOR") {
     return (
       <div className="flex flex-col gap-8 animate-fadeIn">
-        {/* Banner greeting */}
+        {/* Banner */}
         <div className="p-6 md:p-8 bg-gradient-to-r from-purple-900/60 via-purple-950/40 to-slate-900 border border-slate-800 rounded-3xl relative overflow-hidden flex flex-col md:flex-row md:items-center justify-between gap-6">
           <div className="absolute top-0 right-0 w-80 h-80 bg-purple-500/5 rounded-full blur-3xl pointer-events-none"></div>
           <div>
-            <h1 className="text-xl md:text-2xl font-bold text-slate-100">
-              Instructor Dashboard
-            </h1>
+            <h1 className="text-xl md:text-2xl font-bold text-slate-100">Instructor Dashboard</h1>
             <p className="text-xs text-slate-400 mt-1.5 max-w-xl leading-relaxed">
               Plan schedules, construct comprehensive modules containing lessons, draft questions to publish quizzes, and view curriculum statistics.
             </p>
           </div>
           <div>
             <button
-              onClick={() => setShowCreateModal(true)}
+              onClick={openCreateModal}
               className="px-5 py-2.5 bg-indigo-600 hover:bg-indigo-500 text-slate-100 rounded-xl text-xs font-semibold shadow-lg shadow-indigo-600/10 hover:scale-[1.02] active:scale-95 transition-all duration-200 flex items-center gap-2 cursor-pointer"
             >
               <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -349,7 +264,7 @@ const Dashboard = () => {
           </div>
         </div>
 
-        {/* Quick Stats Grid */}
+        {/* Stats Grid */}
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-5">
           <div className="p-5 bg-slate-900 border border-slate-800 rounded-2xl flex items-center gap-4">
             <div className="p-3 bg-indigo-500/10 text-indigo-400 rounded-xl">
@@ -388,28 +303,20 @@ const Dashboard = () => {
           </div>
         </div>
 
-        {/* Instructor Course Listing */}
+        {/* Course Listing */}
         <div>
           <h2 className="text-sm font-bold uppercase tracking-widest text-slate-400 mb-4">Course Curriculums</h2>
           {courses.length === 0 ? (
             <div className="p-10 border border-dashed border-slate-800 bg-slate-900/20 text-center rounded-2xl">
               <p className="text-sm text-slate-400">No courses created yet.</p>
-              <button
-                onClick={() => setShowCreateModal(true)}
-                className="mt-4 px-4 py-2 bg-indigo-600 hover:bg-indigo-500 text-white rounded-xl text-xs font-semibold cursor-pointer"
-              >
+              <button onClick={openCreateModal} className="mt-4 px-4 py-2 bg-indigo-600 hover:bg-indigo-500 text-white rounded-xl text-xs font-semibold cursor-pointer">
                 Create your first course
               </button>
             </div>
           ) : (
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
               {courses.map((course) => (
-                <CourseCard
-                  key={course.id}
-                  course={course}
-                  isEnrolled={false}
-                  userRole={user.role}
-                />
+                <CourseCard key={course.id} course={course} isEnrolled={false} userRole={user.role} />
               ))}
             </div>
           )}
@@ -418,62 +325,29 @@ const Dashboard = () => {
         {/* Create Course Modal */}
         {showCreateModal && (
           <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
-            <div className="fixed inset-0 bg-slate-950/80 backdrop-blur-sm" onClick={() => setShowCreateModal(false)}></div>
+            <div className="fixed inset-0 bg-slate-950/80 backdrop-blur-sm" onClick={closeCreateModal}></div>
             <div className="w-full max-w-md bg-slate-900 border border-slate-800 rounded-3xl p-6 shadow-2xl z-10 animate-scaleIn">
               <div className="flex justify-between items-center mb-5 border-b border-slate-800/60 pb-3">
                 <h3 className="text-base font-bold text-slate-100">Create New Course</h3>
-                <button
-                  onClick={() => setShowCreateModal(false)}
-                  className="p-1.5 text-slate-500 hover:text-slate-300 rounded-full hover:bg-slate-800"
-                >
+                <button onClick={closeCreateModal} className="p-1.5 text-slate-500 hover:text-slate-300 rounded-full hover:bg-slate-800">
                   <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M6 18L18 6M6 6l12 12" />
                   </svg>
                 </button>
               </div>
-
               <form onSubmit={handleCreateCourse} className="flex flex-col gap-4">
                 <div className="flex flex-col gap-1.5">
-                  <label className="text-[10px] font-bold uppercase tracking-widest text-slate-400 ml-1">
-                    Course Title
-                  </label>
-                  <input
-                    type="text"
-                    value={newCourseTitle}
-                    onChange={(e) => setNewCourseTitle(e.target.value)}
-                    className="w-full bg-slate-800/40 border border-slate-800 focus:border-indigo-500/60 rounded-xl py-2.5 px-3.5 text-sm text-slate-200 placeholder-slate-500 focus:outline-none transition-all duration-200"
-                    placeholder="e.g. Introduction to React & Next.js"
-                    required
-                  />
+                  <label className="text-[10px] font-bold uppercase tracking-widest text-slate-400 ml-1">Course Title</label>
+                  <input type="text" value={newCourseTitle} onChange={(e) => setNewCourseTitle(e.target.value)} className="w-full bg-slate-800/40 border border-slate-800 focus:border-indigo-500/60 rounded-xl py-2.5 px-3.5 text-sm text-slate-200 placeholder-slate-500 focus:outline-none transition-all duration-200" placeholder="e.g. Introduction to React & Next.js" required />
                 </div>
-
                 <div className="flex flex-col gap-1.5">
-                  <label className="text-[10px] font-bold uppercase tracking-widest text-slate-400 ml-1">
-                    Course Description
-                  </label>
-                  <textarea
-                    rows="4"
-                    value={newCourseDesc}
-                    onChange={(e) => setNewCourseDesc(e.target.value)}
-                    className="w-full bg-slate-800/40 border border-slate-800 focus:border-indigo-500/60 rounded-xl py-2.5 px-3.5 text-sm text-slate-200 placeholder-slate-500 focus:outline-none transition-all duration-200 resize-none"
-                    placeholder="Provide a comprehensive summary of the course topics, structure, and what students will accomplish..."
-                    required
-                  />
+                  <label className="text-[10px] font-bold uppercase tracking-widest text-slate-400 ml-1">Course Description</label>
+                  <textarea rows="4" value={newCourseDesc} onChange={(e) => setNewCourseDesc(e.target.value)} className="w-full bg-slate-800/40 border border-slate-800 focus:border-indigo-500/60 rounded-xl py-2.5 px-3.5 text-sm text-slate-200 placeholder-slate-500 focus:outline-none transition-all duration-200 resize-none" placeholder="Provide a comprehensive summary of the course topics..." required />
                 </div>
-
-                <button
-                  type="submit"
-                  disabled={courseSubmitLoading}
-                  className="w-full bg-indigo-600 hover:bg-indigo-500 active:bg-indigo-700 disabled:bg-slate-800 disabled:text-slate-600 text-white font-semibold text-xs rounded-xl py-3 mt-2 transition-all duration-200 flex items-center justify-center gap-2 cursor-pointer"
-                >
+                <button type="submit" disabled={courseSubmitLoading} className="w-full bg-indigo-600 hover:bg-indigo-500 active:bg-indigo-700 disabled:bg-slate-800 disabled:text-slate-600 text-white font-semibold text-xs rounded-xl py-3 mt-2 transition-all duration-200 flex items-center justify-center gap-2 cursor-pointer">
                   {courseSubmitLoading ? (
-                    <>
-                      <div className="w-3.5 h-3.5 border-2 border-slate-400 border-t-transparent rounded-full animate-spin"></div>
-                      Creating...
-                    </>
-                  ) : (
-                    "Create Course"
-                  )}
+                    <><div className="w-3.5 h-3.5 border-2 border-slate-400 border-t-transparent rounded-full animate-spin"></div>Creating...</>
+                  ) : "Create Course"}
                 </button>
               </form>
             </div>
@@ -483,24 +357,22 @@ const Dashboard = () => {
     );
   }
 
-  // RENDER ADMIN DASHBOARD
+  // ─── ADMIN DASHBOARD ──────────────────────────────────────────────────────
   if (user.role === "ADMIN") {
     return (
       <div className="flex flex-col gap-8 animate-fadeIn">
-        {/* Header Greeting */}
+        {/* Banner */}
         <div className="p-6 md:p-8 bg-gradient-to-r from-indigo-900/60 via-indigo-950/40 to-slate-900 border border-slate-800 rounded-3xl relative overflow-hidden flex flex-col md:flex-row md:items-center justify-between gap-6">
           <div className="absolute top-0 right-0 w-80 h-80 bg-indigo-500/5 rounded-full blur-3xl pointer-events-none"></div>
           <div>
-            <h1 className="text-xl md:text-2xl font-bold text-slate-100">
-              Administrator Dashboard
-            </h1>
+            <h1 className="text-xl md:text-2xl font-bold text-slate-100">Administrator Dashboard</h1>
             <p className="text-xs text-slate-400 mt-1.5 max-w-xl leading-relaxed">
               Global management panel for users, permissions, roles, and learning content settings. Adjust roles to grant student, instructor, or admin access.
             </p>
           </div>
         </div>
 
-        {/* System Stats Grid */}
+        {/* System Stats */}
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-5">
           <div className="p-5 bg-slate-900 border border-slate-800 rounded-2xl flex items-center gap-4">
             <div className="p-3 bg-indigo-500/10 text-indigo-400 rounded-xl">
@@ -537,7 +409,7 @@ const Dashboard = () => {
           </div>
         </div>
 
-        {/* User Management Section */}
+        {/* User Management Table */}
         <div>
           <h2 className="text-sm font-bold uppercase tracking-widest text-slate-400 mb-4">Manage System Users</h2>
           <div className="bg-slate-900 border border-slate-800 rounded-2xl overflow-hidden shadow-xl shadow-black/10">
@@ -566,15 +438,13 @@ const Dashboard = () => {
                         <td className="px-6 py-4 font-semibold text-slate-200">{item.name}</td>
                         <td className="px-6 py-4 text-slate-400">{item.email}</td>
                         <td className="px-6 py-4">
-                          <span
-                            className={`px-2 py-0.5 rounded font-bold uppercase text-[9px] ${
-                              item.role === "ADMIN"
-                                ? "bg-rose-500/10 text-rose-400 border border-rose-500/20"
-                                : item.role === "INSTRUCTOR"
-                                ? "bg-purple-500/10 text-purple-400 border border-purple-500/20"
-                                : "bg-indigo-500/10 text-indigo-400 border border-indigo-500/20"
-                            }`}
-                          >
+                          <span className={`px-2 py-0.5 rounded font-bold uppercase text-[9px] ${
+                            item.role === "ADMIN"
+                              ? "bg-rose-500/10 text-rose-400 border border-rose-500/20"
+                              : item.role === "INSTRUCTOR"
+                              ? "bg-purple-500/10 text-purple-400 border border-purple-500/20"
+                              : "bg-indigo-500/10 text-indigo-400 border border-indigo-500/20"
+                          }`}>
                             {item.role}
                           </span>
                         </td>
@@ -585,7 +455,7 @@ const Dashboard = () => {
                             <select
                               value={item.role}
                               onChange={(e) => handleRoleChange(item.id, e.target.value)}
-                              disabled={item.email === user.email || userDeleteLoading === item.id} // Prevent changing self role or while deleting
+                              disabled={item.email === user.email || userDeleteLoading === item.id}
                               className="bg-slate-850 border border-slate-800 bg-slate-800 rounded-lg py-1 px-2.5 text-slate-300 focus:outline-none focus:border-indigo-500 transition-colors duration-150 text-[11px] cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
                             >
                               <option value="STUDENT">Make Student</option>
@@ -593,7 +463,6 @@ const Dashboard = () => {
                               <option value="ADMIN">Make Admin</option>
                             </select>
                           )}
-
                           {userDeleteLoading === item.id ? (
                             <div className="w-3.5 h-3.5 border-2 border-rose-500 border-t-transparent rounded-full animate-spin"></div>
                           ) : (
@@ -618,7 +487,7 @@ const Dashboard = () => {
           </div>
         </div>
 
-        {/* Global Courses summary */}
+        {/* Course Management */}
         <div>
           <h2 className="text-sm font-bold uppercase tracking-widest text-slate-400 mb-4">Course Management Catalog</h2>
           {courses.length === 0 ? (
@@ -635,10 +504,7 @@ const Dashboard = () => {
                       <p className="text-[10px] text-slate-500 mt-0.5">{c.modules?.length || 0} Modules</p>
                     </div>
                     <div className="flex items-center gap-2">
-                      <Link
-                        to={`/courses/${c.id}`}
-                        className="px-3 py-1.5 bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white rounded-lg text-[10px] font-semibold transition-colors duration-150"
-                      >
+                      <Link to={`/courses/${c.id}`} className="px-3 py-1.5 bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white rounded-lg text-[10px] font-semibold transition-colors duration-150">
                         Enter Course
                       </Link>
                       <button

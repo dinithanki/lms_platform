@@ -1,8 +1,8 @@
-import React, { useState, useEffect } from "react";
+import React, { useEffect } from "react";
 import { useParams, Link } from "react-router-dom";
-import { useAuth } from "../context/AuthContext";
-import courseService from "../services/courseService";
-import enrollmentService from "../services/enrollmentService";
+import { useAuth } from "../store/authStore";
+import useCourseDetailsStore from "../store/courseDetailsStore";
+import useQuizStore from "../store/quizStore";
 import quizService from "../services/quizService";
 import StudentVideoPlayer from "../components/StudentVideoPlayer";
 
@@ -10,228 +10,114 @@ const CourseDetails = () => {
   const { id } = useParams();
   const { user } = useAuth();
 
-  // Navigation Tabs
-  const [activeTab, setActiveTab] = useState("syllabus"); // syllabus, quiz
+  // Course details store
+  const {
+    course,
+    loading,
+    error,
+    isEnrolled,
+    enrollLoading,
+    progress,
+    completingModuleId,
+    selectedModule,
+    showModuleModal,
+    editingModule,
+    modTitle,
+    modVideo,
+    modResource,
+    modSubmitLoading,
+    activeTab,
+    fetchCourseDetails,
+    enrollStudent,
+    completeModule,
+    saveModule,
+    openCreateModule,
+    openEditModule,
+    closeModuleModal,
+    setModTitle,
+    setModVideo,
+    setModResource,
+    setSelectedModule,
+    setActiveTab,
+    reset: resetCourseDetails,
+  } = useCourseDetailsStore();
 
-  // Course Details State
-  const [course, setCourse] = useState(null);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState("");
-  const [isEnrolled, setIsEnrolled] = useState(false);
-  const [enrollLoading, setEnrollLoading] = useState(false);
+  // Quiz store
+  const {
+    quiz,
+    quizQuestions,
+    quizResults,
+    isTakingQuiz,
+    quizAnswers,
+    quizSubmitLoading,
+    latestAttemptResult,
+    downloadingCert,
+    quizSubmitLoadingInst,
+    qSubmitLoading,
+    fetchQuizDetails,
+    submitQuiz,
+    createQuiz,
+    publishQuiz,
+    addQuestion,
+    deleteQuestion,
+    setIsTakingQuiz,
+    setQuizAnswers,
+    setDownloadingCert,
+    reset: resetQuiz,
+  } = useQuizStore();
 
-  // Student Course Progress State
-  const [progress, setProgress] = useState(null);
-  const [completingModuleId, setCompletingModuleId] = useState(null);
-
-  // Quiz State
-  const [quiz, setQuiz] = useState(null);
-  const [quizQuestions, setQuizQuestions] = useState([]);
-  const [quizResults, setQuizResults] = useState([]);
-  const [quizLoading, setQuizLoading] = useState(false);
-
-  // Student Quiz Attempt State
-  const [isTakingQuiz, setIsTakingQuiz] = useState(false);
-  const [quizAnswers, setQuizAnswers] = useState({}); // questionId -> selectedOption ('A', 'B', 'C', 'D')
-  const [quizSubmitLoading, setQuizSubmitLoading] = useState(false);
-  const [latestAttemptResult, setLatestAttemptResult] = useState(null);
-  const [downloadingCert, setDownloadingCert] = useState(false);
-
-  // Active Selected Module for Student Player
-  const [selectedModule, setSelectedModule] = useState(null);
-
-  // Instructor Module Form
-  const [showModuleModal, setShowModuleModal] = useState(false);
-  const [editingModule, setEditingModule] = useState(null);
-  const [modTitle, setModTitle] = useState("");
-  const [modVideo, setModVideo] = useState("");
-  const [modResource, setModResource] = useState("");
-  const [modSubmitLoading, setModSubmitLoading] = useState(false);
-
-  const handleOpenCreateModule = () => {
-    setEditingModule(null);
-    setModTitle("");
-    setModVideo("");
-    setModResource("");
-    setShowModuleModal(true);
-  };
-
-  const handleOpenEditModule = (mod) => {
-    setEditingModule(mod);
-    setModTitle(mod.title);
-    setModVideo(mod.videoUrl);
-    setModResource(mod.resourceUrl || "");
-    setShowModuleModal(true);
-  };
-
-  const handleCloseModuleModal = () => {
-    setShowModuleModal(false);
-    setEditingModule(null);
-    setModTitle("");
-    setModVideo("");
-    setModResource("");
-  };
-
-  // Instructor Quiz Form
-  const [quizTitle, setQuizTitle] = useState("");
-  const [quizDesc, setQuizDesc] = useState("");
-  const [quizSubmitLoadingInst, setQuizSubmitLoadingInst] = useState(false);
-
-  // Instructor Question Form
-  const [showQuestionModal, setShowQuestionModal] = useState(false);
-  const [qText, setQText] = useState("");
-  const [optA, setOptA] = useState("");
-  const [optB, setOptB] = useState("");
-  const [optC, setOptC] = useState("");
-  const [optD, setOptD] = useState("");
-  const [correctOpt, setCorrectOpt] = useState("A");
-  const [qSubmitLoading, setQSubmitLoading] = useState(false);
+  // Instructor quiz form — local since it's transient UI
+  const [quizTitle, setQuizTitle] = React.useState("");
+  const [quizDesc, setQuizDesc] = React.useState("");
+  const [showQuestionModal, setShowQuestionModal] = React.useState(false);
+  const [qText, setQText] = React.useState("");
+  const [optA, setOptA] = React.useState("");
+  const [optB, setOptB] = React.useState("");
+  const [optC, setOptC] = React.useState("");
+  const [optD, setOptD] = React.useState("");
+  const [correctOpt, setCorrectOpt] = React.useState("A");
 
   useEffect(() => {
-    fetchCourseDetails();
+    const init = async () => {
+      await fetchCourseDetails(id, user);
+      await fetchQuizDetails(id, user);
+    };
+    init();
+    return () => {
+      resetCourseDetails();
+      resetQuiz();
+    };
   }, [id, user]);
 
-  const fetchCourseDetails = async () => {
-    setLoading(true);
-    setError("");
-    try {
-      const data = await courseService.getCourseById(id);
-      const modules = await courseService.getModules(id);
-      setCourse({ ...data, modules });
+  // ── Handlers ────────────────────────────────────────────────────────────────
 
-      if (user) {
-        // Check if user is enrolled
-        if (user.role === "STUDENT") {
-          const enrolledList = await enrollmentService.getEnrolledCourses(user.id);
-          const enrolled = enrolledList.some((c) => c.id === parseInt(id));
-          setIsEnrolled(enrolled);
-
-          if (enrolled) {
-            const prog = await courseService.getCourseProgress(id, user.id);
-            setProgress(prog);
-
-            // Set initial active module for student
-            if (modules && modules.length > 0) {
-              const incomplete = modules.find((m) => !prog.completedModuleIds || !prog.completedModuleIds.includes(m.id));
-              setSelectedModule(incomplete || modules[0]);
-            }
-          }
-        } else {
-          // Instructors and Admins see details directly
-          setIsEnrolled(true);
-        }
-
-        // Fetch Quiz details
-        fetchQuizDetails();
-      }
-    } catch (err) {
-      console.error(err);
-      setError("Failed to load course details. Make sure services are running.");
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const fetchQuizDetails = async () => {
-    try {
-      const quizData = await quizService.getQuizByCourseId(id, user.role === "STUDENT" ? user.id : null);
-      setQuiz(quizData);
-
-      if (quizData) {
-        // Fetch quiz questions
-        const questions = await quizService.getQuestionsByQuizId(quizData.id);
-        setQuizQuestions(questions);
-
-        // Fetch user attempts
-        if (user.role === "STUDENT") {
-          const attempts = await quizService.getQuizResults(user.id, quizData.id);
-          setQuizResults(attempts);
-        }
-      }
-    } catch (err) {
-      // Quiz may not exist yet, which is fine for instructors to build
-      setQuiz(null);
-      setQuizQuestions([]);
-    }
-  };
-
-  // Student Enroll
   const handleEnroll = async () => {
-    setEnrollLoading(true);
     try {
-      await enrollmentService.enrollStudent(id, user.id);
-      setIsEnrolled(true);
-      const prog = await courseService.getCourseProgress(id, user.id);
-      setProgress(prog);
-      fetchQuizDetails();
+      await enrollStudent(id, user);
+      await fetchQuizDetails(id, user);
     } catch (err) {
-      console.error(err);
       alert(err.response?.data?.message || "Enrollment failed.");
-    } finally {
-      setEnrollLoading(false);
     }
   };
 
-  // Student complete module
   const handleCompleteModule = async (moduleId) => {
-    setCompletingModuleId(moduleId);
     try {
-      await courseService.completeModule(moduleId, user.id);
-      // Refresh progress & course details
-      const prog = await courseService.getCourseProgress(id, user.id);
-      setProgress(prog);
-      const data = await courseService.getCourseById(id);
-      const modules = await courseService.getModules(id);
-      setCourse({ ...data, modules });
-
-      // Update selectedModule status in-place if it was the completed module
-      if (selectedModule && selectedModule.id === moduleId) {
-        const updatedMod = modules.find((m) => m.id === moduleId);
-        if (updatedMod) {
-          setSelectedModule(updatedMod);
-        }
-      }
-    } catch (err) {
-      console.error(err);
+      await completeModule(moduleId, id, user);
+    } catch {
       alert("Failed to mark module as complete.");
-    } finally {
-      setCompletingModuleId(null);
     }
   };
 
-  // Student Submit Quiz
   const handleQuizSubmit = async (e) => {
     e.preventDefault();
-    if (!quiz) return;
-
-    // Check that all questions are answered
-    if (Object.keys(quizAnswers).length < quizQuestions.length) {
-      alert("Please answer all questions before submitting.");
-      return;
-    }
-
-    setQuizSubmitLoading(true);
     try {
-      const formattedAnswers = Object.entries(quizAnswers).map(([qId, ans]) => ({
-        questionId: parseInt(qId),
-        selectedOption: ans,
-      }));
-
-      const result = await quizService.submitQuiz(user.id, quiz.id, formattedAnswers);
-      setLatestAttemptResult(result);
-      setIsTakingQuiz(false);
-      setQuizAnswers({});
-      // Refresh results
-      fetchQuizDetails();
+      await submitQuiz(user, quizAnswers);
+      await fetchQuizDetails(id, user);
     } catch (err) {
-      console.error(err);
-      alert(err.response?.data?.message || "Quiz submission failed.");
-    } finally {
-      setQuizSubmitLoading(false);
+      alert(err.message || err.response?.data?.message || "Quiz submission failed.");
     }
   };
 
-  // Student Download Certificate
   const handleDownloadCertificate = async () => {
     setDownloadingCert(true);
     try {
@@ -243,55 +129,27 @@ const CourseDetails = () => {
       document.body.appendChild(link);
       link.click();
       link.parentNode.removeChild(link);
-    } catch (err) {
-      console.error(err);
+    } catch {
       alert("Failed to generate PDF. Make sure you have completed the course and passed the quiz.");
     } finally {
       setDownloadingCert(false);
     }
   };
 
-  // Instructor Save Module (Create/Update)
   const handleSaveModule = async (e) => {
     e.preventDefault();
-    if (!modTitle.trim() || !modVideo.trim()) return;
-
-    setModSubmitLoading(true);
     try {
-      if (editingModule) {
-        await courseService.updateModule(editingModule.id, {
-          title: modTitle,
-          videoUrl: modVideo,
-          resourceUrl: modResource,
-        });
-      } else {
-        await courseService.createModule(id, {
-          title: modTitle,
-          videoUrl: modVideo,
-          resourceUrl: modResource,
-        });
-      }
-      handleCloseModuleModal();
-      // Reload course
-      const data = await courseService.getCourseById(id);
-      const modules = await courseService.getModules(id);
-      setCourse({ ...data, modules });
-    } catch (err) {
-      console.error(err);
+      await saveModule(id, editingModule, modTitle, modVideo, modResource);
+    } catch {
       alert(editingModule ? "Failed to update module." : "Failed to create module.");
-    } finally {
-      setModSubmitLoading(false);
     }
   };
 
-  // Instructor Create Quiz
   const handleCreateQuiz = async (e) => {
     e.preventDefault();
     if (!quizTitle.trim()) return;
-
-    setQuizSubmitLoadingInst(true);
     try {
-      await quizService.createQuiz({
+      await createQuiz({
         courseId: parseInt(id),
         title: quizTitle,
         description: quizDesc,
@@ -299,35 +157,26 @@ const CourseDetails = () => {
       });
       setQuizTitle("");
       setQuizDesc("");
-      fetchQuizDetails();
-    } catch (err) {
-      console.error(err);
+      await fetchQuizDetails(id, user);
+    } catch {
       alert("Failed to create quiz.");
-    } finally {
-      setQuizSubmitLoadingInst(false);
     }
   };
 
-  // Instructor Publish Quiz
   const handlePublishQuiz = async () => {
-    if (!quiz) return;
     try {
-      await quizService.publishQuiz(quiz.id);
-      fetchQuizDetails();
-    } catch (err) {
-      console.error(err);
+      await publishQuiz();
+      await fetchQuizDetails(id, user);
+    } catch {
       alert("Failed to publish quiz.");
     }
   };
 
-  // Instructor Create Question
   const handleCreateQuestion = async (e) => {
     e.preventDefault();
-    if (!qText.trim() || !optA.trim() || !optB.trim() || !optC.trim() || !optD.trim() || !correctOpt) return;
-
-    setQSubmitLoading(true);
+    if (!qText.trim() || !optA.trim() || !optB.trim() || !optC.trim() || !optD.trim()) return;
     try {
-      await quizService.addQuestion({
+      await addQuestion({
         quizId: quiz.id,
         questionText: qText,
         optionA: optA,
@@ -336,34 +185,34 @@ const CourseDetails = () => {
         optionD: optD,
         correctAnswer: correctOpt,
       });
-      setQText("");
-      setOptA("");
-      setOptB("");
-      setOptC("");
-      setOptD("");
-      setCorrectOpt("A");
+      setQText(""); setOptA(""); setOptB(""); setOptC(""); setOptD(""); setCorrectOpt("A");
       setShowQuestionModal(false);
-      fetchQuizDetails();
-    } catch (err) {
-      console.error(err);
+      await fetchQuizDetails(id, user);
+    } catch {
       alert("Failed to add question.");
-    } finally {
-      setQSubmitLoading(false);
     }
   };
 
-  // Instructor Delete Question
   const handleDeleteQuestion = async (qId) => {
     if (!window.confirm("Are you sure you want to delete this question?")) return;
     try {
-      await quizService.deleteQuestion(qId);
-      fetchQuizDetails();
-    } catch (err) {
-      console.error(err);
+      await deleteQuestion(qId);
+      await fetchQuizDetails(id, user);
+    } catch {
       alert("Failed to delete question.");
     }
   };
 
+  // ── Derived ─────────────────────────────────────────────────────────────────
+  const allModulesCompleted =
+    progress &&
+    progress.completedModulesCount === progress.totalModulesCount &&
+    progress.totalModulesCount > 0;
+  const passedQuiz = quizResults.some((r) => r.passed);
+  const attemptsCount = quizResults.length;
+  const attemptsLeft = 5 - attemptsCount;
+
+  // ── Loading / Error ──────────────────────────────────────────────────────────
   if (loading) {
     return (
       <div className="flex items-center justify-center min-h-[60vh]">
@@ -386,11 +235,6 @@ const CourseDetails = () => {
       </div>
     );
   }
-
-  const allModulesCompleted = progress && progress.completedModulesCount === progress.totalModulesCount && progress.totalModulesCount > 0;
-  const passedQuiz = quizResults.some((r) => r.passed);
-  const attemptsCount = quizResults.length;
-  const attemptsLeft = 5 - attemptsCount;
 
   return (
     <div className="flex flex-col gap-6 animate-fadeIn max-w-5xl mx-auto">
@@ -416,18 +260,13 @@ const CourseDetails = () => {
               className="px-5 py-2 bg-indigo-600 hover:bg-indigo-500 disabled:bg-slate-800 text-white rounded-xl text-xs font-semibold flex items-center gap-2 cursor-pointer"
             >
               {enrollLoading ? (
-                <>
-                  <div className="w-3.5 h-3.5 border-2 border-slate-400 border-t-transparent rounded-full animate-spin"></div>
-                  Enrolling...
-                </>
-              ) : (
-                "Enroll Now"
-              )}
+                <><div className="w-3.5 h-3.5 border-2 border-slate-400 border-t-transparent rounded-full animate-spin"></div>Enrolling...</>
+              ) : "Enroll Now"}
             </button>
           </div>
         )}
 
-        {/* Student Progress summary in Banner */}
+        {/* Student Progress Banner */}
         {user.role === "STUDENT" && isEnrolled && progress && (
           <div className="flex flex-col sm:flex-row sm:items-center gap-6 bg-slate-900/60 border border-slate-800/80 p-4 rounded-2xl w-fit">
             <div className="flex flex-col gap-1">
@@ -454,9 +293,7 @@ const CourseDetails = () => {
             <button
               onClick={() => setActiveTab("syllabus")}
               className={`px-6 py-3 text-xs uppercase font-bold tracking-widest border-b-2 transition-colors duration-200 cursor-pointer ${
-                activeTab === "syllabus"
-                  ? "border-indigo-500 text-indigo-400"
-                  : "border-transparent text-slate-500 hover:text-slate-300"
+                activeTab === "syllabus" ? "border-indigo-500 text-indigo-400" : "border-transparent text-slate-500 hover:text-slate-300"
               }`}
             >
               Syllabus Modules
@@ -464,9 +301,7 @@ const CourseDetails = () => {
             <button
               onClick={() => setActiveTab("quiz")}
               className={`px-6 py-3 text-xs uppercase font-bold tracking-widest border-b-2 transition-colors duration-200 cursor-pointer ${
-                activeTab === "quiz"
-                  ? "border-indigo-500 text-indigo-400"
-                  : "border-transparent text-slate-500 hover:text-slate-300"
+                activeTab === "quiz" ? "border-indigo-500 text-indigo-400" : "border-transparent text-slate-500 hover:text-slate-300"
               }`}
             >
               Course Final Quiz
@@ -476,12 +311,11 @@ const CourseDetails = () => {
           {/* TAB 1: SYLLABUS */}
           {activeTab === "syllabus" && (
             <div className="flex flex-col gap-5 animate-fadeIn">
-              {/* Header and Add button for Instructor */}
               <div className="flex justify-between items-center">
                 <h2 className="text-sm font-bold uppercase tracking-widest text-slate-400">Lessons & Content</h2>
                 {user.role === "INSTRUCTOR" && (
                   <button
-                    onClick={handleOpenCreateModule}
+                    onClick={openCreateModule}
                     className="px-4 py-2 bg-indigo-600 hover:bg-indigo-500 text-white rounded-xl text-xs font-semibold transition-all duration-200 flex items-center gap-1.5 cursor-pointer"
                   >
                     <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -492,7 +326,6 @@ const CourseDetails = () => {
                 )}
               </div>
 
-              {/* Modules list */}
               {course.modules?.length === 0 ? (
                 <div className="p-8 border border-dashed border-slate-800 bg-slate-900/10 text-center rounded-2xl">
                   <p className="text-xs text-slate-500">No content modules are set up for this course syllabus yet.</p>
@@ -500,7 +333,6 @@ const CourseDetails = () => {
               ) : user.role === "STUDENT" ? (
                 /* STUDENT SPLIT VIEW */
                 <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-                  {/* Left Column: Player & Active Lesson Card */}
                   <div className="lg:col-span-2 flex flex-col gap-4">
                     <div className="p-5 bg-slate-900 border border-slate-800 rounded-3xl flex flex-col gap-4">
                       {selectedModule ? (
@@ -512,18 +344,10 @@ const CourseDetails = () => {
                             user={user}
                             isEnrolled={isEnrolled}
                           />
-
-                          {/* Extra info/actions for selected lesson */}
                           <div className="flex flex-wrap items-center justify-between gap-4 mt-2 pt-4 border-t border-slate-800/80">
-                            {/* Materials and details */}
                             <div className="flex items-center gap-4">
                               {selectedModule.resourceUrl ? (
-                                <a
-                                  href={selectedModule.resourceUrl}
-                                  target="_blank"
-                                  rel="noreferrer"
-                                  className="flex items-center gap-1.5 text-xs text-indigo-400 hover:text-indigo-300 font-semibold transition-colors"
-                                >
+                                <a href={selectedModule.resourceUrl} target="_blank" rel="noreferrer" className="flex items-center gap-1.5 text-xs text-indigo-400 hover:text-indigo-300 font-semibold transition-colors">
                                   <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
                                   </svg>
@@ -533,8 +357,6 @@ const CourseDetails = () => {
                                 <span className="text-xs text-slate-500 font-medium">No study materials linked</span>
                               )}
                             </div>
-
-                            {/* Mark Completed inline */}
                             <div className="shrink-0">
                               {progress && progress.completedModuleIds && progress.completedModuleIds.includes(selectedModule.id) ? (
                                 <span className="flex items-center gap-1.5 px-4 py-2 bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 rounded-xl text-xs font-bold">
@@ -551,32 +373,23 @@ const CourseDetails = () => {
                                 >
                                   {completingModuleId === selectedModule.id ? (
                                     <div className="w-3.5 h-3.5 border-2 border-slate-350 border-t-transparent rounded-full animate-spin"></div>
-                                  ) : (
-                                    "Mark Completed"
-                                  )}
+                                  ) : "Mark Completed"}
                                 </button>
                               )}
                             </div>
                           </div>
                         </>
                       ) : (
-                        <div className="text-center p-8 text-xs text-slate-500">
-                          Select a lesson from the list to start watching.
-                        </div>
+                        <div className="text-center p-8 text-xs text-slate-500">Select a lesson from the list to start watching.</div>
                       )}
                     </div>
                   </div>
 
-                  {/* Right Column: Lessons list */}
                   <div className="lg:col-span-1 flex flex-col gap-3 max-h-[600px] overflow-y-auto pr-1">
-                    <h3 className="text-xs font-bold uppercase tracking-wider text-slate-500 mb-1">
-                      Course Lectures
-                    </h3>
+                    <h3 className="text-xs font-bold uppercase tracking-wider text-slate-500 mb-1">Course Lectures</h3>
                     {course.modules.map((mod, index) => {
-                      const isCompleted =
-                        progress && progress.completedModuleIds && progress.completedModuleIds.includes(mod.id);
+                      const isCompleted = progress && progress.completedModuleIds && progress.completedModuleIds.includes(mod.id);
                       const isSelected = selectedModule && selectedModule.id === mod.id;
-
                       return (
                         <div
                           key={mod.id}
@@ -588,27 +401,16 @@ const CourseDetails = () => {
                           }`}
                         >
                           <div className={`flex items-center justify-center w-7 h-7 rounded-lg text-xs font-bold shrink-0 mt-0.5 ${
-                            isSelected
-                              ? "bg-indigo-600 text-white"
-                              : isCompleted
-                              ? "bg-emerald-500/10 text-emerald-400 border border-emerald-500/20"
-                              : "bg-slate-800 border border-slate-700 text-indigo-400"
+                            isSelected ? "bg-indigo-600 text-white" : isCompleted ? "bg-emerald-500/10 text-emerald-400 border border-emerald-500/20" : "bg-slate-800 border border-slate-700 text-indigo-400"
                           }`}>
                             {isCompleted ? (
                               <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="3" d="M5 13l4 4L19 7" />
                               </svg>
-                            ) : (
-                              index + 1
-                            )}
+                            ) : index + 1}
                           </div>
-
                           <div className="flex-1 min-w-0">
-                            <h4 className={`text-xs font-bold truncate ${
-                              isSelected ? "text-indigo-300" : "text-slate-200"
-                            }`}>
-                              {mod.title}
-                            </h4>
+                            <h4 className={`text-xs font-bold truncate ${isSelected ? "text-indigo-300" : "text-slate-200"}`}>{mod.title}</h4>
                             <div className="flex items-center gap-2 mt-1 text-[10px] text-slate-500 font-medium">
                               <span className="flex items-center gap-0.5">
                                 <svg className="w-2.5 h-2.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -617,12 +419,7 @@ const CourseDetails = () => {
                                 </svg>
                                 Video
                               </span>
-                              {mod.resourceUrl && (
-                                <>
-                                  <span>•</span>
-                                  <span>Materials</span>
-                                </>
-                              )}
+                              {mod.resourceUrl && <><span>•</span><span>Materials</span></>}
                             </div>
                           </div>
                         </div>
@@ -631,19 +428,12 @@ const CourseDetails = () => {
                   </div>
                 </div>
               ) : (
-                /* INSTRUCTOR / ADMIN VIEW (UNCHANGED) */
+                /* INSTRUCTOR / ADMIN VIEW */
                 <div className="flex flex-col gap-4">
                   {course.modules.map((mod, index) => {
-                    // Check if module is completed by student
-                    const isCompleted =
-                      progress && progress.completedModuleIds && progress.completedModuleIds.includes(mod.id);
-
+                    const isCompleted = progress && progress.completedModuleIds && progress.completedModuleIds.includes(mod.id);
                     return (
-                      <div
-                        key={mod.id}
-                        className="p-5 bg-slate-900 border border-slate-800/80 rounded-2xl hover:border-slate-700/60 transition-all duration-200 flex flex-col sm:flex-row sm:items-center justify-between gap-4"
-                      >
-                        {/* Left description */}
+                      <div key={mod.id} className="p-5 bg-slate-900 border border-slate-800/80 rounded-2xl hover:border-slate-700/60 transition-all duration-200 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                         <div className="flex items-start gap-4">
                           <div className="flex items-center justify-center w-8 h-8 rounded-lg bg-slate-800 border border-slate-700 text-xs font-bold text-indigo-400 shrink-0 mt-0.5">
                             {index + 1}
@@ -651,12 +441,7 @@ const CourseDetails = () => {
                           <div>
                             <h3 className="text-xs font-bold text-slate-200">{mod.title}</h3>
                             <div className="flex flex-wrap items-center gap-3 mt-1.5 text-[10px] text-slate-500 font-medium">
-                              <a
-                                href={mod.videoUrl}
-                                target="_blank"
-                                rel="noreferrer"
-                                className="flex items-center gap-1 text-indigo-400 hover:text-indigo-300 transition-colors"
-                              >
+                              <a href={mod.videoUrl} target="_blank" rel="noreferrer" className="flex items-center gap-1 text-indigo-400 hover:text-indigo-300 transition-colors">
                                 <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z" />
                                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
@@ -664,14 +449,8 @@ const CourseDetails = () => {
                                 Lesson Video
                               </a>
                               {mod.resourceUrl && (
-                                <>
-                                  <span className="text-slate-800">•</span>
-                                  <a
-                                    href={mod.resourceUrl}
-                                    target="_blank"
-                                    rel="noreferrer"
-                                    className="flex items-center gap-1 text-slate-400 hover:text-slate-300 transition-colors"
-                                  >
+                                <><span className="text-slate-800">•</span>
+                                  <a href={mod.resourceUrl} target="_blank" rel="noreferrer" className="flex items-center gap-1 text-slate-400 hover:text-slate-300 transition-colors">
                                     <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
                                     </svg>
@@ -683,7 +462,6 @@ const CourseDetails = () => {
                           </div>
                         </div>
 
-                        {/* Right student button */}
                         {user.role === "STUDENT" && (
                           <div className="shrink-0 self-end sm:self-center">
                             {isCompleted ? (
@@ -694,28 +472,16 @@ const CourseDetails = () => {
                                 Completed
                               </span>
                             ) : (
-                              <button
-                                onClick={() => handleCompleteModule(mod.id)}
-                                disabled={completingModuleId === mod.id}
-                                className="px-3.5 py-1.5 bg-slate-800 hover:bg-slate-700/80 active:bg-slate-900 border border-slate-700/50 hover:border-indigo-500/30 text-[10px] font-bold text-slate-300 hover:text-indigo-400 rounded-xl transition-all duration-150 flex items-center gap-1.5 disabled:opacity-50 cursor-pointer"
-                              >
-                                {completingModuleId === mod.id ? (
-                                  <div className="w-3 h-3 border-2 border-indigo-400 border-t-transparent rounded-full animate-spin"></div>
-                                ) : (
-                                  "Mark Completed"
-                                )}
+                              <button onClick={() => handleCompleteModule(mod.id)} disabled={completingModuleId === mod.id} className="px-3.5 py-1.5 bg-slate-800 hover:bg-slate-700/80 border border-slate-700/50 hover:border-indigo-500/30 text-[10px] font-bold text-slate-300 hover:text-indigo-400 rounded-xl transition-all duration-150 flex items-center gap-1.5 disabled:opacity-50 cursor-pointer">
+                                {completingModuleId === mod.id ? <div className="w-3 h-3 border-2 border-indigo-400 border-t-transparent rounded-full animate-spin"></div> : "Mark Completed"}
                               </button>
                             )}
                           </div>
                         )}
 
-                        {/* Right instructor edit button */}
                         {user.role === "INSTRUCTOR" && (
                           <div className="shrink-0 self-end sm:self-center">
-                            <button
-                              onClick={() => handleOpenEditModule(mod)}
-                              className="px-3.5 py-1.5 bg-slate-800 hover:bg-slate-700/80 active:bg-slate-900 border border-slate-700/50 hover:border-indigo-500/30 text-[10px] font-bold text-indigo-400 hover:text-indigo-300 rounded-xl transition-all duration-150 flex items-center gap-1.5 cursor-pointer"
-                            >
+                            <button onClick={() => openEditModule(mod)} className="px-3.5 py-1.5 bg-slate-800 hover:bg-slate-700/80 border border-slate-700/50 hover:border-indigo-500/30 text-[10px] font-bold text-indigo-400 hover:text-indigo-300 rounded-xl transition-all duration-150 flex items-center gap-1.5 cursor-pointer">
                               <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
                               </svg>
@@ -732,77 +498,33 @@ const CourseDetails = () => {
               {/* Create/Edit Module Modal */}
               {showModuleModal && (
                 <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
-                  <div className="fixed inset-0 bg-slate-950/80 backdrop-blur-sm" onClick={handleCloseModuleModal}></div>
+                  <div className="fixed inset-0 bg-slate-950/80 backdrop-blur-sm" onClick={closeModuleModal}></div>
                   <div className="w-full max-w-md bg-slate-900 border border-slate-800 rounded-3xl p-6 shadow-2xl z-10 animate-scaleIn">
                     <div className="flex justify-between items-center mb-5 border-b border-slate-800/60 pb-3">
-                      <h3 className="text-base font-bold text-slate-100">
-                        {editingModule ? "Edit Lesson Module" : "Add Lesson Module"}
-                      </h3>
-                      <button
-                        onClick={handleCloseModuleModal}
-                        className="p-1.5 text-slate-500 hover:text-slate-300 rounded-full hover:bg-slate-800"
-                      >
+                      <h3 className="text-base font-bold text-slate-100">{editingModule ? "Edit Lesson Module" : "Add Lesson Module"}</h3>
+                      <button onClick={closeModuleModal} className="p-1.5 text-slate-500 hover:text-slate-300 rounded-full hover:bg-slate-800">
                         <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M6 18L18 6M6 6l12 12" />
                         </svg>
                       </button>
                     </div>
-
                     <form onSubmit={handleSaveModule} className="flex flex-col gap-4">
                       <div className="flex flex-col gap-1.5">
-                        <label className="text-[10px] font-bold uppercase tracking-widest text-slate-400 ml-1">
-                          Module Title
-                        </label>
-                        <input
-                          type="text"
-                          value={modTitle}
-                          onChange={(e) => setModTitle(e.target.value)}
-                          className="w-full bg-slate-800/40 border border-slate-800 focus:border-indigo-500/60 rounded-xl py-2.5 px-3.5 text-sm text-slate-200 placeholder-slate-500 focus:outline-none transition-all duration-200"
-                          placeholder="e.g. Lesson 1: Component Fundamentals"
-                          required
-                        />
+                        <label className="text-[10px] font-bold uppercase tracking-widest text-slate-400 ml-1">Module Title</label>
+                        <input type="text" value={modTitle} onChange={(e) => setModTitle(e.target.value)} className="w-full bg-slate-800/40 border border-slate-800 focus:border-indigo-500/60 rounded-xl py-2.5 px-3.5 text-sm text-slate-200 placeholder-slate-500 focus:outline-none transition-all duration-200" placeholder="e.g. Lesson 1: Component Fundamentals" required />
                       </div>
-
                       <div className="flex flex-col gap-1.5">
-                        <label className="text-[10px] font-bold uppercase tracking-widest text-slate-400 ml-1">
-                          Video Lesson URL
-                        </label>
-                        <input
-                          type="url"
-                          value={modVideo}
-                          onChange={(e) => setModVideo(e.target.value)}
-                          className="w-full bg-slate-800/40 border border-slate-800 focus:border-indigo-500/60 rounded-xl py-2.5 px-3.5 text-sm text-slate-200 placeholder-slate-500 focus:outline-none transition-all duration-200"
-                          placeholder="e.g. https://www.youtube.com/watch?v=..."
-                          required
-                        />
+                        <label className="text-[10px] font-bold uppercase tracking-widest text-slate-400 ml-1">Video Lesson URL</label>
+                        <input type="url" value={modVideo} onChange={(e) => setModVideo(e.target.value)} className="w-full bg-slate-800/40 border border-slate-800 focus:border-indigo-500/60 rounded-xl py-2.5 px-3.5 text-sm text-slate-200 placeholder-slate-500 focus:outline-none transition-all duration-200" placeholder="e.g. https://www.youtube.com/watch?v=..." required />
                       </div>
-
                       <div className="flex flex-col gap-1.5">
-                        <label className="text-[10px] font-bold uppercase tracking-widest text-slate-400 ml-1">
-                          Resource Materials URL (Optional)
-                        </label>
-                        <input
-                          type="url"
-                          value={modResource}
-                          onChange={(e) => setModResource(e.target.value)}
-                          className="w-full bg-slate-800/40 border border-slate-800 focus:border-indigo-500/60 rounded-xl py-2.5 px-3.5 text-sm text-slate-200 placeholder-slate-500 focus:outline-none transition-all duration-200"
-                          placeholder="e.g. https://github.com/..."
-                        />
+                        <label className="text-[10px] font-bold uppercase tracking-widest text-slate-400 ml-1">Resource Materials URL (Optional)</label>
+                        <input type="url" value={modResource} onChange={(e) => setModResource(e.target.value)} className="w-full bg-slate-800/40 border border-slate-800 focus:border-indigo-500/60 rounded-xl py-2.5 px-3.5 text-sm text-slate-200 placeholder-slate-500 focus:outline-none transition-all duration-200" placeholder="e.g. https://github.com/..." />
                       </div>
-
-                      <button
-                        type="submit"
-                        disabled={modSubmitLoading}
-                        className="w-full bg-indigo-600 hover:bg-indigo-500 active:bg-indigo-700 disabled:bg-slate-800 disabled:text-slate-600 text-white font-semibold text-xs rounded-xl py-3 mt-2 transition-all duration-200 flex items-center justify-center gap-2 cursor-pointer"
-                      >
+                      <button type="submit" disabled={modSubmitLoading} className="w-full bg-indigo-600 hover:bg-indigo-500 active:bg-indigo-700 disabled:bg-slate-800 disabled:text-slate-600 text-white font-semibold text-xs rounded-xl py-3 mt-2 transition-all duration-200 flex items-center justify-center gap-2 cursor-pointer">
                         {modSubmitLoading ? (
-                          <>
-                            <div className="w-3.5 h-3.5 border-2 border-slate-400 border-t-transparent rounded-full animate-spin"></div>
-                            {editingModule ? "Saving Module..." : "Adding Module..."}
-                          </>
-                        ) : (
-                          editingModule ? "Save Changes" : "Add Module"
-                        )}
+                          <><div className="w-3.5 h-3.5 border-2 border-slate-400 border-t-transparent rounded-full animate-spin"></div>{editingModule ? "Saving Module..." : "Adding Module..."}</>
+                        ) : (editingModule ? "Save Changes" : "Add Module")}
                       </button>
                     </form>
                   </div>
@@ -838,7 +560,6 @@ const CourseDetails = () => {
                       <p className="text-xs text-slate-400">The instructor has draft questions but has not published this quiz yet.</p>
                     </div>
                   ) : passedQuiz ? (
-                    /* PASSED STATE */
                     <div className="p-8 bg-gradient-to-tr from-emerald-950/40 via-slate-900 to-slate-900 border border-emerald-500/20 rounded-2xl flex flex-col items-center text-center gap-4 relative overflow-hidden">
                       <div className="absolute top-0 right-0 w-48 h-48 bg-emerald-500/5 rounded-full blur-3xl pointer-events-none"></div>
                       <div className="p-4 bg-emerald-500/10 text-emerald-400 rounded-full border border-emerald-500/20">
@@ -848,95 +569,41 @@ const CourseDetails = () => {
                       </div>
                       <div>
                         <h3 className="text-sm font-bold text-slate-200 uppercase tracking-widest">Congratulations!</h3>
-                        <p className="text-xs text-slate-400 mt-1 max-w-sm leading-relaxed">
-                          You successfully passed the course quiz and have graduated from this course program!
-                        </p>
+                        <p className="text-xs text-slate-400 mt-1 max-w-sm leading-relaxed">You successfully passed the course quiz and have graduated from this course program!</p>
                       </div>
-
-                      {/* Display high score */}
                       <div className="flex gap-6 border border-slate-800 bg-slate-900/60 p-3.5 rounded-xl text-xs font-semibold">
-                        <div>
-                          <span className="text-[10px] text-slate-500 block">Total Attempts</span>
-                          <span className="text-slate-200 mt-0.5 block">{attemptsCount} / 5</span>
-                        </div>
+                        <div><span className="text-[10px] text-slate-500 block">Total Attempts</span><span className="text-slate-200 mt-0.5 block">{attemptsCount} / 5</span></div>
                         <div className="w-px bg-slate-800"></div>
-                        <div>
-                          <span className="text-[10px] text-slate-500 block">Highest Score</span>
-                          <span className="text-emerald-400 mt-0.5 block">
-                            {Math.max(...quizResults.map((r) => r.score))}%
-                          </span>
-                        </div>
+                        <div><span className="text-[10px] text-slate-500 block">Highest Score</span><span className="text-emerald-400 mt-0.5 block">{Math.max(...quizResults.map((r) => r.score))}%</span></div>
                       </div>
-
-                      <button
-                        onClick={handleDownloadCertificate}
-                        disabled={downloadingCert}
-                        className="px-5 py-2.5 bg-emerald-600 hover:bg-emerald-500 disabled:bg-slate-850 text-white rounded-xl text-xs font-semibold transition-all duration-150 flex items-center gap-2 cursor-pointer shadow-lg shadow-emerald-600/10"
-                      >
+                      <button onClick={handleDownloadCertificate} disabled={downloadingCert} className="px-5 py-2.5 bg-emerald-600 hover:bg-emerald-500 disabled:bg-slate-850 text-white rounded-xl text-xs font-semibold transition-all duration-150 flex items-center gap-2 cursor-pointer shadow-lg shadow-emerald-600/10">
                         {downloadingCert ? (
-                          <>
-                            <div className="w-3.5 h-3.5 border-2 border-slate-400 border-t-transparent rounded-full animate-spin"></div>
-                            Generating PDF...
-                          </>
+                          <><div className="w-3.5 h-3.5 border-2 border-slate-400 border-t-transparent rounded-full animate-spin"></div>Generating PDF...</>
                         ) : (
-                          <>
-                            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-                            </svg>
-                            Download Certificate PDF
-                          </>
+                          <><svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" /></svg>Download Certificate PDF</>
                         )}
                       </button>
                     </div>
                   ) : isTakingQuiz ? (
-                    /* TAKING QUIZ STATE */
                     <form onSubmit={handleQuizSubmit} className="p-6 bg-slate-900 border border-slate-800 rounded-2xl flex flex-col gap-6 animate-scaleIn">
                       <div className="border-b border-slate-800 pb-3 flex justify-between items-center">
                         <div>
                           <h3 className="text-sm font-bold text-slate-200 uppercase tracking-widest">{quiz.title}</h3>
                           <p className="text-[11px] text-slate-500 mt-0.5">Attempt {attemptsCount + 1} of 5</p>
                         </div>
-                        <button
-                          type="button"
-                          onClick={() => setIsTakingQuiz(false)}
-                          className="px-3 py-1 bg-slate-800 hover:bg-slate-700 text-slate-400 rounded-lg text-[10px] font-semibold"
-                        >
+                        <button type="button" onClick={() => setIsTakingQuiz(false)} className="px-3 py-1 bg-slate-800 hover:bg-slate-700 text-slate-400 rounded-lg text-[10px] font-semibold">
                           Cancel Quiz
                         </button>
                       </div>
-
-                      {/* Question items */}
                       <div className="flex flex-col gap-6">
                         {quizQuestions.map((q, idx) => (
                           <div key={q.id} className="p-4 bg-slate-800/25 border border-slate-800 rounded-xl flex flex-col gap-3.5">
                             <span className="text-[10px] uppercase font-bold text-indigo-400">Question {idx + 1}</span>
                             <p className="text-xs text-slate-200 font-semibold leading-relaxed">{q.questionText}</p>
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-2.5">
-                              {[
-                                { val: "A", text: q.optionA },
-                                { val: "B", text: q.optionB },
-                                { val: "C", text: q.optionC },
-                                { val: "D", text: q.optionD },
-                              ].map((opt) => (
-                                <label
-                                  key={opt.val}
-                                  className={`flex items-center gap-3 p-3 bg-slate-900 border rounded-xl cursor-pointer text-xs transition-colors duration-150 ${
-                                    quizAnswers[q.id] === opt.val
-                                      ? "border-indigo-500 bg-indigo-500/5 text-indigo-300"
-                                      : "border-slate-800 hover:border-slate-700 text-slate-400"
-                                  }`}
-                                >
-                                  <input
-                                    type="radio"
-                                    name={`q_${q.id}`}
-                                    value={opt.val}
-                                    checked={quizAnswers[q.id] === opt.val}
-                                    onChange={() =>
-                                      setQuizAnswers((prev) => ({ ...prev, [q.id]: opt.val }))
-                                    }
-                                    className="accent-indigo-500 w-3.5 h-3.5 shrink-0"
-                                    required
-                                  />
+                              {[{ val: "A", text: q.optionA }, { val: "B", text: q.optionB }, { val: "C", text: q.optionC }, { val: "D", text: q.optionD }].map((opt) => (
+                                <label key={opt.val} className={`flex items-center gap-3 p-3 bg-slate-900 border rounded-xl cursor-pointer text-xs transition-colors duration-150 ${quizAnswers[q.id] === opt.val ? "border-indigo-500 bg-indigo-500/5 text-indigo-300" : "border-slate-800 hover:border-slate-700 text-slate-400"}`}>
+                                  <input type="radio" name={`q_${q.id}`} value={opt.val} checked={quizAnswers[q.id] === opt.val} onChange={() => setQuizAnswers((prev) => ({ ...prev, [q.id]: opt.val }))} className="accent-indigo-500 w-3.5 h-3.5 shrink-0" required />
                                   <span className="font-bold text-[10px]">{opt.val}.</span>
                                   <span>{opt.text}</span>
                                 </label>
@@ -945,67 +612,34 @@ const CourseDetails = () => {
                           </div>
                         ))}
                       </div>
-
-                      <button
-                        type="submit"
-                        disabled={quizSubmitLoading}
-                        className="w-full py-3.5 bg-indigo-600 hover:bg-indigo-500 active:bg-indigo-700 text-white font-semibold text-xs rounded-xl flex items-center justify-center gap-2 cursor-pointer shadow-lg shadow-indigo-600/10"
-                      >
-                        {quizSubmitLoading ? (
-                          <>
-                            <div className="w-3.5 h-3.5 border-2 border-slate-400 border-t-transparent rounded-full animate-spin"></div>
-                            Submitting quiz answers...
-                          </>
-                        ) : (
-                          "Submit Quiz Attempt"
-                        )}
+                      <button type="submit" disabled={quizSubmitLoading} className="w-full py-3.5 bg-indigo-600 hover:bg-indigo-500 active:bg-indigo-700 text-white font-semibold text-xs rounded-xl flex items-center justify-center gap-2 cursor-pointer shadow-lg shadow-indigo-600/10">
+                        {quizSubmitLoading ? <><div className="w-3.5 h-3.5 border-2 border-slate-400 border-t-transparent rounded-full animate-spin"></div>Submitting quiz answers...</> : "Submit Quiz Attempt"}
                       </button>
                     </form>
                   ) : (
-                    /* NOT TAKING QUIZ / COMPLETED ALL MODULES / ATTEMPTS REMAINING */
                     <div className="p-8 bg-slate-900 border border-slate-800 rounded-2xl flex flex-col items-center text-center gap-4">
                       <div className="p-3 bg-indigo-500/10 text-indigo-400 rounded-full border border-indigo-400/20">
                         <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 113.536 0V19h2v2h-4v-2h2v-2.03a5.008 5.008 0 01-3.536-1.864z" />
                         </svg>
                       </div>
-
                       <div>
                         <h3 className="text-sm font-bold text-slate-200 uppercase tracking-widest">{quiz.title}</h3>
                         <p className="text-xs text-slate-400 mt-1 max-w-sm leading-relaxed">{quiz.description || "Take the final exam."}</p>
                       </div>
-
-                      {/* Display attempt stats */}
                       <div className="flex gap-6 border border-slate-800 bg-slate-900/60 p-3.5 rounded-xl text-xs font-semibold">
-                        <div>
-                          <span className="text-[10px] text-slate-500 block">Attempts Used</span>
-                          <span className="text-slate-200 mt-0.5 block">{attemptsCount} / 5</span>
-                        </div>
+                        <div><span className="text-[10px] text-slate-500 block">Attempts Used</span><span className="text-slate-200 mt-0.5 block">{attemptsCount} / 5</span></div>
                         <div className="w-px bg-slate-800"></div>
-                        <div>
-                          <span className="text-[10px] text-slate-500 block">Passing Score</span>
-                          <span className="text-indigo-400 mt-0.5 block">80%</span>
-                        </div>
+                        <div><span className="text-[10px] text-slate-500 block">Passing Score</span><span className="text-indigo-400 mt-0.5 block">80%</span></div>
                       </div>
-
                       {latestAttemptResult && (
-                        <div className={`p-4 rounded-xl border text-xs leading-relaxed max-w-sm ${
-                          latestAttemptResult.passed
-                            ? "bg-emerald-500/5 border-emerald-500/20 text-emerald-300"
-                            : "bg-rose-500/5 border-rose-500/20 text-rose-300"
-                        }`}>
-                          <p className="font-bold uppercase tracking-wider mb-1">
-                            Attempt Result: {latestAttemptResult.passed ? "Passed" : "Failed"}
-                          </p>
+                        <div className={`p-4 rounded-xl border text-xs leading-relaxed max-w-sm ${latestAttemptResult.passed ? "bg-emerald-500/5 border-emerald-500/20 text-emerald-300" : "bg-rose-500/5 border-rose-500/20 text-rose-300"}`}>
+                          <p className="font-bold uppercase tracking-wider mb-1">Attempt Result: {latestAttemptResult.passed ? "Passed" : "Failed"}</p>
                           <p>Your Score: <span className="font-bold">{latestAttemptResult.score}%</span>. Attempts used: {latestAttemptResult.attempts}</p>
                         </div>
                       )}
-
                       {attemptsLeft > 0 ? (
-                        <button
-                          onClick={() => setIsTakingQuiz(true)}
-                          className="px-5 py-2.5 bg-indigo-600 hover:bg-indigo-500 text-slate-100 rounded-xl text-xs font-semibold cursor-pointer shadow-lg shadow-indigo-600/10 hover:scale-[1.02] active:scale-95 transition-all duration-200"
-                        >
+                        <button onClick={() => setIsTakingQuiz(true)} className="px-5 py-2.5 bg-indigo-600 hover:bg-indigo-500 text-slate-100 rounded-xl text-xs font-semibold cursor-pointer shadow-lg shadow-indigo-600/10 hover:scale-[1.02] active:scale-95 transition-all duration-200">
                           Start Final Quiz ({attemptsLeft} left)
                         </button>
                       ) : (
@@ -1021,53 +655,21 @@ const CourseDetails = () => {
               {/* ADMIN / INSTRUCTOR WORKFLOW */}
               {(user.role === "INSTRUCTOR" || user.role === "ADMIN") && (
                 <div className="flex flex-col gap-6">
-                  {/* Quiz Details or Creation form */}
                   {!quiz ? (
                     user.role === "INSTRUCTOR" ? (
                       <div className="p-6 bg-slate-900 border border-slate-800 rounded-2xl max-w-md">
                         <h3 className="text-sm font-bold uppercase tracking-widest text-slate-400 mb-4">Set Up Final Quiz</h3>
                         <form onSubmit={handleCreateQuiz} className="flex flex-col gap-4">
                           <div className="flex flex-col gap-1.5">
-                            <label className="text-[10px] font-bold uppercase tracking-widest text-slate-400 ml-1">
-                              Quiz Title
-                            </label>
-                            <input
-                              type="text"
-                              value={quizTitle}
-                              onChange={(e) => setQuizTitle(e.target.value)}
-                              className="w-full bg-slate-800/40 border border-slate-800 focus:border-indigo-500/60 rounded-xl py-2.5 px-3.5 text-sm text-slate-200 placeholder-slate-500 focus:outline-none transition-all duration-200"
-                              placeholder="e.g. React Certification Exam"
-                              required
-                            />
+                            <label className="text-[10px] font-bold uppercase tracking-widest text-slate-400 ml-1">Quiz Title</label>
+                            <input type="text" value={quizTitle} onChange={(e) => setQuizTitle(e.target.value)} className="w-full bg-slate-800/40 border border-slate-800 focus:border-indigo-500/60 rounded-xl py-2.5 px-3.5 text-sm text-slate-200 placeholder-slate-500 focus:outline-none transition-all duration-200" placeholder="e.g. React Certification Exam" required />
                           </div>
-
                           <div className="flex flex-col gap-1.5">
-                            <label className="text-[10px] font-bold uppercase tracking-widest text-slate-400 ml-1">
-                              Quiz Description
-                            </label>
-                            <textarea
-                              rows="3"
-                              value={quizDesc}
-                              onChange={(e) => setQuizDesc(e.target.value)}
-                              className="w-full bg-slate-800/40 border border-slate-800 focus:border-indigo-500/60 rounded-xl py-2.5 px-3.5 text-sm text-slate-200 placeholder-slate-500 focus:outline-none transition-all duration-200 resize-none"
-                              placeholder="Provide details about passing score, attempts limit, and exam rules..."
-                              required
-                            />
+                            <label className="text-[10px] font-bold uppercase tracking-widest text-slate-400 ml-1">Quiz Description</label>
+                            <textarea rows="3" value={quizDesc} onChange={(e) => setQuizDesc(e.target.value)} className="w-full bg-slate-800/40 border border-slate-800 focus:border-indigo-500/60 rounded-xl py-2.5 px-3.5 text-sm text-slate-200 placeholder-slate-500 focus:outline-none transition-all duration-200 resize-none" placeholder="Provide details about passing score, attempts limit, and exam rules..." required />
                           </div>
-
-                          <button
-                            type="submit"
-                            disabled={quizSubmitLoadingInst}
-                            className="w-full py-2.5 bg-indigo-600 hover:bg-indigo-500 active:bg-indigo-700 text-white font-semibold text-xs rounded-xl flex items-center justify-center gap-2 cursor-pointer"
-                          >
-                            {quizSubmitLoadingInst ? (
-                              <>
-                                <div className="w-3.5 h-3.5 border-2 border-slate-400 border-t-transparent rounded-full animate-spin"></div>
-                                Creating Quiz Template...
-                              </>
-                            ) : (
-                              "Create Quiz Template"
-                            )}
+                          <button type="submit" disabled={quizSubmitLoadingInst} className="w-full py-2.5 bg-indigo-600 hover:bg-indigo-500 active:bg-indigo-700 text-white font-semibold text-xs rounded-xl flex items-center justify-center gap-2 cursor-pointer">
+                            {quizSubmitLoadingInst ? <><div className="w-3.5 h-3.5 border-2 border-slate-400 border-t-transparent rounded-full animate-spin"></div>Creating Quiz Template...</> : "Create Quiz Template"}
                           </button>
                         </form>
                       </div>
@@ -1077,46 +679,29 @@ const CourseDetails = () => {
                       </div>
                     )
                   ) : (
-                    /* Quiz details and Question manager */
                     <div className="flex flex-col gap-6">
-                      {/* Status header */}
                       <div className="p-5 bg-slate-900 border border-slate-800 rounded-2xl flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                         <div>
                           <div className="flex items-center gap-3">
                             <h3 className="text-sm font-bold text-slate-200 uppercase tracking-widest">{quiz.title}</h3>
-                            <span className={`px-2 py-0.5 rounded text-[9px] font-bold ${
-                              quiz.published
-                                ? "bg-emerald-500/10 text-emerald-400 border border-emerald-500/20"
-                                : "bg-amber-500/10 text-amber-400 border border-amber-500/20"
-                            }`}>
+                            <span className={`px-2 py-0.5 rounded text-[9px] font-bold ${quiz.published ? "bg-emerald-500/10 text-emerald-400 border border-emerald-500/20" : "bg-amber-500/10 text-amber-400 border border-amber-500/20"}`}>
                               {quiz.published ? "Published" : "Draft"}
                             </span>
                           </div>
                           <p className="text-xs text-slate-400 mt-1">{quiz.description}</p>
                         </div>
-
                         {user.role === "INSTRUCTOR" && !quiz.published && (
-                          <button
-                            onClick={handlePublishQuiz}
-                            disabled={quizQuestions.length === 0}
-                            className="px-4 py-2 bg-emerald-600 hover:bg-emerald-500 disabled:bg-slate-800 disabled:text-slate-500 text-white rounded-xl text-xs font-semibold transition-colors duration-150 cursor-pointer shadow-lg shadow-emerald-600/5"
-                          >
+                          <button onClick={handlePublishQuiz} disabled={quizQuestions.length === 0} className="px-4 py-2 bg-emerald-600 hover:bg-emerald-500 disabled:bg-slate-800 disabled:text-slate-500 text-white rounded-xl text-xs font-semibold transition-colors duration-150 cursor-pointer shadow-lg shadow-emerald-600/5">
                             Publish Final Quiz
                           </button>
                         )}
                       </div>
 
-                      {/* Questions Manager list */}
                       <div className="flex flex-col gap-4">
                         <div className="flex justify-between items-center">
-                          <h4 className="text-xs font-bold uppercase tracking-widest text-slate-500">
-                            Questions List ({quizQuestions.length})
-                          </h4>
+                          <h4 className="text-xs font-bold uppercase tracking-widest text-slate-500">Questions List ({quizQuestions.length})</h4>
                           {user.role === "INSTRUCTOR" && (
-                            <button
-                              onClick={() => setShowQuestionModal(true)}
-                              className="px-3.5 py-1.5 bg-indigo-600 hover:bg-indigo-500 text-white rounded-xl text-[10px] font-bold transition-all duration-150 flex items-center gap-1 cursor-pointer"
-                            >
+                            <button onClick={() => setShowQuestionModal(true)} className="px-3.5 py-1.5 bg-indigo-600 hover:bg-indigo-500 text-white rounded-xl text-[10px] font-bold transition-all duration-150 flex items-center gap-1 cursor-pointer">
                               <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M12 4v16m8-8H4" />
                               </svg>
@@ -1134,40 +719,22 @@ const CourseDetails = () => {
                             {quizQuestions.map((q, idx) => (
                               <div key={q.id} className="p-5 bg-slate-900 border border-slate-800/80 rounded-2xl flex flex-col gap-4 relative">
                                 {user.role === "INSTRUCTOR" && (
-                                  <button
-                                    onClick={() => handleDeleteQuestion(q.id)}
-                                    className="absolute top-4 right-4 text-slate-500 hover:text-rose-400 p-1 rounded-lg hover:bg-slate-850"
-                                  >
+                                  <button onClick={() => handleDeleteQuestion(q.id)} className="absolute top-4 right-4 text-slate-500 hover:text-rose-400 p-1 rounded-lg hover:bg-slate-850">
                                     <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
                                     </svg>
                                   </button>
                                 )}
-
                                 <div>
                                   <span className="text-[10px] font-bold text-indigo-400 uppercase">Question {idx + 1}</span>
                                   <p className="text-xs text-slate-200 font-semibold mt-1 leading-relaxed max-w-[90%]">{q.questionText}</p>
                                 </div>
-
                                 <div className="grid grid-cols-1 md:grid-cols-2 gap-3 text-xs">
-                                  {[
-                                    { k: "A", val: q.optionA },
-                                    { k: "B", val: q.optionB },
-                                    { k: "C", val: q.optionC },
-                                    { k: "D", val: q.optionD },
-                                  ].map((opt) => (
-                                    <div key={opt.k} className={`p-2.5 border rounded-lg flex items-center gap-2 ${
-                                      q.correctAnswer === opt.k
-                                        ? "border-emerald-500 bg-emerald-500/5 text-emerald-400 font-semibold"
-                                        : "border-slate-800 bg-slate-900 text-slate-400"
-                                    }`}>
+                                  {[{ k: "A", val: q.optionA }, { k: "B", val: q.optionB }, { k: "C", val: q.optionC }, { k: "D", val: q.optionD }].map((opt) => (
+                                    <div key={opt.k} className={`p-2.5 border rounded-lg flex items-center gap-2 ${q.correctAnswer === opt.k ? "border-emerald-500 bg-emerald-500/5 text-emerald-400 font-semibold" : "border-slate-800 bg-slate-900 text-slate-400"}`}>
                                       <span className="font-bold text-[9px]">{opt.k}.</span>
                                       <span>{opt.val}</span>
-                                      {q.correctAnswer === opt.k && (
-                                        <span className="text-[9px] uppercase px-1.5 py-0.5 rounded font-extrabold bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 ml-auto">
-                                          Correct
-                                        </span>
-                                      )}
+                                      {q.correctAnswer === opt.k && <span className="text-[9px] uppercase px-1.5 py-0.5 rounded font-extrabold bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 ml-auto">Correct</span>}
                                     </div>
                                   ))}
                                 </div>
@@ -1184,103 +751,36 @@ const CourseDetails = () => {
                           <div className="w-full max-w-md bg-slate-900 border border-slate-800 rounded-3xl p-6 shadow-2xl z-10 animate-scaleIn">
                             <div className="flex justify-between items-center mb-5 border-b border-slate-800/60 pb-3">
                               <h3 className="text-base font-bold text-slate-100">Add Question</h3>
-                              <button
-                                onClick={() => setShowQuestionModal(false)}
-                                className="p-1.5 text-slate-500 hover:text-slate-300 rounded-full hover:bg-slate-800"
-                              >
+                              <button onClick={() => setShowQuestionModal(false)} className="p-1.5 text-slate-500 hover:text-slate-300 rounded-full hover:bg-slate-800">
                                 <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M6 18L18 6M6 6l12 12" />
                                 </svg>
                               </button>
                             </div>
-
                             <form onSubmit={handleCreateQuestion} className="flex flex-col gap-4 text-xs">
                               <div className="flex flex-col gap-1">
-                                <label className="text-[10px] font-bold uppercase tracking-widest text-slate-400 ml-1">
-                                  Question Prompt
-                                </label>
-                                <textarea
-                                  rows="2"
-                                  value={qText}
-                                  onChange={(e) => setQText(e.target.value)}
-                                  className="w-full bg-slate-800/40 border border-slate-800 focus:border-indigo-500/60 rounded-xl py-2 px-3 text-slate-200 placeholder-slate-500 focus:outline-none transition-all duration-200 resize-none"
-                                  placeholder="e.g. Which Hook is used to handle side-effects in React functional components?"
-                                  required
-                                />
+                                <label className="text-[10px] font-bold uppercase tracking-widest text-slate-400 ml-1">Question Prompt</label>
+                                <textarea rows="2" value={qText} onChange={(e) => setQText(e.target.value)} className="w-full bg-slate-800/40 border border-slate-800 focus:border-indigo-500/60 rounded-xl py-2 px-3 text-slate-200 placeholder-slate-500 focus:outline-none transition-all duration-200 resize-none" placeholder="e.g. Which Hook is used to handle side-effects in React functional components?" required />
                               </div>
-
                               <div className="grid grid-cols-2 gap-3">
-                                <div className="flex flex-col gap-1">
-                                  <label className="text-[9px] font-bold text-slate-500 ml-1 uppercase">Option A</label>
-                                  <input
-                                    type="text"
-                                    value={optA}
-                                    onChange={(e) => setOptA(e.target.value)}
-                                    className="w-full bg-slate-800/40 border border-slate-800 focus:border-indigo-500/60 rounded-xl py-2 px-3 text-slate-200 placeholder-slate-500 focus:outline-none"
-                                    required
-                                  />
-                                </div>
-                                <div className="flex flex-col gap-1">
-                                  <label className="text-[9px] font-bold text-slate-500 ml-1 uppercase">Option B</label>
-                                  <input
-                                    type="text"
-                                    value={optB}
-                                    onChange={(e) => setOptB(e.target.value)}
-                                    className="w-full bg-slate-800/40 border border-slate-800 focus:border-indigo-500/60 rounded-xl py-2 px-3 text-slate-200 placeholder-slate-500 focus:outline-none"
-                                    required
-                                  />
-                                </div>
-                                <div className="flex flex-col gap-1">
-                                  <label className="text-[9px] font-bold text-slate-500 ml-1 uppercase">Option C</label>
-                                  <input
-                                    type="text"
-                                    value={optC}
-                                    onChange={(e) => setOptC(e.target.value)}
-                                    className="w-full bg-slate-800/40 border border-slate-800 focus:border-indigo-500/60 rounded-xl py-2 px-3 text-slate-200 placeholder-slate-500 focus:outline-none"
-                                    required
-                                  />
-                                </div>
-                                <div className="flex flex-col gap-1">
-                                  <label className="text-[9px] font-bold text-slate-500 ml-1 uppercase">Option D</label>
-                                  <input
-                                    type="text"
-                                    value={optD}
-                                    onChange={(e) => setOptD(e.target.value)}
-                                    className="w-full bg-slate-800/40 border border-slate-800 focus:border-indigo-500/60 rounded-xl py-2 px-3 text-slate-200 placeholder-slate-500 focus:outline-none"
-                                    required
-                                  />
-                                </div>
+                                {[["A", optA, setOptA], ["B", optB, setOptB], ["C", optC, setOptC], ["D", optD, setOptD]].map(([label, val, setter]) => (
+                                  <div key={label} className="flex flex-col gap-1">
+                                    <label className="text-[9px] font-bold text-slate-500 ml-1 uppercase">Option {label}</label>
+                                    <input type="text" value={val} onChange={(e) => setter(e.target.value)} className="w-full bg-slate-800/40 border border-slate-800 focus:border-indigo-500/60 rounded-xl py-2 px-3 text-slate-200 placeholder-slate-500 focus:outline-none" required />
+                                  </div>
+                                ))}
                               </div>
-
                               <div className="flex flex-col gap-1">
-                                <label className="text-[10px] font-bold uppercase tracking-widest text-slate-400 ml-1">
-                                  Correct Answer
-                                </label>
-                                <select
-                                  value={correctOpt}
-                                  onChange={(e) => setCorrectOpt(e.target.value)}
-                                  className="w-full bg-slate-800 border border-slate-800 focus:border-indigo-500/60 rounded-xl py-2.5 px-3 text-slate-300 focus:outline-none cursor-pointer"
-                                >
+                                <label className="text-[10px] font-bold uppercase tracking-widest text-slate-400 ml-1">Correct Answer</label>
+                                <select value={correctOpt} onChange={(e) => setCorrectOpt(e.target.value)} className="w-full bg-slate-800 border border-slate-800 focus:border-indigo-500/60 rounded-xl py-2.5 px-3 text-slate-300 focus:outline-none cursor-pointer">
                                   <option value="A">A</option>
                                   <option value="B">B</option>
                                   <option value="C">C</option>
                                   <option value="D">D</option>
                                 </select>
                               </div>
-
-                              <button
-                                type="submit"
-                                disabled={qSubmitLoading}
-                                className="w-full bg-indigo-600 hover:bg-indigo-500 active:bg-indigo-700 disabled:bg-slate-800 disabled:text-slate-600 text-white font-semibold text-xs rounded-xl py-3 mt-2 transition-all duration-200 flex items-center justify-center gap-2 cursor-pointer"
-                              >
-                                {qSubmitLoading ? (
-                                  <>
-                                    <div className="w-3.5 h-3.5 border-2 border-slate-400 border-t-transparent rounded-full animate-spin"></div>
-                                    Adding Question...
-                                  </>
-                                ) : (
-                                  "Add Question"
-                                )}
+                              <button type="submit" disabled={qSubmitLoading} className="w-full bg-indigo-600 hover:bg-indigo-500 active:bg-indigo-700 disabled:bg-slate-800 disabled:text-slate-600 text-white font-semibold text-xs rounded-xl py-3 mt-2 transition-all duration-200 flex items-center justify-center gap-2 cursor-pointer">
+                                {qSubmitLoading ? <><div className="w-3.5 h-3.5 border-2 border-slate-400 border-t-transparent rounded-full animate-spin"></div>Adding Question...</> : "Add Question"}
                               </button>
                             </form>
                           </div>

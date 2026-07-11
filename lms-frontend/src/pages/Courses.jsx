@@ -1,67 +1,35 @@
-import React, { useState, useEffect } from "react";
-import { useAuth } from "../context/AuthContext";
-import courseService from "../services/courseService";
-import enrollmentService from "../services/enrollmentService";
+import React, { useEffect } from "react";
+import { useAuth } from "../store/authStore";
+import useCourseStore from "../store/courseStore";
 import quizService from "../services/quizService";
 import CourseCard from "../components/CourseCard";
 
 const Courses = () => {
   const { user } = useAuth();
-  const [courses, setCourses] = useState([]);
-  const [enrolledCourses, setEnrolledCourses] = useState([]);
-  const [studentProgress, setStudentProgress] = useState({});
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState("");
-  const [searchTerm, setSearchTerm] = useState("");
-  const [enrollLoadingMap, setEnrollLoadingMap] = useState({});
+  const {
+    courses,
+    enrolledCourses,
+    studentProgress,
+    loading,
+    error,
+    enrollLoadingMap,
+    fetchCoursesAndEnrollment,
+    enrollStudent,
+    deleteCourse,
+  } = useCourseStore();
+
+  // Local UI-only state
+  const [searchTerm, setSearchTerm] = React.useState("");
 
   useEffect(() => {
-    fetchCoursesAndEnrollment();
+    fetchCoursesAndEnrollment(user);
   }, [user]);
 
-  const fetchCoursesAndEnrollment = async () => {
-    setLoading(true);
-    setError("");
-    try {
-      const allCourses = await courseService.getAllCourses();
-      setCourses(allCourses);
-
-      if (user && user.role === "STUDENT") {
-        const enrolled = await enrollmentService.getEnrolledCourses(user.id);
-        setEnrolledCourses(enrolled);
-
-        // Fetch progress details for all enrolled courses
-        const progressMap = {};
-        for (const c of enrolled) {
-          try {
-            const prog = await courseService.getCourseProgress(c.id, user.id);
-            progressMap[c.id] = prog.progressPercent;
-          } catch (e) {
-            console.error(`Failed to get progress for course ${c.id}`, e);
-            progressMap[c.id] = 0;
-          }
-        }
-        setStudentProgress(progressMap);
-      }
-    } catch (err) {
-      console.error("Failed to load courses:", err);
-      setError("Unable to load course catalog. Please ensure services are active.");
-    } finally {
-      setLoading(false);
-    }
-  };
-
   const handleEnroll = async (courseId) => {
-    setEnrollLoadingMap((prev) => ({ ...prev, [courseId]: true }));
     try {
-      await enrollmentService.enrollStudent(courseId, user.id);
-      // Refresh details
-      await fetchCoursesAndEnrollment();
+      await enrollStudent(courseId, user);
     } catch (err) {
-      console.error("Enrollment failed:", err);
       alert(err.response?.data?.message || "Failed to enroll in the course.");
-    } finally {
-      setEnrollLoadingMap((prev) => ({ ...prev, [courseId]: false }));
     }
   };
 
@@ -73,25 +41,10 @@ const Courses = () => {
     ) {
       return;
     }
-
     try {
-      // Try to delete the quiz associated with this course if it exists
-      try {
-        const quiz = await quizService.getQuizByCourseId(courseId);
-        if (quiz && quiz.id) {
-          await quizService.deleteQuiz(quiz.id);
-        }
-      } catch (quizErr) {
-        // Quiz might not exist, which is fine
-        console.log("No quiz to delete or error deleting quiz:", quizErr.message || quizErr);
-      }
-
-      // Delete the course
-      await courseService.deleteCourse(courseId);
+      await deleteCourse(courseId);
       alert("Course successfully deleted.");
-      fetchCoursesAndEnrollment();
     } catch (err) {
-      console.error("Failed to delete course:", err);
       alert(err.response?.data?.message || "Failed to delete the course. Please try again.");
     }
   };
