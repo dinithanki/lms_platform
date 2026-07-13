@@ -103,6 +103,9 @@ const CourseDetails = () => {
   const handleCompleteModule = async (moduleId) => {
     try {
       await completeModule(moduleId, id, user);
+      // Re-fetch quiz details so the Quiz tab unlocks immediately
+      // when the final module is completed, without needing a page refresh.
+      await fetchQuizDetails(id, user);
     } catch {
       alert("Failed to mark module as complete.");
     }
