@@ -46,14 +46,14 @@ const Navbar = () => {
   const unreadCount = notifications.filter((n) => n.unread).length;
 
   return (
-    <header className="sticky top-0 z-30 flex items-center justify-between h-16 px-6 bg-slate-900/80 backdrop-blur-md border-b border-slate-800">
+    <header className="sticky top-0 z-30 flex items-center justify-between h-16 px-6 glass-header border-b border-slate-200/50">
       {/* Title */}
       <div>
-        <h2 className="text-lg font-semibold text-slate-100 hidden md:block">
-          Welcome back, <span className="text-indigo-400">{user?.name}</span>
+        <h2 className="text-sm font-semibold text-slate-800 hidden md:block">
+          Welcome back, <span className="text-indigo-600 font-extrabold">{user?.name}</span> 👋
         </h2>
-        <h2 className="text-base font-semibold text-slate-100 md:hidden">
-          LMS Portal
+        <h2 className="text-xs font-bold text-slate-800 md:hidden uppercase tracking-wider">
+          LearnSphere
         </h2>
       </div>
 
@@ -63,7 +63,7 @@ const Navbar = () => {
         <div className="relative">
           <button
             onClick={() => setShowNotifications(!showNotifications)}
-            className="relative p-2 text-slate-400 hover:text-indigo-400 hover:bg-slate-800/60 rounded-full transition-all duration-200"
+            className="relative p-2 text-slate-500 hover:text-indigo-600 hover:bg-slate-100 rounded-full transition-all duration-200"
             aria-label="Notifications"
           >
             <svg
@@ -80,7 +80,7 @@ const Navbar = () => {
               />
             </svg>
             {unreadCount > 0 && (
-              <span className="absolute top-1 right-1 flex items-center justify-center w-5 h-5 text-xs font-bold text-white bg-indigo-500 rounded-full animate-pulse">
+              <span className="absolute top-1 right-1 flex items-center justify-center w-5 h-5 text-xs font-bold text-white bg-indigo-600 rounded-full animate-pulse">
                 {unreadCount}
               </span>
             )}
@@ -93,23 +93,23 @@ const Navbar = () => {
                 className="fixed inset-0 z-10"
                 onClick={() => setShowNotifications(false)}
               ></div>
-              <div className="absolute right-0 mt-3 w-80 bg-slate-900 border border-slate-800 rounded-xl shadow-2xl shadow-black/80 overflow-hidden z-20 transition-all duration-200 transform origin-top-right">
-                <div className="flex items-center justify-between px-4 py-3 bg-slate-800/40 border-b border-slate-800">
-                  <span className="font-semibold text-sm text-slate-200">
+              <div className="absolute right-0 mt-3 w-80 bg-white border border-slate-200 rounded-xl shadow-xl shadow-slate-200/50 overflow-hidden z-20 transition-all duration-200 transform origin-top-right">
+                <div className="flex items-center justify-between px-4 py-3 bg-slate-50 border-b border-slate-150">
+                  <span className="font-semibold text-sm text-slate-800">
                     Notifications
                   </span>
                   {unreadCount > 0 && (
                     <button
                       onClick={markAllRead}
-                      className="text-xs text-indigo-400 hover:text-indigo-300 font-medium"
+                      className="text-xs text-indigo-600 hover:text-indigo-700 font-medium"
                     >
                       Mark all as read
                     </button>
                   )}
                 </div>
-                <div className="max-h-72 overflow-y-auto divide-y divide-slate-800/50">
+                <div className="max-h-72 overflow-y-auto divide-y divide-slate-100">
                   {notifications.length === 0 ? (
-                    <div className="p-4 text-center text-xs text-slate-500">
+                    <div className="p-4 text-center text-xs text-slate-400">
                       No notifications
                     </div>
                   ) : (
@@ -117,22 +117,22 @@ const Navbar = () => {
                       <div
                         key={notif.id}
                         className={`p-4 transition-colors duration-200 ${
-                          notif.unread ? "bg-indigo-500/5" : "hover:bg-slate-800/30"
+                          notif.unread ? "bg-indigo-50/50" : "hover:bg-slate-50"
                         }`}
                       >
                         <div className="flex justify-between items-start gap-2 mb-1">
                           <span
                             className={`text-xs font-semibold ${
-                              notif.unread ? "text-indigo-300" : "text-slate-300"
+                              notif.unread ? "text-indigo-600" : "text-slate-700"
                             }`}
                           >
                             {notif.title}
                           </span>
-                          <span className="text-[10px] text-slate-500 whitespace-nowrap">
+                          <span className="text-[10px] text-slate-450 whitespace-nowrap">
                             {notif.time}
                           </span>
                         </div>
-                        <p className="text-xs text-slate-400 leading-relaxed">
+                        <p className="text-xs text-slate-500 leading-relaxed">
                           {notif.message}
                         </p>
                       </div>
@@ -145,12 +145,12 @@ const Navbar = () => {
         </div>
 
         {/* Vertical divider */}
-        <div className="w-px h-6 bg-slate-800"></div>
+        <div className="w-px h-6 bg-slate-200"></div>
 
         {/* User Card */}
         <div className="flex items-center gap-3">
           <div className="flex flex-col text-right hidden sm:flex">
-            <span className="text-xs font-semibold text-slate-200">
+            <span className="text-xs font-semibold text-slate-700">
               {user?.name}
             </span>
             <span className="text-[10px] uppercase font-bold text-slate-400 tracking-wider">
@@ -169,7 +169,7 @@ const Navbar = () => {
           {/* Log Out Button */}
           <button
             onClick={handleLogout}
-            className="flex items-center justify-center p-2 text-slate-400 hover:text-rose-400 hover:bg-slate-800/60 rounded-full transition-all duration-200"
+            className="flex items-center justify-center p-2 text-slate-500 hover:text-rose-600 hover:bg-slate-100 rounded-full transition-all duration-200"
             title="Log Out"
           >
             <svg

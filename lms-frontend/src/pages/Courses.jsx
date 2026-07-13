@@ -62,7 +62,7 @@ const Courses = () => {
       <div className="flex items-center justify-center min-h-[60vh]">
         <div className="flex flex-col items-center gap-3">
           <div className="w-10 h-10 border-4 border-indigo-500 border-t-transparent rounded-full animate-spin"></div>
-          <p className="text-sm text-slate-400 font-medium">Loading course catalog...</p>
+          <p className="text-sm text-slate-500 font-medium">Loading course catalog...</p>
         </div>
       </div>
     );
@@ -71,17 +71,17 @@ const Courses = () => {
   return (
     <div className="flex flex-col gap-6 animate-fadeIn">
       {/* Title Header and Search Bar */}
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-slate-800 pb-5">
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-slate-200/80 pb-5">
         <div>
-          <h1 className="text-xl font-bold text-slate-100">Course Catalog</h1>
-          <p className="text-xs text-slate-400 mt-1">
+          <h1 className="text-xl font-bold text-slate-800">Course Catalog</h1>
+          <p className="text-xs text-slate-500 mt-1">
             Browse through all learning courses available in the LMS microservices platform
           </p>
         </div>
 
         {/* Search */}
         <div className="relative w-full md:w-80">
-          <span className="absolute inset-y-0 left-0 flex items-center pl-3 text-slate-500">
+          <span className="absolute inset-y-0 left-0 flex items-center pl-3 text-slate-400">
             <svg
               className="w-4 h-4"
               fill="none"
@@ -100,22 +100,22 @@ const Courses = () => {
             type="text"
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
-            className="w-full bg-slate-900 border border-slate-800 focus:border-indigo-500/60 rounded-xl py-2 pl-9 pr-4 text-xs text-slate-200 placeholder-slate-500 focus:outline-none transition-colors duration-200"
+            className="w-full bg-white border border-slate-200 focus:border-indigo-500 rounded-xl py-2 pl-9 pr-4 text-xs text-slate-700 placeholder-slate-400 focus:outline-none transition-colors duration-200 shadow-sm shadow-slate-100"
             placeholder="Search courses by title or description..."
           />
         </div>
       </div>
 
       {error && (
-        <div className="bg-rose-500/10 border border-rose-500/20 text-rose-300 px-5 py-3.5 rounded-2xl text-xs leading-relaxed max-w-xl">
+        <div className="bg-rose-50 border border-rose-200 text-rose-700 px-5 py-3.5 rounded-2xl text-xs leading-relaxed max-w-xl">
           {error}
         </div>
       )}
 
       {/* Grid listing */}
       {filteredCourses.length === 0 ? (
-        <div className="p-10 border border-dashed border-slate-800 text-center rounded-2xl bg-slate-900/10">
-          <p className="text-xs text-slate-400">
+        <div className="p-10 border border-dashed border-slate-200 text-center rounded-2xl bg-white shadow-sm">
+          <p className="text-xs text-slate-500">
             No courses found matching "{searchTerm}"
           </p>
         </div>

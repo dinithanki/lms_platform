@@ -39,16 +39,16 @@ export default function StudentVideoPlayer({ videoUrl, lessonTitle }) {
   return (
     <div className="flex flex-col gap-4 w-full">
       <div className="flex items-center justify-between">
-        <h2 className="text-sm font-bold text-slate-100 flex items-center gap-2">
-          <span className="text-indigo-400">🎥</span> {lessonTitle || "Lesson Video"}
+        <h2 className="text-sm font-bold text-slate-800 flex items-center gap-2">
+          <span className="text-indigo-600">🎥</span> {lessonTitle || "Lesson Video"}
         </h2>
       </div>
 
-      <div className="relative w-full aspect-video rounded-2xl overflow-hidden border border-slate-800 bg-slate-950 shadow-2xl">
+      <div className="relative w-full aspect-video rounded-2xl overflow-hidden border border-slate-200 bg-slate-900 shadow-xl shadow-slate-250/20">
         {loading && (
-          <div className="absolute inset-0 flex flex-col items-center justify-center gap-3 bg-slate-950/80 backdrop-blur-sm z-10 transition-all duration-300">
+          <div className="absolute inset-0 flex flex-col items-center justify-center gap-3 bg-slate-900/80 backdrop-blur-sm z-10 transition-all duration-300">
             <div className="w-8 h-8 border-3 border-indigo-500 border-t-transparent rounded-full animate-spin"></div>
-            <p className="text-xs text-slate-400 font-medium">Loading video...</p>
+            <p className="text-xs text-slate-350 font-medium">Loading video...</p>
           </div>
         )}
 
@@ -70,8 +70,8 @@ export default function StudentVideoPlayer({ videoUrl, lessonTitle }) {
             }}
           />
         ) : (
-          <div className="absolute inset-0 flex flex-col items-center justify-center text-slate-500 gap-2">
-            <svg className="w-10 h-10 text-slate-650" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <div className="absolute inset-0 flex flex-col items-center justify-center text-slate-400 gap-2">
+            <svg className="w-10 h-10 text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.5" d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z" />
             </svg>
             <p className="text-xs font-semibold">No video URL available for this lesson</p>
