@@ -8,14 +8,6 @@ const CourseCard = ({ course, isEnrolled, progress, onEnroll, isEnrolling, userR
     return text.length > maxLength ? `${text.substring(0, maxLength)}...` : text;
   };
 
-  const getCategory = () => {
-    const title = (course.title || "").toLowerCase();
-    if (title.includes("react") || title.includes("frontend") || title.includes("next")) return "Frontend Development";
-    if (title.includes("spring") || title.includes("backend") || title.includes("java") || title.includes("sql")) return "Backend Engineering";
-    if (title.includes("full") || title.includes("web") || title.includes("js")) return "Full-Stack Web";
-    return "Technology Mastery";
-  };
-
   return (
     <div className="bg-white border border-slate-200/80 rounded-3xl overflow-hidden flex flex-col justify-between h-full group modern-hover-card">
       {/* Course Banner Overlay */}
@@ -24,9 +16,6 @@ const CourseCard = ({ course, isEnrolled, progress, onEnroll, isEnrolling, userR
         <div className="absolute top-0 right-0 w-24 h-24 bg-indigo-600/5 rounded-full blur-2xl group-hover:bg-indigo-600/10 transition-all duration-300"></div>
 
         <div className="flex justify-between items-start z-10">
-          <span className="text-[9px] uppercase font-bold tracking-widest px-2.5 py-1 bg-white border border-slate-200 text-indigo-600 rounded-full w-fit shadow-sm">
-            {getCategory()}
-          </span>
           {userRole === "ADMIN" && onDelete && (
             <button
               onClick={(e) => {
