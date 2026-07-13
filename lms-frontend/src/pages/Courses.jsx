@@ -71,10 +71,10 @@ const Courses = () => {
   return (
     <div className="flex flex-col gap-6 animate-fadeIn">
       {/* Title Header and Search Bar */}
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-slate-200/80 pb-5">
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-slate-200/60 pb-5">
         <div>
-          <h1 className="text-xl font-bold text-slate-800">Course Catalog</h1>
-          <p className="text-xs text-slate-500 mt-1">
+          <h1 className="text-xl md:text-2xl font-black text-slate-900 font-display tracking-tight leading-tight">Course Catalog</h1>
+          <p className="text-xs text-slate-400 mt-1.5">
             Browse through all learning courses available in the LMS microservices platform
           </p>
         </div>
@@ -100,7 +100,7 @@ const Courses = () => {
             type="text"
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
-            className="w-full bg-white border border-slate-200 focus:border-indigo-500 rounded-xl py-2 pl-9 pr-4 text-xs text-slate-700 placeholder-slate-400 focus:outline-none transition-colors duration-200 shadow-sm shadow-slate-100"
+            className="w-full bg-white border border-slate-200 focus:border-indigo-500 focus:ring-4 focus:ring-indigo-500/10 rounded-xl py-2.5 pl-9 pr-4 text-xs text-slate-700 placeholder-slate-400 focus:outline-none transition-all duration-200 shadow-sm shadow-slate-100/50 font-sans"
             placeholder="Search courses by title or description..."
           />
         </div>

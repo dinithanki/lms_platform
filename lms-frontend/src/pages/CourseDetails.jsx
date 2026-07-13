@@ -242,25 +242,25 @@ const CourseDetails = () => {
   return (
     <div className="flex flex-col gap-6 animate-fadeIn max-w-5xl mx-auto">
       {/* Course Banner Header */}
-      <div className="p-6 md:p-8 bg-gradient-to-br from-indigo-50 to-indigo-100/50 border border-indigo-100 rounded-3xl relative overflow-hidden flex flex-col justify-between gap-6">
-        <div className="absolute top-0 right-0 w-96 h-96 bg-indigo-600/5 rounded-full blur-3xl pointer-events-none"></div>
+      <div className="p-6 md:p-8 bg-gradient-to-br from-slate-900 via-slate-900 to-indigo-950 border border-slate-800/40 rounded-3xl relative overflow-hidden flex flex-col justify-between gap-6 shadow-xl">
+        <div className="absolute top-0 right-0 w-[30rem] h-[30rem] bg-indigo-500/10 rounded-full blur-3xl pointer-events-none"></div>
 
         <div>
-          <span className="text-[10px] uppercase font-bold tracking-widest px-2.5 py-1 bg-indigo-600 text-white rounded-full w-fit">
+          <span className="text-[10px] uppercase font-bold tracking-widest px-2.5 py-1 bg-indigo-500/20 text-indigo-200 border border-indigo-500/30 rounded-full w-fit font-display">
             Course details
           </span>
-          <h1 className="text-xl md:text-2xl font-bold text-slate-800 mt-3">{course.title}</h1>
-          <p className="text-xs text-slate-500 mt-2 max-w-3xl leading-relaxed">{course.description}</p>
+          <h1 className="text-xl md:text-2xl font-black text-white mt-3.5 font-display tracking-tight leading-tight">{course.title}</h1>
+          <p className="text-xs text-slate-300 mt-2.5 max-w-3xl leading-relaxed">{course.description}</p>
         </div>
 
         {/* Enrollment Overlay for Students */}
         {user.role === "STUDENT" && !isEnrolled && (
-          <div className="flex items-center gap-4 bg-white border border-slate-200 p-4 rounded-2xl w-fit shadow-sm">
-            <p className="text-xs text-slate-500">You are not enrolled in this course yet.</p>
+          <div className="flex items-center gap-4 bg-slate-950/40 border border-slate-800/80 p-4 rounded-2xl w-fit shadow-sm">
+            <p className="text-xs text-slate-300">You are not enrolled in this course yet.</p>
             <button
               onClick={handleEnroll}
               disabled={enrollLoading}
-              className="px-5 py-2 bg-indigo-600 hover:bg-indigo-500 disabled:bg-slate-200 disabled:text-slate-400 text-white rounded-xl text-xs font-semibold flex items-center gap-2 cursor-pointer"
+              className="px-5 py-2.5 bg-indigo-600 hover:bg-indigo-750 disabled:bg-slate-800 disabled:text-slate-500 text-white rounded-xl text-xs font-bold flex items-center gap-2 cursor-pointer font-display transition-all shadow-md shadow-indigo-600/10"
             >
               {enrollLoading ? (
                 <><div className="w-3.5 h-3.5 border-2 border-slate-400 border-t-transparent rounded-full animate-spin"></div>Enrolling...</>
@@ -271,20 +271,20 @@ const CourseDetails = () => {
 
         {/* Student Progress Banner */}
         {user.role === "STUDENT" && isEnrolled && progress && (
-          <div className="flex items-center gap-6 bg-white border border-slate-200 p-4 rounded-2xl w-fit shadow-sm">
+          <div className="flex flex-col sm:flex-row sm:items-center gap-4 sm:gap-6 bg-slate-950/40 border border-slate-800/85 p-4 rounded-2xl w-full sm:w-fit shadow-sm">
             <div className="flex flex-col gap-1">
-              <span className="text-[10px] uppercase font-bold text-slate-500">Your Progression</span>
-              <span className="text-sm font-bold text-slate-700">
+              <span className="text-[10px] uppercase font-extrabold text-slate-400 tracking-wider font-display">Your Progression</span>
+              <span className="text-sm font-extrabold text-slate-100 font-display">
                 {progress.completedModulesCount} / {progress.totalModulesCount} Modules Completed
               </span>
             </div>
-            <div className="w-48 h-2.5 bg-slate-200 rounded-full overflow-hidden">
+            <div className="w-full sm:w-48 h-2.5 bg-slate-850/80 rounded-full overflow-hidden">
               <div
-                className="h-full bg-gradient-to-r from-indigo-500 to-indigo-650 rounded-full transition-all duration-500"
+                className="h-full bg-gradient-to-r from-indigo-500 to-indigo-600 rounded-full transition-all duration-500"
                 style={{ width: `${progress.progressPercent}%` }}
               ></div>
             </div>
-            <span className="text-xs font-bold text-indigo-600">{Math.round(progress.progressPercent)}%</span>
+            <span className="text-xs font-black text-indigo-300 font-display">{Math.round(progress.progressPercent)}%</span>
           </div>
         )}
       </div>
@@ -295,16 +295,16 @@ const CourseDetails = () => {
           <div className="flex border-b border-slate-200">
             <button
               onClick={() => setActiveTab("syllabus")}
-              className={`px-6 py-3 text-xs uppercase font-bold tracking-widest border-b-2 transition-colors duration-200 cursor-pointer ${
-                activeTab === "syllabus" ? "border-indigo-600 text-indigo-600 font-bold" : "border-transparent text-slate-550 hover:text-indigo-600"
+              className={`px-6 py-3 text-xs uppercase font-extrabold tracking-wider border-b-2 transition-colors duration-200 cursor-pointer font-display ${
+                activeTab === "syllabus" ? "border-indigo-600 text-indigo-600" : "border-transparent text-slate-500 hover:text-indigo-600"
               }`}
             >
               Syllabus Modules
             </button>
             <button
               onClick={() => setActiveTab("quiz")}
-              className={`px-6 py-3 text-xs uppercase font-bold tracking-widest border-b-2 transition-colors duration-200 cursor-pointer ${
-                activeTab === "quiz" ? "border-indigo-600 text-indigo-600 font-bold" : "border-transparent text-slate-550 hover:text-indigo-600"
+              className={`px-6 py-3 text-xs uppercase font-extrabold tracking-wider border-b-2 transition-colors duration-200 cursor-pointer font-display ${
+                activeTab === "quiz" ? "border-indigo-600 text-indigo-600" : "border-transparent text-slate-500 hover:text-indigo-600"
               }`}
             >
               Course Final Quiz
@@ -616,7 +616,7 @@ const CourseDetails = () => {
                             <p className="text-xs text-slate-800 font-semibold leading-relaxed">{q.questionText}</p>
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-2.5">
                               {[{ val: "A", text: q.optionA }, { val: "B", text: q.optionB }, { val: "C", text: q.optionC }, { val: "D", text: q.optionD }].map((opt) => (
-                                <label key={opt.val} className={`flex items-center gap-3 p-3 bg-white border rounded-xl cursor-pointer text-xs transition-colors duration-150 shadow-sm ${quizAnswers[q.id] === opt.val ? "border-indigo-500 bg-indigo-50 text-indigo-700 font-bold" : "border-slate-205 hover:border-indigo-200 text-slate-650"}`}>
+                                <label key={opt.val} className={`flex items-center gap-3 p-3 bg-white border rounded-xl cursor-pointer text-xs transition-colors duration-150 shadow-sm ${quizAnswers[q.id] === opt.val ? "border-indigo-500 bg-indigo-50/50 text-indigo-700 font-bold" : "border-slate-200 hover:border-indigo-200 text-slate-650"}`}>
                                   <input type="radio" name={`q_${q.id}`} value={opt.val} checked={quizAnswers[q.id] === opt.val} onChange={() => setQuizAnswers((prev) => ({ ...prev, [q.id]: opt.val }))} className="accent-indigo-500 w-3.5 h-3.5 shrink-0" required />
                                   <span className="font-bold text-[10px]">{opt.val}.</span>
                                   <span>{opt.text}</span>

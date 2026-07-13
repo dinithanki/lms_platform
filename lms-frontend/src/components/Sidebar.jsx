@@ -2,20 +2,33 @@ import React from "react";
 import { NavLink } from "react-router-dom";
 import { useAuth } from "../store/authStore";
 
-const Sidebar = () => {
+const Sidebar = ({ isOpen, onClose }) => {
   const { user } = useAuth();
 
   const getNavLinkClass = ({ isActive }) => {
     const baseClass =
-      "flex items-center gap-3 px-4 py-3 text-xs uppercase font-bold tracking-wider rounded-xl transition-all duration-200 border";
+      "flex items-center gap-3 px-4 py-3 text-xs uppercase font-extrabold tracking-wider rounded-xl transition-all duration-200 border font-display";
     return isActive
-      ? `${baseClass} bg-indigo-50 text-indigo-650 border-indigo-100/50 shadow-sm shadow-indigo-100`
-      : `${baseClass} text-slate-600 hover:text-indigo-600 hover:bg-slate-50/70 border-transparent`;
+      ? `${baseClass} bg-indigo-50 text-indigo-600 border-indigo-100/50 shadow-sm shadow-indigo-100`
+      : `${baseClass} text-slate-500 hover:text-indigo-600 hover:bg-slate-50 border-transparent`;
   };
 
   return (
-    <aside className="w-64 min-h-screen bg-white border-r border-slate-200/60 flex flex-col justify-between hidden md:flex">
-      {/* Upper Logo / Links Section */}
+    <>
+      {/* Mobile Sidebar backdrop */}
+      {isOpen && (
+        <div
+          className="fixed inset-0 z-40 bg-slate-900/40 backdrop-blur-xs md:hidden"
+          onClick={onClose}
+        ></div>
+      )}
+
+      <aside
+        className={`fixed inset-y-0 left-0 z-50 w-64 min-h-screen bg-white border-r border-slate-200/60 flex flex-col justify-between transition-transform duration-300 md:translate-x-0 md:static md:flex ${
+          isOpen ? "translate-x-0" : "-translate-x-full"
+        }`}
+      >
+        {/* Upper Logo / Links Section */}
       <div className="flex flex-col gap-8 px-6 py-6">
         {/* Brand Logo */}
         <div className="flex items-center gap-3 select-none">
@@ -35,17 +48,17 @@ const Sidebar = () => {
             </svg>
           </div>
           <div>
-            <h1 className="text-base font-extrabold text-slate-800 tracking-tight leading-tight">
+            <h1 className="text-base font-black text-slate-800 tracking-tight leading-tight font-display bg-gradient-to-r from-slate-900 to-indigo-950 bg-clip-text text-transparent">
               LearnSphere
             </h1>
-            <span className="text-[9px] text-indigo-600 font-bold tracking-widest uppercase block mt-0.5">
+            <span className="text-[9px] text-indigo-600 font-bold tracking-widest uppercase block mt-0.5 font-display">
               LMS Platform
             </span>
           </div>
         </div>
 
         {/* Navigation Menu */}
-        <nav className="flex flex-col gap-1">
+        <nav className="flex flex-col gap-1" onClick={onClose}>
           <NavLink to="/dashboard" className={getNavLinkClass}>
             <svg
               className="w-4.5 h-4.5"
@@ -126,7 +139,7 @@ const Sidebar = () => {
             <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
             <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
           </span>
-          <span className="text-[9px] uppercase font-bold tracking-widest text-slate-400">
+          <span className="text-[9px] uppercase font-bold tracking-widest text-slate-400 font-display">
             System Live
           </span>
         </div>
@@ -134,15 +147,16 @@ const Sidebar = () => {
           Logged in as:
         </p>
         <div className="flex items-center justify-between mt-0.5">
-          <span className="text-xs font-bold text-slate-700 truncate w-28">
+          <span className="text-xs font-bold text-slate-700 truncate w-28 font-display">
             {user?.name}
           </span>
-          <span className="text-[9px] uppercase px-2 py-0.5 rounded-lg font-extrabold text-indigo-700 bg-indigo-50 border border-indigo-100/30">
+          <span className="text-[9px] uppercase px-2 py-0.5 rounded-lg font-extrabold text-indigo-700 bg-indigo-50 border border-indigo-100/30 font-display">
             {user?.role}
           </span>
         </div>
       </div>
     </aside>
+  </>
   );
 };
 

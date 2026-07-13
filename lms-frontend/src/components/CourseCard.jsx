@@ -32,7 +32,7 @@ const CourseCard = ({ course, isEnrolled, progress, onEnroll, isEnrolling, userR
             </button>
           )}
         </div>
-        <h3 className="text-base font-extrabold text-slate-800 line-clamp-2 leading-snug group-hover:text-indigo-600 transition-colors duration-200 z-10">
+        <h3 className="text-base font-extrabold text-slate-800 line-clamp-2 leading-snug group-hover:text-indigo-600 transition-colors duration-200 z-10 font-display">
           {course.title}
         </h3>
       </div>
@@ -75,14 +75,14 @@ const CourseCard = ({ course, isEnrolled, progress, onEnroll, isEnrolling, userR
 
         {/* Progress Bar (Visible only to students enrolled in the course) */}
         {isEnrolled && progress !== undefined && (
-          <div className="flex flex-col gap-1.5 mt-1 bg-slate-50/50 p-2.5 rounded-xl border border-slate-100 shadow-sm shadow-slate-50">
+          <div className="flex flex-col gap-1.5 mt-1 bg-slate-50/50 p-2.5 rounded-xl border border-slate-200/40 shadow-sm shadow-slate-100/30">
             <div className="flex justify-between items-center text-[10px]">
-              <span className="text-slate-450 font-medium">Your Progress</span>
-              <span className="font-bold text-indigo-600">{Math.round(progress)}%</span>
+              <span className="text-slate-400 font-medium">Your Progress</span>
+              <span className="font-extrabold text-indigo-650 font-display">{Math.round(progress)}%</span>
             </div>
-            <div className="w-full h-1.5 bg-slate-200/70 rounded-full overflow-hidden">
+            <div className="w-full h-1.5 bg-slate-200/50 rounded-full overflow-hidden">
               <div
-                className="h-full bg-gradient-to-r from-indigo-500 to-indigo-650 rounded-full transition-all duration-500 ease-out"
+                className="h-full bg-gradient-to-r from-indigo-500 to-indigo-600 rounded-full transition-all duration-500 ease-out"
                 style={{ width: `${progress}%` }}
               ></div>
             </div>
@@ -95,7 +95,7 @@ const CourseCard = ({ course, isEnrolled, progress, onEnroll, isEnrolling, userR
             <button
               onClick={() => onEnroll(course.id)}
               disabled={isEnrolling}
-              className="flex-1 py-2.5 text-xs font-bold text-white bg-indigo-600 hover:bg-indigo-500 active:scale-[0.99] disabled:bg-slate-200 disabled:text-slate-400 border border-transparent rounded-xl transition-all duration-200 flex items-center justify-center gap-2 cursor-pointer shadow-md shadow-indigo-600/10 hover:shadow-lg hover:shadow-indigo-600/15"
+              className="flex-1 py-2.5 text-xs font-bold text-white bg-indigo-600 hover:bg-indigo-700 active:scale-[0.99] disabled:bg-slate-200 disabled:text-slate-400 border border-transparent rounded-xl transition-all duration-200 flex items-center justify-center gap-2 cursor-pointer shadow-lg shadow-indigo-600/15 font-display"
             >
               {isEnrolling ? (
                 <>
@@ -109,7 +109,7 @@ const CourseCard = ({ course, isEnrolled, progress, onEnroll, isEnrolling, userR
           ) : (
             <Link
               to={`/courses/${course.id}`}
-              className="flex-grow text-center py-2.5 text-xs font-bold text-slate-700 hover:text-slate-900 bg-white hover:bg-slate-50 border border-slate-200 rounded-xl transition-all duration-200 shadow-sm"
+              className="flex-grow text-center py-2.5 text-xs font-bold text-slate-700 hover:text-slate-900 bg-white hover:bg-slate-50 border border-slate-250 rounded-xl transition-all duration-200 shadow-sm font-display"
             >
               {isEnrolled || userRole !== "STUDENT" ? "Enter Course" : "View Details"}
             </Link>

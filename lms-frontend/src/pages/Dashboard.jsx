@@ -140,24 +140,24 @@ const Dashboard = () => {
     return (
       <div className="flex flex-col gap-8 animate-fadeIn">
         {/* Modern Interactive Banner */}
-        <div className="relative p-6 md:p-8 bg-gradient-to-br from-indigo-600 via-indigo-700 to-indigo-850 rounded-3xl overflow-hidden flex flex-col md:flex-row md:items-center justify-between gap-6 shadow-lg shadow-indigo-100/80 border border-indigo-500/20">
+        <div className="relative p-6 md:p-8 bg-gradient-to-br from-slate-900 via-slate-900 to-indigo-950 rounded-3xl overflow-hidden flex flex-col md:flex-row md:items-center justify-between gap-6 shadow-xl border border-slate-800/40">
           {/* Glassmorphic glows */}
           <div className="absolute -top-12 -right-12 w-72 h-72 bg-white/10 rounded-full blur-3xl pointer-events-none"></div>
           <div className="absolute -bottom-16 -left-16 w-56 h-56 bg-purple-500/20 rounded-full blur-2xl pointer-events-none"></div>
           
           <div className="relative z-10 flex-1">
-            <span className="text-[9px] uppercase tracking-widest font-extrabold px-3 py-1 bg-white/15 text-indigo-50 border border-white/10 rounded-full">
+            <span className="text-[9px] uppercase tracking-widest font-extrabold px-3 py-1 bg-indigo-500/20 text-indigo-200 border border-indigo-500/30 rounded-full font-display">
               Student Workspace
             </span>
-            <h1 className="text-xl md:text-2xl font-extrabold text-white mt-3.5">
+            <h1 className="text-xl md:text-2xl font-black text-white mt-3.5 font-display tracking-tight leading-tight">
               Welcome back to your Learning Space, {user?.name}!
             </h1>
-            <p className="text-xs text-indigo-100/90 mt-2 max-w-xl leading-relaxed">
+            <p className="text-xs text-slate-350 mt-2 max-w-xl leading-relaxed">
               Resume your active syllabus classes, check off module milestones, and pass final quizzes to obtain certified, downloadable credentials.
             </p>
           </div>
           <div className="relative z-10 shrink-0">
-            <Link to="/courses" className="px-5 py-3 bg-white hover:bg-slate-50 active:scale-[0.98] text-indigo-700 rounded-xl text-xs font-bold transition-all duration-200 shadow-md hover:shadow-lg inline-block">
+            <Link to="/courses" className="px-5 py-3 bg-white hover:bg-slate-50 active:scale-[0.98] text-indigo-700 rounded-xl text-xs font-bold transition-all duration-200 shadow-md hover:shadow-lg inline-block font-display">
               Explore Catalog
             </Link>
           </div>
@@ -165,53 +165,53 @@ const Dashboard = () => {
 
         {/* Stats Widgets Grid */}
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-5">
-          <div className="p-5 bg-white border border-slate-200/80 rounded-2xl flex items-center gap-4 shadow-sm shadow-slate-100/40 hover:shadow-md transition-all duration-200 group">
+          <div className="p-5 bg-white border border-slate-200/50 rounded-2xl flex items-center gap-4 shadow-sm shadow-slate-100/30 hover:shadow-md transition-all duration-250 group">
             <div className="p-3 bg-indigo-50 text-indigo-600 rounded-xl group-hover:scale-105 transition-transform duration-200">
               <svg className="w-5.5 h-5.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
               </svg>
             </div>
             <div>
-              <span className="text-[9px] uppercase font-bold tracking-widest text-slate-450 block">Enrolled Courses</span>
+              <span className="text-[9px] uppercase font-bold tracking-widest text-slate-400 block font-display">Enrolled Courses</span>
               <div className="flex items-baseline gap-2 mt-0.5">
-                <p className="text-2xl font-extrabold text-slate-800">{enrolledCourses.length}</p>
+                <p className="text-2xl font-black text-slate-800 font-display">{enrolledCourses.length}</p>
                 {enrolledCourses.length > 0 && (
-                  <span className="text-[9px] font-bold text-indigo-600 bg-indigo-50 px-1.5 py-0.5 rounded-md">
+                  <span className="text-[9px] font-bold text-indigo-600 bg-indigo-50 px-1.5 py-0.5 rounded-md font-display">
                     +1 Ongoing
                   </span>
                 )}
               </div>
             </div>
           </div>
-          <div className="p-5 bg-white border border-slate-200/80 rounded-2xl flex items-center gap-4 shadow-sm shadow-slate-100/40 hover:shadow-md transition-all duration-200 group">
+          <div className="p-5 bg-white border border-slate-200/50 rounded-2xl flex items-center gap-4 shadow-sm shadow-slate-100/30 hover:shadow-md transition-all duration-250 group">
             <div className="p-3 bg-emerald-50 text-emerald-600 rounded-xl group-hover:scale-105 transition-transform duration-200">
               <svg className="w-5.5 h-5.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.2" d="M9 12l2 2 4-4M7.835 4.697a3.42 3.42 0 001.946-.806 3.42 3.42 0 014.438 0 3.42 3.42 0 001.946.806 3.42 3.42 0 013.138 3.138 3.42 3.42 0 00.806 1.946 3.42 3.42 0 010 4.438 3.42 3.42 0 00-.806 1.946 3.42 3.42 0 01-3.138 3.138 3.42 3.42 0 00-1.946.806 3.42 3.42 0 01-4.438 0 3.42 3.42 0 00-1.946-.806 3.42 3.42 0 01-3.138-3.138z" />
               </svg>
             </div>
             <div>
-              <span className="text-[9px] uppercase font-bold tracking-widest text-slate-450 block">Certificates Earned</span>
+              <span className="text-[9px] uppercase font-bold tracking-widest text-slate-400 block font-display">Certificates Earned</span>
               <div className="flex items-baseline gap-2 mt-0.5">
-                <p className="text-2xl font-extrabold text-slate-800">{certificatesCount}</p>
+                <p className="text-2xl font-black text-slate-800 font-display">{certificatesCount}</p>
                 {certificatesCount > 0 && (
-                  <span className="text-[9px] font-bold text-emerald-600 bg-emerald-50 px-1.5 py-0.5 rounded-md">
+                  <span className="text-[9px] font-bold text-emerald-600 bg-emerald-50 px-1.5 py-0.5 rounded-md font-display">
                     Verified
                   </span>
                 )}
               </div>
             </div>
           </div>
-          <div className="p-5 bg-white border border-slate-200/80 rounded-2xl flex items-center gap-4 shadow-sm shadow-slate-100/40 hover:shadow-md transition-all duration-200 group">
+          <div className="p-5 bg-white border border-slate-200/50 rounded-2xl flex items-center gap-4 shadow-sm shadow-slate-100/30 hover:shadow-md transition-all duration-250 group">
             <div className="p-3 bg-purple-50 text-purple-650 rounded-xl group-hover:scale-105 transition-transform duration-200">
               <svg className="w-5.5 h-5.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.2" d="M13 10V3L4 14h7v7l9-11h-7z" />
               </svg>
             </div>
             <div>
-              <span className="text-[9px] uppercase font-bold tracking-widest text-slate-450 block">LMS Catalog Size</span>
+              <span className="text-[9px] uppercase font-bold tracking-widest text-slate-400 block font-display">LMS Catalog Size</span>
               <div className="flex items-baseline gap-2 mt-0.5">
-                <p className="text-2xl font-extrabold text-slate-800">{courses.length}</p>
-                <span className="text-[9px] font-bold text-purple-600 bg-purple-50 px-1.5 py-0.5 rounded-md">
+                <p className="text-2xl font-black text-slate-800 font-display">{courses.length}</p>
+                <span className="text-[9px] font-bold text-purple-600 bg-purple-50 px-1.5 py-0.5 rounded-md font-display">
                   Published
                 </span>
               </div>
@@ -222,9 +222,9 @@ const Dashboard = () => {
         {/* Enrolled Courses */}
         <div>
           <div className="flex items-center justify-between mb-4">
-            <h2 className="text-xs font-bold uppercase tracking-wider text-slate-800">My Enrolled Lectures</h2>
+            <h2 className="text-xs font-extrabold uppercase tracking-wider text-slate-900 font-display">My Enrolled Lectures</h2>
             {enrolledCourses.length > 0 && (
-              <Link to="/my-courses" className="text-xs text-indigo-650 hover:text-indigo-700 font-bold transition-colors">
+              <Link to="/my-courses" className="text-xs text-indigo-600 hover:text-indigo-700 font-bold transition-colors font-display">
                 View All Courses
               </Link>
             )}
@@ -248,8 +248,8 @@ const Dashboard = () => {
         {/* Available Courses */}
         <div>
           <div className="flex items-center justify-between mb-4">
-            <h2 className="text-xs font-bold uppercase tracking-wider text-slate-800">Recommended For You</h2>
-            <Link to="/courses" className="text-xs text-indigo-650 hover:text-indigo-700 font-bold transition-colors">
+            <h2 className="text-xs font-extrabold uppercase tracking-wider text-slate-900 font-display">Recommended For You</h2>
+            <Link to="/courses" className="text-xs text-indigo-600 hover:text-indigo-700 font-bold transition-colors font-display">
               Explore Full Library
             </Link>
           </div>
@@ -398,15 +398,15 @@ const Dashboard = () => {
     return (
       <div className="flex flex-col gap-8 animate-fadeIn">
         {/* Premium Control Banner */}
-        <div className="relative p-6 md:p-8 bg-gradient-to-br from-slate-900 to-slate-800 rounded-3xl overflow-hidden flex flex-col md:flex-row md:items-center justify-between gap-6 shadow-xl border border-slate-800/40">
+        <div className="relative p-6 md:p-8 bg-gradient-to-br from-slate-900 via-slate-900 to-indigo-950 rounded-3xl overflow-hidden flex flex-col md:flex-row md:items-center justify-between gap-6 shadow-xl border border-slate-800/40">
           <div className="absolute -top-12 -right-12 w-72 h-72 bg-indigo-500/10 rounded-full blur-3xl pointer-events-none"></div>
           <div className="absolute -bottom-16 -left-16 w-56 h-56 bg-slate-500/10 rounded-full blur-2xl pointer-events-none"></div>
           
           <div className="relative z-10 flex-1">
-            <span className="text-[9px] uppercase tracking-widest font-extrabold px-3 py-1 bg-white/10 text-slate-300 border border-white/5 rounded-full">
+            <span className="text-[9px] uppercase tracking-widest font-extrabold px-3 py-1 bg-indigo-500/20 text-indigo-200 border border-indigo-500/30 rounded-full font-display">
               System Admin
             </span>
-            <h1 className="text-xl md:text-2xl font-extrabold text-white mt-3.5">Administrator Dashboard</h1>
+            <h1 className="text-xl md:text-2xl font-black text-white mt-3.5 font-display tracking-tight leading-tight">Administrator Dashboard</h1>
             <p className="text-xs text-slate-400 mt-1.5 max-w-xl leading-relaxed">
               Global control deck for allocating user roles, auditing system profiles, managing registered courses, and monitoring cluster microservices.
             </p>
@@ -415,44 +415,44 @@ const Dashboard = () => {
 
         {/* System Stats */}
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-5">
-          <div className="p-5 bg-white border border-slate-200 rounded-2xl flex items-center gap-4 shadow-sm shadow-slate-100/40 hover:shadow-md transition-all duration-200 group">
+          <div className="p-5 bg-white border border-slate-200/50 rounded-2xl flex items-center gap-4 shadow-sm shadow-slate-100/30 hover:shadow-md transition-all duration-250 group">
             <div className="p-3 bg-indigo-50 text-indigo-650 rounded-xl group-hover:scale-105 transition-transform duration-200">
               <svg className="w-5.5 h-5.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" />
               </svg>
             </div>
             <div>
-              <span className="text-[9px] uppercase font-bold tracking-widest text-slate-450 block">System Members</span>
-              <p className="text-xl font-extrabold text-slate-800 mt-0.5">{users.length}</p>
+              <span className="text-[9px] uppercase font-bold tracking-widest text-slate-400 block font-display">System Members</span>
+              <p className="text-2xl font-black text-slate-800 font-display mt-0.5">{users.length}</p>
             </div>
           </div>
-          <div className="p-5 bg-white border border-slate-200 rounded-2xl flex items-center gap-4 shadow-sm shadow-slate-100/40 hover:shadow-md transition-all duration-200 group">
+          <div className="p-5 bg-white border border-slate-200/50 rounded-2xl flex items-center gap-4 shadow-sm shadow-slate-100/30 hover:shadow-md transition-all duration-250 group">
             <div className="p-3 bg-purple-50 text-purple-650 rounded-xl group-hover:scale-105 transition-transform duration-200">
               <svg className="w-5.5 h-5.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
               </svg>
             </div>
             <div>
-              <span className="text-[9px] uppercase font-bold tracking-widest text-slate-450 block">Total Curriculums</span>
-              <p className="text-xl font-extrabold text-slate-800 mt-0.5">{courses.length}</p>
+              <span className="text-[9px] uppercase font-bold tracking-widest text-slate-400 block font-display">Total Curriculums</span>
+              <p className="text-2xl font-black text-slate-800 font-display mt-0.5">{courses.length}</p>
             </div>
           </div>
-          <div className="p-5 bg-white border border-slate-200 rounded-2xl flex items-center gap-4 shadow-sm shadow-slate-100/40 hover:shadow-md transition-all duration-200 group">
+          <div className="p-5 bg-white border border-slate-200/50 rounded-2xl flex items-center gap-4 shadow-sm shadow-slate-100/30 hover:shadow-md transition-all duration-250 group">
             <div className="p-3 bg-emerald-50 text-emerald-650 rounded-xl group-hover:scale-105 transition-transform duration-200">
               <svg className="w-5.5 h-5.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.2" d="M9 12l2 2 4-4M7.835 4.697a3.42 3.42 0 001.946-.806 3.42 3.42 0 014.438 0 3.42 3.42 0 001.946.806 3.42 3.42 0 013.138 3.138 3.42 3.42 0 00.806 1.946 3.42 3.42 0 010 4.438 3.42 3.42 0 00-.806 1.946 3.42 3.42 0 01-3.138 3.138 3.42 3.42 0 00-1.946.806 3.42 3.42 0 01-4.438 0 3.42 3.42 0 00-1.946-.806 3.42 3.42 0 01-3.138-3.138z" />
               </svg>
             </div>
             <div>
-              <span className="text-[9px] uppercase font-bold tracking-widest text-slate-450 block">Microservices</span>
-              <p className="text-xl font-extrabold text-slate-800 mt-0.5">Online</p>
+              <span className="text-[9px] uppercase font-bold tracking-widest text-slate-400 block font-display">Microservices</span>
+              <p className="text-2xl font-black text-slate-800 font-display mt-0.5">Online</p>
             </div>
           </div>
         </div>
 
         {/* User Management Table */}
         <div>
-          <h2 className="text-xs font-bold uppercase tracking-wider text-slate-800 mb-4">Manage System Users</h2>
+          <h2 className="text-xs font-extrabold uppercase tracking-wider text-slate-900 mb-4 font-display">Manage System Users</h2>
           <div className="bg-white border border-slate-200 rounded-3xl overflow-hidden shadow-sm shadow-slate-100/50">
             <div className="overflow-x-auto">
               <table className="w-full text-left text-xs border-collapse">

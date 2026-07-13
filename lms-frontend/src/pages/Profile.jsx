@@ -86,8 +86,8 @@ const Profile = () => {
             )}
           </div>
 
-          <h2 className="text-base font-extrabold text-slate-800 mt-4">{profile?.name}</h2>
-          <span className="text-[9px] uppercase font-bold tracking-widest text-indigo-600 bg-indigo-50 px-2 py-0.5 rounded-lg border border-indigo-100/30 mt-1.5">
+          <h2 className="text-base font-black text-slate-800 mt-4 font-display tracking-tight leading-tight">{profile?.name}</h2>
+          <span className="text-[9px] uppercase font-extrabold tracking-widest text-indigo-600 bg-indigo-50 px-2 py-0.5 rounded-lg border border-indigo-100/50 mt-1.5 font-display">
             {profile?.role}
           </span>
           <p className="text-xs text-slate-500 mt-3.5 leading-relaxed">

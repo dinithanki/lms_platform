@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import { useAuth } from "../store/authStore";
 import { useNavigate } from "react-router-dom";
 
-const Navbar = () => {
+const Navbar = ({ onMenuToggle }) => {
   const { user, logout } = useAuth();
   const navigate = useNavigate();
   const [showNotifications, setShowNotifications] = useState(false);
@@ -46,15 +46,28 @@ const Navbar = () => {
   const unreadCount = notifications.filter((n) => n.unread).length;
 
   return (
-    <header className="sticky top-0 z-30 flex items-center justify-between h-16 px-6 glass-header border-b border-slate-200/50">
-      {/* Title */}
-      <div>
-        <h2 className="text-sm font-semibold text-slate-800 hidden md:block">
-          Welcome back, <span className="text-indigo-600 font-extrabold">{user?.name}</span> 👋
-        </h2>
-        <h2 className="text-xs font-bold text-slate-800 md:hidden uppercase tracking-wider">
-          LearnSphere
-        </h2>
+    <header className="sticky top-0 z-30 flex items-center justify-between h-16 px-4 md:px-6 glass-header border-b border-slate-200/50 font-display">
+      <div className="flex items-center gap-3">
+        {/* Mobile Hamburger menu toggle */}
+        <button
+          onClick={onMenuToggle}
+          className="p-1.5 text-slate-500 hover:text-indigo-600 hover:bg-slate-100 rounded-lg md:hidden transition-colors cursor-pointer"
+          aria-label="Toggle menu"
+        >
+          <svg className="w-5.5 h-5.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M4 6h16M4 12h16M4 18h16" />
+          </svg>
+        </button>
+
+        {/* Title */}
+        <div>
+          <h2 className="text-sm font-semibold text-slate-800 hidden md:block">
+            Welcome back, <span className="text-indigo-600 font-extrabold">{user?.name}</span> 👋
+          </h2>
+          <h2 className="text-xs font-black tracking-widest text-indigo-600 md:hidden uppercase">
+            LearnSphere
+          </h2>
+        </div>
       </div>
 
       {/* Actions */}
@@ -145,15 +158,15 @@ const Navbar = () => {
         </div>
 
         {/* Vertical divider */}
-        <div className="w-px h-6 bg-slate-200"></div>
+        <div className="w-px h-6 bg-slate-200 hidden sm:block"></div>
 
         {/* User Card */}
         <div className="flex items-center gap-3">
           <div className="flex flex-col text-right hidden sm:flex">
-            <span className="text-xs font-semibold text-slate-700">
+            <span className="text-xs font-bold text-slate-700 font-display">
               {user?.name}
             </span>
-            <span className="text-[10px] uppercase font-bold text-slate-400 tracking-wider">
+            <span className="text-[9px] uppercase font-extrabold text-slate-400 tracking-wider font-display">
               {user?.role}
             </span>
           </div>
@@ -161,7 +174,7 @@ const Navbar = () => {
           {/* User profile initial or picture */}
           <div
             onClick={() => navigate("/profile")}
-            className="flex items-center justify-center w-9 h-9 rounded-full bg-gradient-to-tr from-indigo-500 to-purple-600 text-white font-bold text-sm shadow-md cursor-pointer border border-indigo-400/20 hover:scale-105 transition-transform duration-200"
+            className="flex items-center justify-center w-9 h-9 rounded-full bg-gradient-to-tr from-indigo-500 to-indigo-600 text-white font-black text-xs shadow-md cursor-pointer border border-indigo-400/20 hover:scale-105 transition-transform duration-200 font-display"
           >
             {user?.name?.charAt(0).toUpperCase() || "U"}
           </div>
