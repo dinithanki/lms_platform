@@ -5,6 +5,7 @@ import useCourseDetailsStore from "../store/courseDetailsStore";
 import useQuizStore from "../store/quizStore";
 import quizService from "../services/quizService";
 import StudentVideoPlayer from "../components/StudentVideoPlayer";
+import { useDialogStore } from "../store/dialogStore";
 
 const CourseDetails = () => {
   const { id } = useParams();
@@ -197,7 +198,11 @@ const CourseDetails = () => {
   };
 
   const handleDeleteQuestion = async (qId) => {
-    if (!window.confirm("Are you sure you want to delete this question?")) return;
+    const confirmed = await useDialogStore.getState().showConfirm(
+      "Are you sure you want to delete this question?",
+      "Delete Question"
+    );
+    if (!confirmed) return;
     try {
       await deleteQuestion(qId);
       await fetchQuizDetails(id, user);

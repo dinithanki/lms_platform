@@ -5,6 +5,7 @@ import useDashboardStore from "../store/dashboardStore";
 import quizService from "../services/quizService";
 import CourseCard from "../components/CourseCard";
 import { Link } from "react-router-dom";
+import { useDialogStore } from "../store/dialogStore";
 
 const Dashboard = () => {
   const { user } = useAuth();
@@ -101,7 +102,11 @@ const Dashboard = () => {
 
   // Admin delete user
   const handleDeleteUser = async (userId, userName) => {
-    if (!window.confirm(`Are you sure you want to permanently delete user "${userName}"? This will also delete their profile.`)) return;
+    const confirmed = await useDialogStore.getState().showConfirm(
+      `Are you sure you want to permanently delete user "${userName}"? This will also delete their profile.`,
+      "Delete User"
+    );
+    if (!confirmed) return;
     try {
       await deleteUser(userId);
     } catch (err) {
@@ -111,7 +116,11 @@ const Dashboard = () => {
 
   // Admin/instructor delete course
   const handleDeleteCourse = async (courseId, courseTitle) => {
-    if (!window.confirm(`Are you sure you want to permanently delete course "${courseTitle}"?`)) return;
+    const confirmed = await useDialogStore.getState().showConfirm(
+      `Are you sure you want to permanently delete course "${courseTitle}"?`,
+      "Delete Course"
+    );
+    if (!confirmed) return;
     try {
       await deleteCourse(courseId);
       alert("Course successfully deleted.");

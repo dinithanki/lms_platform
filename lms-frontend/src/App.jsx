@@ -2,6 +2,13 @@ import React, { useEffect } from "react";
 import { BrowserRouter } from "react-router-dom";
 import AppRoutes from "./routes/AppRoutes";
 import useAuthStore from "./store/authStore";
+import CustomDialog from "./components/CustomDialog";
+import { useDialogStore } from "./store/dialogStore";
+
+// Override native window.alert globally to use custom alert box
+window.alert = (message) => {
+  useDialogStore.getState().showAlert(message);
+};
 
 function AuthBootstrap({ children }) {
   const initializeAuth = useAuthStore((s) => s.initializeAuth);
@@ -25,6 +32,7 @@ function App() {
     <BrowserRouter>
       <AuthBootstrap>
         <AppRoutes />
+        <CustomDialog />
       </AuthBootstrap>
     </BrowserRouter>
   );

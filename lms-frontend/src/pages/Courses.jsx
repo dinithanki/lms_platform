@@ -3,6 +3,7 @@ import { useAuth } from "../store/authStore";
 import useCourseStore from "../store/courseStore";
 import quizService from "../services/quizService";
 import CourseCard from "../components/CourseCard";
+import { useDialogStore } from "../store/dialogStore";
 
 const Courses = () => {
   const { user } = useAuth();
@@ -34,13 +35,11 @@ const Courses = () => {
   };
 
   const handleDeleteCourse = async (courseId, courseTitle) => {
-    if (
-      !window.confirm(
-        `Are you sure you want to permanently delete course "${courseTitle}"? This will delete all modules, progress, enrollments, quiz results, certificates, and the quiz associated with this course.`
-      )
-    ) {
-      return;
-    }
+    const confirmed = await useDialogStore.getState().showConfirm(
+      `Are you sure you want to permanently delete course "${courseTitle}"? This will delete all modules, progress, enrollments, quiz results, certificates, and the quiz associated with this course.`,
+      "Delete Course"
+    );
+    if (!confirmed) return;
     try {
       await deleteCourse(courseId);
       alert("Course successfully deleted.");
