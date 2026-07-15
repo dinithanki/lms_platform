@@ -388,7 +388,7 @@ const CourseDetails = () => {
                     </div>
                   </div>
 
-                  <div className="lg:col-span-1 flex flex-col gap-4 max-h-[600px] overflow-y-auto pr-2 relative">
+                  <div className="lg:col-span-1 flex flex-col gap-4 lg:max-h-[600px] lg:overflow-y-auto pr-2 relative">
                     <h3 className="text-xs font-extrabold uppercase tracking-wider text-slate-450 mb-1 pl-1">Course Curriculum</h3>
                     <div className="flex flex-col gap-3 relative pl-3.5 border-l border-slate-200/80">
                       {course.modules.map((mod, index) => {

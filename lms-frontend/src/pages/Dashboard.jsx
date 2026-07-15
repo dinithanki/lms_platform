@@ -454,7 +454,8 @@ const Dashboard = () => {
         <div>
           <h2 className="text-xs font-extrabold uppercase tracking-wider text-slate-900 mb-4 font-display">Manage System Users</h2>
           <div className="bg-white border border-slate-200 rounded-3xl overflow-hidden shadow-sm shadow-slate-100/50">
-            <div className="overflow-x-auto">
+            {/* Desktop Table View */}
+            <div className="hidden md:block overflow-x-auto">
               <table className="w-full text-left text-xs border-collapse">
                 <thead>
                   <tr className="bg-slate-50 border-b border-slate-200 text-[9px] uppercase font-bold tracking-widest text-slate-500">
@@ -524,6 +525,69 @@ const Dashboard = () => {
                   )}
                 </tbody>
               </table>
+            </div>
+
+            {/* Mobile Card List View */}
+            <div className="flex flex-col gap-4 md:hidden p-4 bg-slate-50/30">
+              {users.length === 0 ? (
+                <div className="text-center text-slate-400 py-6 text-xs">
+                  No registered users found in Auth Database.
+                </div>
+              ) : (
+                users.map((item) => (
+                  <div key={item.id} className="p-4 bg-white border border-slate-200/80 rounded-2xl flex flex-col gap-3 shadow-xs">
+                    <div className="flex items-center justify-between border-b border-slate-100 pb-2.5">
+                      <span className="font-mono text-slate-400 text-[10px]">#{item.id}</span>
+                      <span className={`px-2 py-0.5 rounded-lg text-[9px] font-extrabold border ${
+                        item.role === "ADMIN"
+                          ? "bg-rose-50 text-rose-705 border-rose-100"
+                          : item.role === "INSTRUCTOR"
+                          ? "bg-purple-50 text-purple-700 border-purple-100"
+                          : "bg-indigo-50 text-indigo-700 border-indigo-100"
+                      }`}>
+                        {item.role}
+                      </span>
+                    </div>
+                    <div className="flex flex-col gap-1">
+                      <h4 className="font-bold text-slate-800 text-xs truncate">{item.name}</h4>
+                      <p className="text-slate-500 text-[11px] truncate">{item.email}</p>
+                    </div>
+                    <div className="flex items-center justify-between border-t border-slate-100 pt-2.5 mt-1">
+                      <span className="text-[10px] text-slate-400 font-bold uppercase tracking-wider">Actions</span>
+                      <div className="flex items-center gap-2">
+                        {roleUpdateLoading === item.id ? (
+                          <div className="w-3.5 h-3.5 border-2 border-indigo-400 border-t-transparent rounded-full animate-spin"></div>
+                        ) : (
+                          <select
+                            value={item.role}
+                            onChange={(e) => handleRoleChange(item.id, e.target.value)}
+                            disabled={item.email === user.email || userDeleteLoading === item.id}
+                            className="bg-white border border-slate-200 rounded-xl py-1.5 px-3 text-slate-705 focus:outline-none focus:border-indigo-500 transition-colors duration-150 text-[11px] cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed shadow-sm font-semibold"
+                          >
+                            <option value="STUDENT">Student Access</option>
+                            <option value="INSTRUCTOR">Instructor Access</option>
+                            <option value="ADMIN">Admin Access</option>
+                          </select>
+                        )}
+                        {userDeleteLoading === item.id ? (
+                          <div className="w-3.5 h-3.5 border-2 border-rose-500 border-t-transparent rounded-full animate-spin"></div>
+                        ) : (
+                          <button
+                            onClick={() => handleDeleteUser(item.id, item.name)}
+                            disabled={item.email === user.email || roleUpdateLoading === item.id}
+                            className="p-2 bg-rose-50 hover:bg-rose-100 text-rose-600 disabled:opacity-30 disabled:hover:bg-rose-50 rounded-xl transition-all duration-150 cursor-pointer border border-rose-150"
+                            title="Delete User"
+                          >
+                            <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                            </svg>
+                          </button>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+                ))
+              )}
             </div>
           </div>
         </div>

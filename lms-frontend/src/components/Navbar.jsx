@@ -106,7 +106,7 @@ const Navbar = ({ onMenuToggle }) => {
                 className="fixed inset-0 z-10"
                 onClick={() => setShowNotifications(false)}
               ></div>
-              <div className="absolute right-0 mt-3 w-80 bg-white border border-slate-200 rounded-xl shadow-xl shadow-slate-200/50 overflow-hidden z-20 transition-all duration-200 transform origin-top-right">
+              <div className="absolute right-0 mt-3 w-[calc(100vw-2rem)] max-w-xs sm:w-80 bg-white border border-slate-200 rounded-xl shadow-xl shadow-slate-200/50 overflow-hidden z-20 transition-all duration-200 transform origin-top-right">
                 <div className="flex items-center justify-between px-4 py-3 bg-slate-50 border-b border-slate-150">
                   <span className="font-semibold text-sm text-slate-800">
                     Notifications

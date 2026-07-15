@@ -45,7 +45,7 @@ const Login = () => {
       <div className="absolute top-1/4 left-1/4 w-[30rem] h-[30rem] bg-indigo-500/5 rounded-full blur-3xl animate-pulse"></div>
       <div className="absolute bottom-1/4 right-1/4 w-[30rem] h-[30rem] bg-purple-500/5 rounded-full blur-3xl"></div>
 
-      <div className="w-full max-w-md bg-white border border-slate-100 rounded-[2rem] p-8 md:p-10 shadow-[0_20px_50px_rgba(79,70,229,0.05)] ring-1 ring-slate-100/50 z-10">
+      <div className="w-full max-w-md bg-white border border-slate-100 rounded-[2rem] p-6 sm:p-10 shadow-[0_20px_50px_rgba(79,70,229,0.05)] ring-1 ring-slate-100/50 z-10">
         {/* Header */}
         <div className="flex flex-col items-center mb-8">
           <div className="flex items-center justify-center w-12 h-12 rounded-2xl bg-gradient-to-tr from-indigo-500 to-indigo-600 shadow-lg shadow-indigo-500/20 text-white mb-4 transform hover:rotate-6 transition-transform duration-300">

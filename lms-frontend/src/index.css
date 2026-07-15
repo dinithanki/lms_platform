@@ -50,6 +50,8 @@
     -moz-osx-font-smoothing: grayscale;
   }
 
+
+
   /* Custom modern thin scrollbar design */
   ::-webkit-scrollbar {
     width: 6px;

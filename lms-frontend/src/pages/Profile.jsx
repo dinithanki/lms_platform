@@ -233,17 +233,17 @@ const Profile = () => {
                   return (
                     <div
                       key={cert.id}
-                      className="p-4 bg-slate-50 border border-slate-200/80 rounded-2xl hover:border-indigo-200 transition-all duration-150 flex items-center justify-between gap-4"
+                      className="p-4 bg-slate-50 border border-slate-200/80 rounded-2xl hover:border-indigo-200 transition-all duration-150 flex flex-col sm:flex-row sm:items-center justify-between gap-4"
                     >
                       <div className="flex items-center gap-3">
-                        <div className="p-2.5 bg-amber-50 text-amber-600 rounded-xl border border-amber-200/60">
+                        <div className="p-2.5 bg-amber-50 text-amber-600 rounded-xl border border-amber-200/60 shrink-0">
                           <svg className="w-5 h-5 text-amber-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.2" d="M12 14l9-5-9-5-9 5 9 5z" />
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.2" d="M12 14l6.16-3.422a12.083 12.083 0 01.665 6.479A11.952 11.952 0 0012 20.055a11.952 11.952 0 00-6.824-2.998 12.078 12.078 0 01.665-6.479L12 14z" />
                           </svg>
                         </div>
-                        <div>
-                          <h4 className="text-xs font-bold text-slate-800">{courseTitle}</h4>
+                        <div className="min-w-0">
+                          <h4 className="text-xs font-bold text-slate-800 truncate">{courseTitle}</h4>
                           <span className="text-[10px] text-slate-450 font-medium block mt-0.5">
                             Issue Date: {new Date(cert.issuedAt).toLocaleDateString()}
                           </span>
@@ -253,10 +253,10 @@ const Profile = () => {
                       <button
                         onClick={() => handleDownloadCert(cert.courseId, courseTitle)}
                         disabled={downloadingCertId === cert.courseId}
-                        className="px-3 py-2 bg-white hover:bg-slate-50 border border-slate-200 text-[10px] font-bold text-slate-700 rounded-xl flex items-center gap-1.5 cursor-pointer transition-all duration-150 disabled:opacity-50 shadow-sm"
+                        className="w-full sm:w-auto px-3 py-2 bg-white hover:bg-slate-50 border border-slate-200 text-[10px] font-bold text-slate-700 rounded-xl flex items-center justify-center gap-1.5 cursor-pointer transition-all duration-150 disabled:opacity-50 shadow-sm"
                       >
                         {downloadingCertId === cert.courseId ? (
-                          <div className="w-3 h-3 border-2 border-slate-400 border-t-transparent rounded-full animate-spin"></div>
+                          <div className="w-3.5 h-3.5 border-2 border-slate-400 border-t-transparent rounded-full animate-spin"></div>
                         ) : (
                           <>
                             <svg className="w-3.5 h-3.5 text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
