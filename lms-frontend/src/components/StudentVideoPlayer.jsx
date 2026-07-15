@@ -44,11 +44,11 @@ export default function StudentVideoPlayer({ videoUrl, lessonTitle }) {
         </h2>
       </div>
 
-      <div className="relative w-full aspect-video rounded-2xl overflow-hidden border border-slate-200 bg-slate-900 shadow-xl shadow-slate-250/20">
+      <div className="relative w-full aspect-video rounded-2xl overflow-hidden border border-slate-200 bg-slate-50 shadow-xl shadow-black/20">
         {loading && (
-          <div className="absolute inset-0 flex flex-col items-center justify-center gap-3 bg-slate-900/80 backdrop-blur-sm z-10 transition-all duration-300">
+          <div className="absolute inset-0 flex flex-col items-center justify-center gap-3 bg-slate-50/80 backdrop-blur-sm z-10 transition-all duration-300">
             <div className="w-8 h-8 border-3 border-indigo-500 border-t-transparent rounded-full animate-spin"></div>
-            <p className="text-xs text-slate-350 font-medium">Loading video...</p>
+            <p className="text-xs text-slate-600 font-medium">Loading video...</p>
           </div>
         )}
 

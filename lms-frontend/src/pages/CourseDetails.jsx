@@ -242,21 +242,21 @@ const CourseDetails = () => {
   return (
     <div className="flex flex-col gap-6 animate-fadeIn max-w-5xl mx-auto">
       {/* Course Banner Header */}
-      <div className="p-6 md:p-8 bg-gradient-to-br from-slate-900 via-slate-900 to-indigo-950 border border-slate-800/40 rounded-3xl relative overflow-hidden flex flex-col justify-between gap-6 shadow-xl">
+      <div className="p-6 md:p-8 bg-gradient-to-br from-indigo-50 via-slate-100 to-indigo-100 border border-slate-800/40 rounded-3xl relative overflow-hidden flex flex-col justify-between gap-6 shadow-xl">
         <div className="absolute top-0 right-0 w-[30rem] h-[30rem] bg-indigo-500/10 rounded-full blur-3xl pointer-events-none"></div>
 
         <div>
-          <span className="text-[10px] uppercase font-bold tracking-widest px-2.5 py-1 bg-indigo-500/20 text-indigo-200 border border-indigo-500/30 rounded-full w-fit font-display">
+          <span className="text-[10px] uppercase font-bold tracking-widest px-2.5 py-1 bg-indigo-500/20 text-indigo-400 border border-indigo-500/30 rounded-full w-fit font-display">
             Course details
           </span>
           <h1 className="text-xl md:text-2xl font-black text-white mt-3.5 font-display tracking-tight leading-tight">{course.title}</h1>
-          <p className="text-xs text-slate-300 mt-2.5 max-w-3xl leading-relaxed">{course.description}</p>
+          <p className="text-xs text-slate-600 mt-2.5 max-w-3xl leading-relaxed">{course.description}</p>
         </div>
 
         {/* Enrollment Overlay for Students */}
         {user.role === "STUDENT" && !isEnrolled && (
-          <div className="flex items-center gap-4 bg-slate-950/40 border border-slate-800/80 p-4 rounded-2xl w-fit shadow-sm">
-            <p className="text-xs text-slate-300">You are not enrolled in this course yet.</p>
+          <div className="flex items-center gap-4 bg-slate-50/40 border border-slate-300/40 p-4 rounded-2xl w-fit shadow-sm">
+            <p className="text-xs text-slate-700">You are not enrolled in this course yet.</p>
             <button
               onClick={handleEnroll}
               disabled={enrollLoading}
@@ -271,7 +271,7 @@ const CourseDetails = () => {
 
         {/* Student Progress Banner */}
         {user.role === "STUDENT" && isEnrolled && progress && (
-          <div className="flex flex-col sm:flex-row sm:items-center gap-4 sm:gap-6 bg-slate-950/40 border border-slate-800/85 p-4 rounded-2xl w-full sm:w-fit shadow-sm">
+          <div className="flex flex-col sm:flex-row sm:items-center gap-4 sm:gap-6 bg-slate-50/40 border border-slate-300/40 p-4 rounded-2xl w-full sm:w-fit shadow-sm">
             <div className="flex flex-col gap-1">
               <span className="text-[10px] uppercase font-extrabold text-slate-500 tracking-wider font-display">Your Progression</span>
               <span className="text-sm font-extrabold text-slate-800 font-display">
@@ -331,7 +331,7 @@ const CourseDetails = () => {
 
               {course.modules?.length === 0 ? (
                 <div className="p-8 border border-dashed border-slate-300 bg-slate-200 text-center rounded-2xl shadow-none">
-                  <p className="text-xs text-slate-550">No content modules are set up for this course syllabus yet.</p>
+                  <p className="text-xs text-slate-500">No content modules are set up for this course syllabus yet.</p>
                 </div>
               ) : user.role === "STUDENT" ? (
                 /* STUDENT SPLIT VIEW */
@@ -412,7 +412,7 @@ const CourseDetails = () => {
                             <div className={`p-3.5 rounded-2xl border transition-all duration-200 flex items-start gap-3 ${
                               isSelected
                                 ? "bg-indigo-950/30 border-indigo-500/30 shadow-none"
-                                : "bg-slate-200 border-slate-300 hover:border-slate-350 hover:shadow-none"
+                                : "bg-slate-200 border-slate-300 hover:border-slate-400 hover:shadow-none"
                             }`}>
                               <div className="flex-1 min-w-0">
                                 <h4 className={`text-xs font-bold truncate ${isSelected ? "text-indigo-400" : "text-slate-800"}`}>
@@ -512,11 +512,11 @@ const CourseDetails = () => {
               {/* Create/Edit Lesson Modal */}
               {showModuleModal && (
                 <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
-                  <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-sm" onClick={closeModuleModal}></div>
+                  <div className="fixed inset-0 bg-slate-50/60 backdrop-blur-sm" onClick={closeModuleModal}></div>
                   <div className="w-full max-w-md bg-slate-200 border border-slate-300 rounded-3xl p-6 shadow-2xl z-10 animate-scaleIn">
                     <div className="flex justify-between items-center mb-5 border-b border-slate-300 pb-3">
                       <h3 className="text-base font-bold text-slate-800">{editingModule ? "Edit Lesson Module" : "Add Lesson Module"}</h3>
-                      <button onClick={closeModuleModal} className="p-1.5 text-slate-550 hover:text-slate-750 rounded-full hover:bg-slate-300 transition-colors">
+                      <button onClick={closeModuleModal} className="p-1.5 text-slate-500 hover:text-slate-800 rounded-full hover:bg-slate-300 transition-colors">
                         <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M6 18L18 6M6 6l12 12" />
                         </svg>
@@ -745,7 +745,7 @@ const CourseDetails = () => {
                                 </div>
                                 <div className="grid grid-cols-1 md:grid-cols-2 gap-3 text-xs">
                                   {[{ k: "A", val: q.optionA }, { k: "B", val: q.optionB }, { k: "C", val: q.optionC }, { k: "D", val: q.optionD }].map((opt) => (
-                                    <div key={opt.k} className={`p-2.5 border rounded-lg flex items-center gap-2 shadow-none ${q.correctAnswer === opt.k ? "border-emerald-500 bg-emerald-950/40 text-emerald-450 font-semibold" : "border-slate-300 bg-slate-100 text-slate-650"}`}>
+                                    <div key={opt.k} className={`p-2.5 border rounded-lg flex items-center gap-2 shadow-none ${q.correctAnswer === opt.k ? "border-emerald-500 bg-emerald-950/40 text-emerald-455 font-semibold" : "border-slate-300 bg-slate-100 text-slate-600"}`}>
                                       <span className="font-bold text-[9px]">{opt.k}.</span>
                                       <span>{opt.val}</span>
                                       {q.correctAnswer === opt.k && <span className="text-[9px] uppercase px-1.5 py-0.5 rounded font-extrabold bg-emerald-950/50 border border-emerald-900/50 text-emerald-455 ml-auto">Correct</span>}
@@ -761,7 +761,7 @@ const CourseDetails = () => {
                       {/* Create Question Modal */}
                       {user.role === "INSTRUCTOR" && showQuestionModal && (
                         <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
-                          <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-sm" onClick={() => setShowQuestionModal(false)}></div>
+                          <div className="fixed inset-0 bg-slate-50/60 backdrop-blur-sm" onClick={() => setShowQuestionModal(false)}></div>
                           <div className="w-full max-w-md bg-slate-200 border border-slate-300 rounded-3xl p-6 shadow-2xl z-10 animate-scaleIn">
                             <div className="flex justify-between items-center mb-5 border-b border-slate-300 pb-3">
                               <h3 className="text-base font-bold text-slate-800">Add Question</h3>

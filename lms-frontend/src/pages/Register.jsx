@@ -50,7 +50,7 @@ const Register = () => {
         <div className="absolute top-1/4 right-1/4 w-[25rem] h-[25rem] bg-purple-500/5 rounded-full blur-3xl animate-pulse -z-10"></div>
         <div className="absolute bottom-1/4 left-1/4 w-[25rem] h-[25rem] bg-indigo-500/5 rounded-full blur-3xl -z-10"></div>
 
-        <div className="w-full max-w-md bg-slate-100 border border-slate-350 rounded-[2rem] p-6 sm:p-10 shadow-2xl z-10">
+        <div className="w-full max-w-md bg-slate-100 border border-slate-300 rounded-[2rem] p-6 sm:p-10 shadow-2xl z-10">
           {/* Header */}
           <div className="flex flex-col items-center mb-6">
             <div className="flex items-center justify-center w-12 h-12 rounded-2xl bg-gradient-to-tr from-indigo-500 to-indigo-650 shadow-lg shadow-indigo-500/20 text-white mb-4 transform hover:rotate-6 transition-transform duration-300">
@@ -194,7 +194,7 @@ const Register = () => {
               <label className="text-[9px] font-bold uppercase tracking-widest text-slate-500 ml-1 font-display">
                 Join Workspace As
               </label>
-              <div className="grid grid-cols-2 gap-2 bg-slate-200/50 p-1.5 rounded-2xl border border-slate-350">
+              <div className="grid grid-cols-2 gap-2 bg-slate-200/50 p-1.5 rounded-2xl border border-slate-300">
                 <button
                   type="button"
                   onClick={() => setRole("STUDENT")}
@@ -250,7 +250,7 @@ const Register = () => {
       </div>
 
       {/* RIGHT COLUMN: The decorative illustration / image */}
-      <div className="hidden lg:flex flex-col justify-between w-1/2 bg-slate-950 p-16 relative overflow-hidden">
+      <div className="hidden lg:flex flex-col justify-between w-1/2 bg-slate-50 p-16 relative overflow-hidden">
         {/* Background Image with dark overlay */}
         <div
           className="absolute inset-0 bg-cover bg-center opacity-30 mix-blend-luminosity"
@@ -258,7 +258,7 @@ const Register = () => {
             backgroundImage: `url('https://images.unsplash.com/photo-1522202176988-66273c2fd55f?q=80&w=1200&auto=format&fit=crop')`,
           }}
         ></div>
-        <div className="absolute inset-0 bg-gradient-to-tr from-indigo-950/90 via-slate-950/85 to-transparent"></div>
+        <div className="absolute inset-0 bg-gradient-to-tr from-indigo-50/90 via-slate-50/85 to-transparent"></div>
 
         {/* Brand Header */}
         <div className="relative z-10 flex items-center gap-3">

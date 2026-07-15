@@ -140,19 +140,19 @@ const Dashboard = () => {
     return (
       <div className="flex flex-col gap-8 animate-fadeIn">
         {/* Modern Interactive Banner */}
-        <div className="relative p-6 md:p-8 bg-gradient-to-br from-slate-900 via-slate-900 to-indigo-950 rounded-3xl overflow-hidden flex flex-col md:flex-row md:items-center justify-between gap-6 shadow-xl border border-slate-800/40">
+        <div className="relative p-6 md:p-8 bg-gradient-to-br from-indigo-50 via-slate-100 to-indigo-100 rounded-3xl overflow-hidden flex flex-col md:flex-row md:items-center justify-between gap-6 shadow-xl border border-slate-800/40">
           {/* Glassmorphic glows */}
           <div className="absolute -top-12 -right-12 w-72 h-72 bg-white/10 rounded-full blur-3xl pointer-events-none"></div>
           <div className="absolute -bottom-16 -left-16 w-56 h-56 bg-purple-500/20 rounded-full blur-2xl pointer-events-none"></div>
           
           <div className="relative z-10 flex-1">
-            <span className="text-[9px] uppercase tracking-widest font-extrabold px-3 py-1 bg-indigo-500/20 text-indigo-200 border border-indigo-500/30 rounded-full font-display">
+            <span className="text-[9px] uppercase tracking-widest font-extrabold px-3 py-1 bg-indigo-500/20 text-indigo-400 border border-indigo-500/30 rounded-full font-display">
               Student Workspace
             </span>
             <h1 className="text-xl md:text-2xl font-black text-white mt-3.5 font-display tracking-tight leading-tight">
               Welcome back to your Learning Space, {user?.name}!
             </h1>
-            <p className="text-xs text-slate-350 mt-2 max-w-xl leading-relaxed">
+            <p className="text-xs text-slate-600 mt-2 max-w-xl leading-relaxed">
               Resume your active syllabus classes, check off module milestones, and pass final quizzes to obtain certified, downloadable credentials.
             </p>
           </div>
@@ -165,8 +165,8 @@ const Dashboard = () => {
 
         {/* Stats Widgets Grid */}
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-5">
-          <div className="p-5 bg-slate-200 border border-slate-300 rounded-2xl flex items-center gap-4 shadow-none hover:border-slate-350 transition-all duration-250 group">
-            <div className="p-3 bg-indigo-950/50 text-indigo-400 rounded-xl group-hover:scale-105 transition-transform duration-200">
+          <div className="p-5 bg-white border border-slate-200 rounded-2xl flex items-center gap-4 shadow-sm hover:border-indigo-200 transition-all duration-250 group">
+            <div className="p-3 bg-indigo-50 text-indigo-600 rounded-xl group-hover:scale-105 transition-transform duration-200">
               <svg className="w-5.5 h-5.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
               </svg>
@@ -176,17 +176,17 @@ const Dashboard = () => {
               <div className="flex items-baseline gap-2 mt-0.5">
                 <p className="text-2xl font-black text-slate-900 font-display">{enrolledCourses.length}</p>
                 {enrolledCourses.length > 0 && (
-                  <span className="text-[9px] font-bold text-indigo-400 bg-indigo-950/40 px-1.5 py-0.5 rounded-md font-display">
+                  <span className="text-[9px] font-bold text-indigo-600 bg-indigo-50 px-1.5 py-0.5 rounded-md font-display">
                     +1 Ongoing
                   </span>
                 )}
               </div>
             </div>
           </div>
-          <div className="p-5 bg-slate-200 border border-slate-300 rounded-2xl flex items-center gap-4 shadow-none hover:border-slate-350 transition-all duration-250 group">
-            <div className="p-3 bg-emerald-950/40 text-emerald-450 rounded-xl group-hover:scale-105 transition-transform duration-200">
+          <div className="p-5 bg-white border border-slate-200 rounded-2xl flex items-center gap-4 shadow-sm hover:border-emerald-200 transition-all duration-250 group">
+            <div className="p-3 bg-emerald-50 text-emerald-600 rounded-xl group-hover:scale-105 transition-transform duration-200">
               <svg className="w-5.5 h-5.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.2" d="M9 12l2 2 4-4M7.835 4.697a3.42 3.42 0 001.946-.806 3.42 3.42 0 014.438 0 3.42 3.42 0 001.946.806 3.42 3.42 0 013.138 3.138 3.42 3.42 0 00.806 1.946 3.42 3.42 0 010 4.438 3.42 3.42 0 00-.806 1.946 3.42 3.42 0 01-3.138 3.138 3.42 3.42 0 00-1.946.806 3.42 3.42 0 01-4.438 0 3.42 3.42 0 00-1.946-.806 3.42 3.42 0 01-3.138-3.138z" />
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.2" d="M9 12l2 2 4-4M7.835 4.697a3.42 3.42 0 001.946-.806 3.42 3.42 0 014.438 0 3.42 3.42 0 001.946.806 3.42 3.42 0 010 4.438 3.42 3.42 0 00-.806 1.946 3.42 3.42 0 01-3.138 3.138 3.42 3.42 0 00-1.946.806 3.42 3.42 0 01-4.438 0 3.42 3.42 0 00-1.946-.806 3.42 3.42 0 01-3.138-3.138z" />
               </svg>
             </div>
             <div>
@@ -194,15 +194,15 @@ const Dashboard = () => {
               <div className="flex items-baseline gap-2 mt-0.5">
                 <p className="text-2xl font-black text-slate-900 font-display">{certificatesCount}</p>
                 {certificatesCount > 0 && (
-                  <span className="text-[9px] font-bold text-emerald-450 bg-emerald-950/40 px-1.5 py-0.5 rounded-md font-display">
+                  <span className="text-[9px] font-bold text-emerald-600 bg-emerald-50 px-1.5 py-0.5 rounded-md font-display">
                     Verified
                   </span>
                 )}
               </div>
             </div>
           </div>
-          <div className="p-5 bg-slate-200 border border-slate-300 rounded-2xl flex items-center gap-4 shadow-none hover:border-slate-350 transition-all duration-250 group">
-            <div className="p-3 bg-indigo-950/40 text-indigo-400 rounded-xl group-hover:scale-105 transition-transform duration-200">
+          <div className="p-5 bg-white border border-slate-200 rounded-2xl flex items-center gap-4 shadow-sm hover:border-indigo-200 transition-all duration-250 group">
+            <div className="p-3 bg-indigo-50 text-indigo-600 rounded-xl group-hover:scale-105 transition-transform duration-200">
               <svg className="w-5.5 h-5.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.2" d="M13 10V3L4 14h7v7l9-11h-7z" />
               </svg>
@@ -211,7 +211,7 @@ const Dashboard = () => {
               <span className="text-[9px] uppercase font-bold tracking-widest text-slate-500 block font-display">LMS Catalog Size</span>
               <div className="flex items-baseline gap-2 mt-0.5">
                 <p className="text-2xl font-black text-slate-900 font-display">{courses.length}</p>
-                <span className="text-[9px] font-bold text-indigo-400 bg-indigo-950/40 px-1.5 py-0.5 rounded-md font-display">
+                <span className="text-[9px] font-bold text-indigo-600 bg-indigo-50 px-1.5 py-0.5 rounded-md font-display">
                   Published
                 </span>
               </div>
@@ -230,7 +230,7 @@ const Dashboard = () => {
             )}
           </div>
           {enrolledCourses.length === 0 ? (
-            <div className="p-10 border border-dashed border-slate-350 bg-slate-200 text-center rounded-3xl shadow-none">
+            <div className="p-10 border border-dashed border-slate-300 bg-slate-200 text-center rounded-3xl shadow-none">
               <p className="text-xs text-slate-500">You are not enrolled in any study courses yet.</p>
               <Link to="/courses" className="inline-block mt-4 px-4 py-2.5 bg-indigo-500 hover:bg-indigo-650 text-white rounded-xl text-xs font-bold transition-all shadow-md shadow-indigo-500/10">
                 Browse Recommended Courses
@@ -361,11 +361,11 @@ const Dashboard = () => {
         {/* Create Course Modal */}
         {showCreateModal && (
           <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
-            <div className="fixed inset-0 bg-slate-900/40 backdrop-blur-sm" onClick={closeCreateModal}></div>
-            <div className="w-full max-w-md bg-white border border-slate-200 rounded-3xl p-6 shadow-2xl shadow-slate-200/50 z-10 animate-scaleIn">
-              <div className="flex justify-between items-center mb-5 border-b border-slate-100 pb-3">
+            <div className="fixed inset-0 bg-slate-50/40 backdrop-blur-sm" onClick={closeCreateModal}></div>
+            <div className="w-full max-w-md bg-slate-100 border border-slate-300 rounded-3xl p-6 shadow-2xl shadow-black/50 z-10 animate-scaleIn">
+              <div className="flex justify-between items-center mb-5 border-b border-slate-200 pb-3">
                 <h3 className="text-base font-extrabold text-slate-800">Launch New Course</h3>
-                <button onClick={closeCreateModal} className="p-1.5 text-slate-450 hover:text-slate-700 rounded-full hover:bg-slate-50 transition-colors">
+                <button onClick={closeCreateModal} className="p-1.5 text-slate-500 hover:text-slate-700 rounded-full hover:bg-slate-200 transition-colors">
                   <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M6 18L18 6M6 6l12 12" />
                   </svg>
@@ -373,12 +373,12 @@ const Dashboard = () => {
               </div>
               <form onSubmit={handleCreateCourse} className="flex flex-col gap-4">
                 <div className="flex flex-col gap-1.5">
-                  <label className="text-[9px] font-bold uppercase tracking-widest text-slate-450 ml-1">Course Title</label>
-                  <input type="text" value={newCourseTitle} onChange={(e) => setNewCourseTitle(e.target.value)} className="w-full bg-slate-50 border border-slate-200 focus:border-indigo-500 rounded-xl py-2.5 px-3.5 text-sm text-slate-700 placeholder-slate-400 focus:outline-none focus:bg-white transition-all duration-200" placeholder="e.g. Introduction to React & Next.js" required />
+                  <label className="text-[9px] font-bold uppercase tracking-widest text-slate-500 ml-1">Course Title</label>
+                  <input type="text" value={newCourseTitle} onChange={(e) => setNewCourseTitle(e.target.value)} className="w-full bg-slate-50 border border-slate-250 focus:border-indigo-500 rounded-xl py-2.5 px-3.5 text-sm text-slate-700 placeholder-slate-500 focus:outline-none focus:bg-slate-200 transition-all duration-200" placeholder="e.g. Introduction to React & Next.js" required />
                 </div>
                 <div className="flex flex-col gap-1.5">
-                  <label className="text-[9px] font-bold uppercase tracking-widest text-slate-450 ml-1">Course Description</label>
-                  <textarea rows="4" value={newCourseDesc} onChange={(e) => setNewCourseDesc(e.target.value)} className="w-full bg-slate-50 border border-slate-200 focus:border-indigo-500 rounded-xl py-2.5 px-3.5 text-sm text-slate-700 placeholder-slate-400 focus:outline-none focus:bg-white transition-all duration-200 resize-none" placeholder="Provide a comprehensive summary of the course topics..." required />
+                  <label className="text-[9px] font-bold uppercase tracking-widest text-slate-500 ml-1">Course Description</label>
+                  <textarea rows="4" value={newCourseDesc} onChange={(e) => setNewCourseDesc(e.target.value)} className="w-full bg-slate-50 border border-slate-250 focus:border-indigo-500 rounded-xl py-2.5 px-3.5 text-sm text-slate-700 placeholder-slate-500 focus:outline-none focus:bg-slate-200 transition-all duration-200 resize-none" placeholder="Provide a comprehensive summary of the course topics..." required />
                 </div>
                 <button type="submit" disabled={courseSubmitLoading} className="w-full bg-purple-650 hover:bg-purple-600 active:scale-[0.98] disabled:bg-slate-200 disabled:text-slate-400 text-white font-bold text-xs rounded-xl py-3 mt-2 transition-all duration-200 flex items-center justify-center gap-2 cursor-pointer shadow-md shadow-purple-650/10">
                   {courseSubmitLoading ? (
@@ -398,16 +398,16 @@ const Dashboard = () => {
     return (
       <div className="flex flex-col gap-8 animate-fadeIn">
         {/* Premium Control Banner */}
-        <div className="relative p-6 md:p-8 bg-gradient-to-br from-slate-900 via-slate-900 to-indigo-950 rounded-3xl overflow-hidden flex flex-col md:flex-row md:items-center justify-between gap-6 shadow-xl border border-slate-800/40">
+        <div className="relative p-6 md:p-8 bg-gradient-to-br from-indigo-50 via-slate-100 to-indigo-100 rounded-3xl overflow-hidden flex flex-col md:flex-row md:items-center justify-between gap-6 shadow-xl border border-slate-800/40">
           <div className="absolute -top-12 -right-12 w-72 h-72 bg-indigo-500/10 rounded-full blur-3xl pointer-events-none"></div>
           <div className="absolute -bottom-16 -left-16 w-56 h-56 bg-slate-500/10 rounded-full blur-2xl pointer-events-none"></div>
           
           <div className="relative z-10 flex-1">
-            <span className="text-[9px] uppercase tracking-widest font-extrabold px-3 py-1 bg-indigo-500/20 text-indigo-200 border border-indigo-500/30 rounded-full font-display">
+            <span className="text-[9px] uppercase tracking-widest font-extrabold px-3 py-1 bg-indigo-500/20 text-indigo-400 border border-indigo-500/30 rounded-full font-display">
               System Admin
             </span>
             <h1 className="text-xl md:text-2xl font-black text-white mt-3.5 font-display tracking-tight leading-tight">Administrator Dashboard</h1>
-            <p className="text-xs text-slate-400 mt-1.5 max-w-xl leading-relaxed">
+            <p className="text-xs text-slate-600 mt-1.5 max-w-xl leading-relaxed">
               Global control deck for allocating user roles, auditing system profiles, managing registered courses, and monitoring cluster microservices.
             </p>
           </div>
@@ -415,7 +415,7 @@ const Dashboard = () => {
 
         {/* System Stats */}
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-5">
-          <div className="p-5 bg-slate-200 border border-slate-300 rounded-2xl flex items-center gap-4 shadow-none hover:border-slate-350 transition-all duration-250 group">
+          <div className="p-5 bg-slate-200 border border-slate-300 rounded-2xl flex items-center gap-4 shadow-none hover:border-slate-400 transition-all duration-250 group">
             <div className="p-3 bg-indigo-950/40 text-indigo-400 rounded-xl group-hover:scale-105 transition-transform duration-200">
               <svg className="w-5.5 h-5.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" />
@@ -426,7 +426,7 @@ const Dashboard = () => {
               <p className="text-2xl font-black text-slate-900 font-display mt-0.5">{users.length}</p>
             </div>
           </div>
-          <div className="p-5 bg-slate-200 border border-slate-300 rounded-2xl flex items-center gap-4 shadow-none hover:border-slate-350 transition-all duration-250 group">
+          <div className="p-5 bg-slate-200 border border-slate-300 rounded-2xl flex items-center gap-4 shadow-none hover:border-slate-400 transition-all duration-250 group">
             <div className="p-3 bg-indigo-950/40 text-indigo-400 rounded-xl group-hover:scale-105 transition-transform duration-200">
               <svg className="w-5.5 h-5.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
@@ -437,7 +437,7 @@ const Dashboard = () => {
               <p className="text-2xl font-black text-slate-900 font-display mt-0.5">{courses.length}</p>
             </div>
           </div>
-          <div className="p-5 bg-slate-200 border border-slate-300 rounded-2xl flex items-center gap-4 shadow-none hover:border-slate-350 transition-all duration-250 group">
+          <div className="p-5 bg-slate-200 border border-slate-300 rounded-2xl flex items-center gap-4 shadow-none hover:border-slate-400 transition-all duration-250 group">
             <div className="p-3 bg-emerald-950/30 text-emerald-500 rounded-xl group-hover:scale-105 transition-transform duration-200">
               <svg className="w-5.5 h-5.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.2" d="M9 12l2 2 4-4M7.835 4.697a3.42 3.42 0 001.946-.806 3.42 3.42 0 014.438 0 3.42 3.42 0 001.946.806 3.42 3.42 0 013.138 3.138 3.42 3.42 0 00.806 1.946 3.42 3.42 0 010 4.438 3.42 3.42 0 00-.806 1.946 3.42 3.42 0 01-3.138 3.138 3.42 3.42 0 00-1.946.806 3.42 3.42 0 01-4.438 0 3.42 3.42 0 00-1.946-.806 3.42 3.42 0 01-3.138-3.138z" />

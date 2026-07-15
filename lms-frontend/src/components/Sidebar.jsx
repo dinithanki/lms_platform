@@ -18,7 +18,7 @@ const Sidebar = ({ isOpen, onClose }) => {
       {/* Mobile Sidebar backdrop */}
       {isOpen && (
         <div
-          className="fixed inset-0 z-40 bg-slate-900/40 backdrop-blur-xs md:hidden"
+          className="fixed inset-0 z-40 bg-slate-50/40 backdrop-blur-xs md:hidden"
           onClick={onClose}
         ></div>
       )}
