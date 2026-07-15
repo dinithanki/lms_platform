@@ -9,11 +9,11 @@ const CourseCard = ({ course, isEnrolled, progress, onEnroll, isEnrolling, userR
   };
 
   return (
-    <div className="bg-slate-200 border border-slate-300 rounded-3xl overflow-hidden flex flex-col justify-between h-full group modern-hover-card">
+    <div className="bg-navy-800 border border-navy-700/40 rounded-2xl overflow-hidden flex flex-col justify-between h-full group modern-hover-card">
       {/* Course Banner Overlay */}
-      <div className="h-36 bg-gradient-to-br from-slate-200 to-indigo-950/40 p-5 flex flex-col justify-between border-b border-slate-300 relative overflow-hidden">
+      <div className="h-36 bg-gradient-to-br from-navy-700 via-navy-800 to-accent-900/40 p-5 flex flex-col justify-between border-b border-navy-700/40 relative overflow-hidden">
         {/* Glow effect */}
-        <div className="absolute top-0 right-0 w-24 h-24 bg-indigo-500/10 rounded-full blur-2xl group-hover:bg-indigo-500/20 transition-all duration-300"></div>
+        <div className="absolute top-0 right-0 w-24 h-24 bg-accent-500/8 rounded-full blur-2xl group-hover:bg-accent-500/15 transition-all duration-500"></div>
 
         <div className="flex justify-between items-start z-10">
           {userRole === "ADMIN" && onDelete && (
@@ -23,7 +23,7 @@ const CourseCard = ({ course, isEnrolled, progress, onEnroll, isEnrolling, userR
                 e.stopPropagation();
                 onDelete(course.id, course.title);
               }}
-              className="p-1.5 bg-rose-950/40 hover:bg-rose-900/60 active:bg-rose-800 text-rose-400 rounded-lg transition-colors duration-150 cursor-pointer border border-rose-900/50"
+              className="p-1.5 bg-danger-700/30 hover:bg-danger-700/50 text-danger-400 rounded-lg transition-colors duration-150 cursor-pointer border border-danger-700/40"
               title="Delete Course"
             >
               <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -32,22 +32,22 @@ const CourseCard = ({ course, isEnrolled, progress, onEnroll, isEnrolling, userR
             </button>
           )}
         </div>
-        <h3 className="text-base font-extrabold text-slate-800 line-clamp-2 leading-snug group-hover:text-indigo-400 transition-colors duration-200 z-10 font-display">
+        <h3 className="text-[15px] font-bold text-navy-50 line-clamp-2 leading-snug group-hover:text-accent-300 transition-colors duration-300 z-10 font-display">
           {course.title}
         </h3>
       </div>
 
       {/* Description & Details */}
       <div className="p-5 flex-1 flex flex-col justify-between gap-4">
-        <p className="text-xs text-slate-500 leading-relaxed">
+        <p className="text-[13px] text-navy-300 leading-relaxed">
           {truncateText(course.description)}
         </p>
 
         {/* Modules Count & Badges */}
-        <div className="flex items-center justify-between text-[11px] text-slate-500 font-medium border-t border-slate-300 pt-3">
-          <span className="flex items-center gap-1">
+        <div className="flex items-center justify-between text-[12px] text-navy-400 font-medium border-t border-navy-700/30 pt-3">
+          <span className="flex items-center gap-1.5">
             <svg
-              className="w-3.5 h-3.5 text-indigo-400"
+              className="w-3.5 h-3.5 text-accent-400"
               fill="none"
               stroke="currentColor"
               viewBox="0 0 24 24"
@@ -55,19 +55,19 @@ const CourseCard = ({ course, isEnrolled, progress, onEnroll, isEnrolling, userR
               <path
                 strokeLinecap="round"
                 strokeLinejoin="round"
-                strokeWidth="2.2"
+                strokeWidth="2"
                 d="M4 6h16M4 10h16M4 14h16M4 18h16"
               />
             </svg>
             {course.modules ? course.modules.length : 0} Modules
           </span>
-          <span className="flex items-center gap-1 text-slate-500">
+          <span className="flex items-center gap-1.5 text-navy-400">
             <span>•</span>
             <span>Self-paced</span>
           </span>
           {isEnrolled && (
-            <span className="text-emerald-450 font-bold flex items-center gap-1">
-              <span className="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>
+            <span className="text-success-400 font-semibold flex items-center gap-1.5">
+              <span className="w-1.5 h-1.5 rounded-full bg-success-500"></span>
               Enrolled
             </span>
           )}
@@ -75,14 +75,14 @@ const CourseCard = ({ course, isEnrolled, progress, onEnroll, isEnrolling, userR
 
         {/* Progress Bar (Visible only to students enrolled in the course) */}
         {isEnrolled && progress !== undefined && (
-          <div className="flex flex-col gap-1.5 mt-1 bg-slate-100 p-2.5 rounded-xl border border-slate-300 shadow-none">
-            <div className="flex justify-between items-center text-[10px]">
-              <span className="text-slate-500 font-medium">Your Progress</span>
-              <span className="font-extrabold text-indigo-400 font-display">{Math.round(progress)}%</span>
+          <div className="flex flex-col gap-2 mt-1 bg-navy-850 p-3 rounded-xl border border-navy-700/30">
+            <div className="flex justify-between items-center text-[11px]">
+              <span className="text-navy-400 font-medium">Your Progress</span>
+              <span className="font-bold text-accent-400">{Math.round(progress)}%</span>
             </div>
-            <div className="w-full h-1.5 bg-slate-300 rounded-full overflow-hidden">
+            <div className="w-full h-1.5 bg-navy-700 rounded-full overflow-hidden">
               <div
-                className="h-full bg-gradient-to-r from-indigo-500 to-indigo-650 rounded-full transition-all duration-500 ease-out"
+                className="h-full bg-gradient-to-r from-accent-500 to-cyan-500 rounded-full transition-all duration-500 ease-out"
                 style={{ width: `${progress}%` }}
               ></div>
             </div>
@@ -95,11 +95,11 @@ const CourseCard = ({ course, isEnrolled, progress, onEnroll, isEnrolling, userR
             <button
               onClick={() => onEnroll(course.id)}
               disabled={isEnrolling}
-              className="flex-1 py-2.5 text-xs font-bold text-white bg-indigo-500 hover:bg-indigo-600 active:scale-[0.99] disabled:bg-slate-300 disabled:text-slate-500 border border-transparent rounded-xl transition-all duration-200 flex items-center justify-center gap-2 cursor-pointer shadow-lg shadow-indigo-500/10 font-display"
+              className="flex-1 py-2.5 text-[13px] font-semibold text-white bg-accent-600 hover:bg-accent-500 active:scale-[0.99] disabled:bg-navy-700 disabled:text-navy-500 border border-transparent rounded-xl transition-all duration-200 flex items-center justify-center gap-2 cursor-pointer shadow-lg shadow-accent-600/15"
             >
               {isEnrolling ? (
                 <>
-                  <div className="w-3.5 h-3.5 border-2 border-slate-400 border-t-transparent rounded-full animate-spin"></div>
+                  <div className="w-3.5 h-3.5 border-2 border-navy-400 border-t-transparent rounded-full animate-spin"></div>
                   Enrolling...
                 </>
               ) : (
@@ -109,7 +109,7 @@ const CourseCard = ({ course, isEnrolled, progress, onEnroll, isEnrolling, userR
           ) : (
             <Link
               to={`/courses/${course.id}`}
-              className="flex-grow text-center py-2.5 text-xs font-bold text-slate-600 hover:text-indigo-400 bg-slate-100 hover:bg-slate-300 border border-slate-300 rounded-xl transition-all duration-200 font-display"
+              className="flex-grow text-center py-2.5 text-[13px] font-semibold text-navy-200 hover:text-accent-400 bg-navy-700/50 hover:bg-navy-700 border border-navy-700/40 rounded-xl transition-all duration-200"
             >
               {isEnrolled || userRole !== "STUDENT" ? "Enter Course" : "View Details"}
             </Link>
