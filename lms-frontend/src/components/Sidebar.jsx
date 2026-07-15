@@ -9,8 +9,8 @@ const Sidebar = ({ isOpen, onClose }) => {
     const baseClass =
       "flex items-center gap-3 px-4 py-3 text-xs uppercase font-extrabold tracking-wider rounded-xl transition-all duration-200 border font-display";
     return isActive
-      ? `${baseClass} bg-indigo-50 text-indigo-600 border-indigo-100/50 shadow-sm shadow-indigo-100`
-      : `${baseClass} text-slate-500 hover:text-indigo-600 hover:bg-slate-50 border-transparent`;
+      ? `${baseClass} bg-indigo-500/10 text-indigo-400 border-indigo-500/20 shadow-none`
+      : `${baseClass} text-slate-500 hover:text-indigo-400 hover:bg-slate-200/50 border-transparent`;
   };
 
   return (
@@ -24,7 +24,7 @@ const Sidebar = ({ isOpen, onClose }) => {
       )}
 
       <aside
-        className={`fixed inset-y-0 left-0 z-50 w-64 min-h-screen bg-white border-r border-slate-200/60 flex flex-col justify-between transition-transform duration-300 md:translate-x-0 md:static md:flex ${
+        className={`fixed inset-y-0 left-0 z-50 w-64 min-h-screen bg-slate-100 border-r border-slate-300/40 flex flex-col justify-between transition-transform duration-300 md:translate-x-0 md:static md:flex ${
           isOpen ? "translate-x-0" : "-translate-x-full"
         }`}
       >
@@ -48,7 +48,7 @@ const Sidebar = ({ isOpen, onClose }) => {
             </svg>
           </div>
           <div>
-            <h1 className="text-base font-black text-slate-800 tracking-tight leading-tight font-display bg-gradient-to-r from-slate-900 to-indigo-950 bg-clip-text text-transparent">
+            <h1 className="text-base font-black tracking-tight leading-tight font-display bg-gradient-to-r from-white to-indigo-400 bg-clip-text text-transparent">
               LearnSphere
             </h1>
             <span className="text-[9px] text-indigo-600 font-bold tracking-widest uppercase block mt-0.5 font-display">
@@ -133,24 +133,24 @@ const Sidebar = ({ isOpen, onClose }) => {
       </div>
 
       {/* Role specific sidebar card */}
-      <div className="p-4 mx-4 mb-6 bg-slate-50/50 border border-slate-100 rounded-2xl flex flex-col gap-2 shadow-sm shadow-slate-100/50">
+      <div className="p-4 mx-4 mb-6 bg-slate-200/30 border border-slate-300/50 rounded-2xl flex flex-col gap-2 shadow-none">
         <div className="flex items-center gap-2">
           <span className="relative flex h-2 w-2">
             <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
             <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
           </span>
-          <span className="text-[9px] uppercase font-bold tracking-widest text-slate-400 font-display">
+          <span className="text-[9px] uppercase font-bold tracking-widest text-slate-500 font-display">
             System Live
           </span>
         </div>
-        <p className="text-[10px] text-slate-400 font-medium">
+        <p className="text-[10px] text-slate-500 font-medium">
           Logged in as:
         </p>
         <div className="flex items-center justify-between mt-0.5">
-          <span className="text-xs font-bold text-slate-700 truncate w-28 font-display">
+          <span className="text-xs font-bold text-slate-800 truncate w-28 font-display">
             {user?.name}
           </span>
-          <span className="text-[9px] uppercase px-2 py-0.5 rounded-lg font-extrabold text-indigo-700 bg-indigo-50 border border-indigo-100/30 font-display">
+          <span className="text-[9px] uppercase px-2 py-0.5 rounded-lg font-extrabold text-indigo-400 bg-indigo-950/50 border border-indigo-500/20 font-display">
             {user?.role}
           </span>
         </div>

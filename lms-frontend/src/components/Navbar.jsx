@@ -17,7 +17,7 @@ const Navbar = ({ onMenuToggle }) => {
         {/* Mobile Hamburger menu toggle */}
         <button
           onClick={onMenuToggle}
-          className="p-1.5 text-slate-500 hover:text-indigo-600 hover:bg-slate-100 rounded-lg md:hidden transition-colors cursor-pointer"
+          className="p-1.5 text-slate-500 hover:text-indigo-400 hover:bg-slate-200 rounded-lg md:hidden transition-colors cursor-pointer"
           aria-label="Toggle menu"
         >
           <svg className="w-5.5 h-5.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -28,9 +28,9 @@ const Navbar = ({ onMenuToggle }) => {
         {/* Title */}
         <div>
           <h2 className="text-sm font-semibold text-slate-800 hidden md:block">
-            Welcome back, <span className="text-indigo-600 font-extrabold">{user?.name}</span> 👋
+            Welcome back, <span className="text-indigo-400 font-extrabold">{user?.name}</span> 👋
           </h2>
-          <h2 className="text-xs font-black tracking-widest text-indigo-600 md:hidden uppercase">
+          <h2 className="text-xs font-black tracking-widest text-indigo-400 md:hidden uppercase">
             LearnSphere
           </h2>
         </div>
@@ -60,7 +60,7 @@ const Navbar = ({ onMenuToggle }) => {
           {/* Log Out Button */}
           <button
             onClick={handleLogout}
-            className="flex items-center justify-center p-2 text-slate-500 hover:text-rose-600 hover:bg-slate-100 rounded-full transition-all duration-200"
+            className="flex items-center justify-center p-2 text-slate-500 hover:text-rose-455 hover:bg-slate-200 rounded-full transition-all duration-200"
             title="Log Out"
           >
             <svg

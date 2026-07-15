@@ -165,53 +165,53 @@ const Dashboard = () => {
 
         {/* Stats Widgets Grid */}
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-5">
-          <div className="p-5 bg-white border border-slate-200/50 rounded-2xl flex items-center gap-4 shadow-sm shadow-slate-100/30 hover:shadow-md transition-all duration-250 group">
-            <div className="p-3 bg-indigo-50 text-indigo-600 rounded-xl group-hover:scale-105 transition-transform duration-200">
+          <div className="p-5 bg-slate-200 border border-slate-300 rounded-2xl flex items-center gap-4 shadow-none hover:border-slate-350 transition-all duration-250 group">
+            <div className="p-3 bg-indigo-950/50 text-indigo-400 rounded-xl group-hover:scale-105 transition-transform duration-200">
               <svg className="w-5.5 h-5.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
               </svg>
             </div>
             <div>
-              <span className="text-[9px] uppercase font-bold tracking-widest text-slate-400 block font-display">Enrolled Courses</span>
+              <span className="text-[9px] uppercase font-bold tracking-widest text-slate-500 block font-display">Enrolled Courses</span>
               <div className="flex items-baseline gap-2 mt-0.5">
-                <p className="text-2xl font-black text-slate-800 font-display">{enrolledCourses.length}</p>
+                <p className="text-2xl font-black text-slate-900 font-display">{enrolledCourses.length}</p>
                 {enrolledCourses.length > 0 && (
-                  <span className="text-[9px] font-bold text-indigo-600 bg-indigo-50 px-1.5 py-0.5 rounded-md font-display">
+                  <span className="text-[9px] font-bold text-indigo-400 bg-indigo-950/40 px-1.5 py-0.5 rounded-md font-display">
                     +1 Ongoing
                   </span>
                 )}
               </div>
             </div>
           </div>
-          <div className="p-5 bg-white border border-slate-200/50 rounded-2xl flex items-center gap-4 shadow-sm shadow-slate-100/30 hover:shadow-md transition-all duration-250 group">
-            <div className="p-3 bg-emerald-50 text-emerald-600 rounded-xl group-hover:scale-105 transition-transform duration-200">
+          <div className="p-5 bg-slate-200 border border-slate-300 rounded-2xl flex items-center gap-4 shadow-none hover:border-slate-350 transition-all duration-250 group">
+            <div className="p-3 bg-emerald-950/40 text-emerald-450 rounded-xl group-hover:scale-105 transition-transform duration-200">
               <svg className="w-5.5 h-5.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.2" d="M9 12l2 2 4-4M7.835 4.697a3.42 3.42 0 001.946-.806 3.42 3.42 0 014.438 0 3.42 3.42 0 001.946.806 3.42 3.42 0 013.138 3.138 3.42 3.42 0 00.806 1.946 3.42 3.42 0 010 4.438 3.42 3.42 0 00-.806 1.946 3.42 3.42 0 01-3.138 3.138 3.42 3.42 0 00-1.946.806 3.42 3.42 0 01-4.438 0 3.42 3.42 0 00-1.946-.806 3.42 3.42 0 01-3.138-3.138z" />
               </svg>
             </div>
             <div>
-              <span className="text-[9px] uppercase font-bold tracking-widest text-slate-400 block font-display">Certificates Earned</span>
+              <span className="text-[9px] uppercase font-bold tracking-widest text-slate-500 block font-display">Certificates Earned</span>
               <div className="flex items-baseline gap-2 mt-0.5">
-                <p className="text-2xl font-black text-slate-800 font-display">{certificatesCount}</p>
+                <p className="text-2xl font-black text-slate-900 font-display">{certificatesCount}</p>
                 {certificatesCount > 0 && (
-                  <span className="text-[9px] font-bold text-emerald-600 bg-emerald-50 px-1.5 py-0.5 rounded-md font-display">
+                  <span className="text-[9px] font-bold text-emerald-450 bg-emerald-950/40 px-1.5 py-0.5 rounded-md font-display">
                     Verified
                   </span>
                 )}
               </div>
             </div>
           </div>
-          <div className="p-5 bg-white border border-slate-200/50 rounded-2xl flex items-center gap-4 shadow-sm shadow-slate-100/30 hover:shadow-md transition-all duration-250 group">
-            <div className="p-3 bg-purple-50 text-purple-650 rounded-xl group-hover:scale-105 transition-transform duration-200">
+          <div className="p-5 bg-slate-200 border border-slate-300 rounded-2xl flex items-center gap-4 shadow-none hover:border-slate-350 transition-all duration-250 group">
+            <div className="p-3 bg-indigo-950/40 text-indigo-400 rounded-xl group-hover:scale-105 transition-transform duration-200">
               <svg className="w-5.5 h-5.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.2" d="M13 10V3L4 14h7v7l9-11h-7z" />
               </svg>
             </div>
             <div>
-              <span className="text-[9px] uppercase font-bold tracking-widest text-slate-400 block font-display">LMS Catalog Size</span>
+              <span className="text-[9px] uppercase font-bold tracking-widest text-slate-500 block font-display">LMS Catalog Size</span>
               <div className="flex items-baseline gap-2 mt-0.5">
-                <p className="text-2xl font-black text-slate-800 font-display">{courses.length}</p>
-                <span className="text-[9px] font-bold text-purple-600 bg-purple-50 px-1.5 py-0.5 rounded-md font-display">
+                <p className="text-2xl font-black text-slate-900 font-display">{courses.length}</p>
+                <span className="text-[9px] font-bold text-indigo-400 bg-indigo-950/40 px-1.5 py-0.5 rounded-md font-display">
                   Published
                 </span>
               </div>
@@ -224,15 +224,15 @@ const Dashboard = () => {
           <div className="flex items-center justify-between mb-4">
             <h2 className="text-xs font-extrabold uppercase tracking-wider text-slate-900 font-display">My Enrolled Lectures</h2>
             {enrolledCourses.length > 0 && (
-              <Link to="/my-courses" className="text-xs text-indigo-600 hover:text-indigo-700 font-bold transition-colors font-display">
+              <Link to="/my-courses" className="text-xs text-indigo-400 hover:text-indigo-300 font-bold transition-colors font-display">
                 View All Courses
               </Link>
             )}
           </div>
           {enrolledCourses.length === 0 ? (
-            <div className="p-10 border border-dashed border-slate-200 bg-white text-center rounded-3xl shadow-sm">
+            <div className="p-10 border border-dashed border-slate-350 bg-slate-200 text-center rounded-3xl shadow-none">
               <p className="text-xs text-slate-500">You are not enrolled in any study courses yet.</p>
-              <Link to="/courses" className="inline-block mt-4 px-4 py-2.5 bg-indigo-600 hover:bg-indigo-500 text-white rounded-xl text-xs font-bold transition-all shadow-md shadow-indigo-600/10">
+              <Link to="/courses" className="inline-block mt-4 px-4 py-2.5 bg-indigo-500 hover:bg-indigo-650 text-white rounded-xl text-xs font-bold transition-all shadow-md shadow-indigo-500/10">
                 Browse Recommended Courses
               </Link>
             </div>
@@ -249,12 +249,12 @@ const Dashboard = () => {
         <div>
           <div className="flex items-center justify-between mb-4">
             <h2 className="text-xs font-extrabold uppercase tracking-wider text-slate-900 font-display">Recommended For You</h2>
-            <Link to="/courses" className="text-xs text-indigo-600 hover:text-indigo-700 font-bold transition-colors font-display">
+            <Link to="/courses" className="text-xs text-indigo-400 hover:text-indigo-300 font-bold transition-colors font-display">
               Explore Full Library
             </Link>
           </div>
           {availableCourses.length === 0 ? (
-            <div className="p-8 text-center text-xs text-slate-500 bg-white border border-slate-200/80 rounded-3xl shadow-sm">
+            <div className="p-8 text-center text-xs text-slate-500 bg-slate-200 border border-slate-300 rounded-3xl shadow-none">
               You are currently enrolled in all available curricular programs!
             </div>
           ) : (
@@ -302,39 +302,39 @@ const Dashboard = () => {
 
         {/* Stats Grid */}
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-5">
-          <div className="p-5 bg-white border border-slate-200 rounded-2xl flex items-center gap-4 shadow-sm shadow-slate-100/40 hover:shadow-md transition-all duration-200 group">
-            <div className="p-3 bg-indigo-50 text-indigo-600 rounded-xl group-hover:scale-105 transition-transform duration-200">
+          <div className="p-5 bg-slate-200 border border-slate-300 rounded-2xl flex items-center gap-4 shadow-none hover:border-slate-355 transition-all duration-200 group">
+            <div className="p-3 bg-indigo-955/50 text-indigo-400 rounded-xl group-hover:scale-105 transition-transform duration-200">
               <svg className="w-5.5 h-5.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
               </svg>
             </div>
             <div>
-              <span className="text-[9px] uppercase font-bold tracking-widest text-slate-450 block">Managed Courses</span>
-              <p className="text-xl font-extrabold text-slate-800 mt-0.5">{courses.length}</p>
+              <span className="text-[9px] uppercase font-bold tracking-widest text-slate-500 block">Managed Courses</span>
+              <p className="text-xl font-extrabold text-slate-900 mt-0.5">{courses.length}</p>
             </div>
           </div>
-          <div className="p-5 bg-white border border-slate-200 rounded-2xl flex items-center gap-4 shadow-sm shadow-slate-100/40 hover:shadow-md transition-all duration-200 group">
-            <div className="p-3 bg-purple-50 text-purple-650 rounded-xl group-hover:scale-105 transition-transform duration-200">
+          <div className="p-5 bg-slate-200 border border-slate-300 rounded-2xl flex items-center gap-4 shadow-none hover:border-slate-355 transition-all duration-200 group">
+            <div className="p-3 bg-indigo-955/50 text-indigo-400 rounded-xl group-hover:scale-105 transition-transform duration-200">
               <svg className="w-5.5 h-5.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 6h16M4 10h16M4 14h16M4 18h16" />
               </svg>
             </div>
             <div>
-              <span className="text-[9px] uppercase font-bold tracking-widest text-slate-450 block">Syllabus Chapters</span>
-              <p className="text-xl font-extrabold text-slate-800 mt-0.5">
+              <span className="text-[9px] uppercase font-bold tracking-widest text-slate-500 block">Syllabus Chapters</span>
+              <p className="text-xl font-extrabold text-slate-900 mt-0.5">
                 {courses.reduce((acc, c) => acc + (c.modules?.length || 0), 0)}
               </p>
             </div>
           </div>
-          <div className="p-5 bg-white border border-slate-200 rounded-2xl flex items-center gap-4 shadow-sm shadow-slate-100/40 hover:shadow-md transition-all duration-200 group">
-            <div className="p-3 bg-amber-50 text-amber-600 rounded-xl group-hover:scale-105 transition-transform duration-200">
+          <div className="p-5 bg-slate-200 border border-slate-300 rounded-2xl flex items-center gap-4 shadow-none hover:border-slate-355 transition-all duration-200 group">
+            <div className="p-3 bg-amber-955/40 text-amber-450 rounded-xl group-hover:scale-105 transition-transform duration-200">
               <svg className="w-5.5 h-5.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 113.536 0V19h2v2h-4v-2h2v-2.03a5.008 5.008 0 01-3.536-1.864z" />
               </svg>
             </div>
             <div>
-              <span className="text-[9px] uppercase font-bold tracking-widest text-slate-450 block">Quiz Assessments</span>
-              <p className="text-xl font-extrabold text-slate-800 mt-0.5">Active</p>
+              <span className="text-[9px] uppercase font-bold tracking-widest text-slate-500 block">Quiz Assessments</span>
+              <p className="text-xl font-extrabold text-slate-900 mt-0.5">Active</p>
             </div>
           </div>
         </div>
@@ -415,37 +415,37 @@ const Dashboard = () => {
 
         {/* System Stats */}
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-5">
-          <div className="p-5 bg-white border border-slate-200/50 rounded-2xl flex items-center gap-4 shadow-sm shadow-slate-100/30 hover:shadow-md transition-all duration-250 group">
-            <div className="p-3 bg-indigo-50 text-indigo-650 rounded-xl group-hover:scale-105 transition-transform duration-200">
+          <div className="p-5 bg-slate-200 border border-slate-300 rounded-2xl flex items-center gap-4 shadow-none hover:border-slate-350 transition-all duration-250 group">
+            <div className="p-3 bg-indigo-950/40 text-indigo-400 rounded-xl group-hover:scale-105 transition-transform duration-200">
               <svg className="w-5.5 h-5.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" />
               </svg>
             </div>
             <div>
-              <span className="text-[9px] uppercase font-bold tracking-widest text-slate-400 block font-display">System Members</span>
-              <p className="text-2xl font-black text-slate-800 font-display mt-0.5">{users.length}</p>
+              <span className="text-[9px] uppercase font-bold tracking-widest text-slate-500 block font-display">System Members</span>
+              <p className="text-2xl font-black text-slate-900 font-display mt-0.5">{users.length}</p>
             </div>
           </div>
-          <div className="p-5 bg-white border border-slate-200/50 rounded-2xl flex items-center gap-4 shadow-sm shadow-slate-100/30 hover:shadow-md transition-all duration-250 group">
-            <div className="p-3 bg-purple-50 text-purple-650 rounded-xl group-hover:scale-105 transition-transform duration-200">
+          <div className="p-5 bg-slate-200 border border-slate-300 rounded-2xl flex items-center gap-4 shadow-none hover:border-slate-350 transition-all duration-250 group">
+            <div className="p-3 bg-indigo-950/40 text-indigo-400 rounded-xl group-hover:scale-105 transition-transform duration-200">
               <svg className="w-5.5 h-5.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
               </svg>
             </div>
             <div>
-              <span className="text-[9px] uppercase font-bold tracking-widest text-slate-400 block font-display">Total Curriculums</span>
-              <p className="text-2xl font-black text-slate-800 font-display mt-0.5">{courses.length}</p>
+              <span className="text-[9px] uppercase font-bold tracking-widest text-slate-500 block font-display">Total Curriculums</span>
+              <p className="text-2xl font-black text-slate-900 font-display mt-0.5">{courses.length}</p>
             </div>
           </div>
-          <div className="p-5 bg-white border border-slate-200/50 rounded-2xl flex items-center gap-4 shadow-sm shadow-slate-100/30 hover:shadow-md transition-all duration-250 group">
-            <div className="p-3 bg-emerald-50 text-emerald-650 rounded-xl group-hover:scale-105 transition-transform duration-200">
+          <div className="p-5 bg-slate-200 border border-slate-300 rounded-2xl flex items-center gap-4 shadow-none hover:border-slate-350 transition-all duration-250 group">
+            <div className="p-3 bg-emerald-950/30 text-emerald-500 rounded-xl group-hover:scale-105 transition-transform duration-200">
               <svg className="w-5.5 h-5.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.2" d="M9 12l2 2 4-4M7.835 4.697a3.42 3.42 0 001.946-.806 3.42 3.42 0 014.438 0 3.42 3.42 0 001.946.806 3.42 3.42 0 013.138 3.138 3.42 3.42 0 00.806 1.946 3.42 3.42 0 010 4.438 3.42 3.42 0 00-.806 1.946 3.42 3.42 0 01-3.138 3.138 3.42 3.42 0 00-1.946.806 3.42 3.42 0 01-4.438 0 3.42 3.42 0 00-1.946-.806 3.42 3.42 0 01-3.138-3.138z" />
               </svg>
             </div>
             <div>
-              <span className="text-[9px] uppercase font-bold tracking-widest text-slate-400 block font-display">Microservices</span>
-              <p className="text-2xl font-black text-slate-800 font-display mt-0.5">Online</p>
+              <span className="text-[9px] uppercase font-bold tracking-widest text-slate-500 block font-display">Microservices</span>
+              <p className="text-2xl font-black text-slate-900 font-display mt-0.5">Online</p>
             </div>
           </div>
         </div>
@@ -453,12 +453,12 @@ const Dashboard = () => {
         {/* User Management Table */}
         <div>
           <h2 className="text-xs font-extrabold uppercase tracking-wider text-slate-900 mb-4 font-display">Manage System Users</h2>
-          <div className="bg-white border border-slate-200 rounded-3xl overflow-hidden shadow-sm shadow-slate-100/50">
+          <div className="bg-slate-200 border border-slate-300 rounded-3xl overflow-hidden shadow-none">
             {/* Desktop Table View */}
             <div className="hidden md:block overflow-x-auto">
               <table className="w-full text-left text-xs border-collapse">
                 <thead>
-                  <tr className="bg-slate-50 border-b border-slate-200 text-[9px] uppercase font-bold tracking-widest text-slate-500">
+                  <tr className="bg-slate-100 border-b border-slate-300 text-[9px] uppercase font-bold tracking-widest text-slate-500">
                     <th className="px-6 py-4.5">ID</th>
                     <th className="px-6 py-4.5">Name</th>
                     <th className="px-6 py-4.5">Email Address</th>
@@ -466,26 +466,26 @@ const Dashboard = () => {
                     <th className="px-6 py-4.5 text-right">Access Actions</th>
                   </tr>
                 </thead>
-                <tbody className="divide-y divide-slate-100">
+                <tbody className="divide-y divide-slate-300">
                   {users.length === 0 ? (
                     <tr>
-                      <td colSpan="5" className="px-6 py-8 text-center text-slate-400">
+                      <td colSpan="5" className="px-6 py-8 text-center text-slate-500">
                         No registered users found in Auth Database.
                       </td>
                     </tr>
                   ) : (
                     users.map((item) => (
-                      <tr key={item.id} className="hover:bg-slate-50/50 transition-colors duration-150">
-                        <td className="px-6 py-4 font-mono text-slate-400">#{item.id}</td>
-                        <td className="px-6 py-4 font-bold text-slate-800">{item.name}</td>
-                        <td className="px-6 py-4 text-slate-500">{item.email}</td>
+                      <tr key={item.id} className="hover:bg-slate-100/50 transition-colors duration-150">
+                        <td className="px-6 py-4 font-mono text-slate-500">#{item.id}</td>
+                        <td className="px-6 py-4 font-bold text-slate-900">{item.name}</td>
+                        <td className="px-6 py-4 text-slate-650">{item.email}</td>
                         <td className="px-6 py-4">
                           <span className={`px-2 py-0.5 rounded-lg text-[9px] font-extrabold border ${
                             item.role === "ADMIN"
-                              ? "bg-rose-50 text-rose-705 border-rose-100"
+                              ? "bg-rose-955/40 text-rose-300 border-rose-900/55"
                               : item.role === "INSTRUCTOR"
-                              ? "bg-purple-50 text-purple-700 border-purple-100"
-                              : "bg-indigo-50 text-indigo-700 border-indigo-100"
+                              ? "bg-indigo-955/50 text-indigo-400 border-indigo-900/55"
+                              : "bg-indigo-955/50 text-indigo-400 border-indigo-900/55"
                           }`}>
                             {item.role}
                           </span>
@@ -495,10 +495,10 @@ const Dashboard = () => {
                             <div className="w-3.5 h-3.5 border-2 border-indigo-400 border-t-transparent rounded-full animate-spin"></div>
                           ) : (
                             <select
-                              value={item.role}
-                              onChange={(e) => handleRoleChange(item.id, e.target.value)}
-                              disabled={item.email === user.email || userDeleteLoading === item.id}
-                              className="bg-white border border-slate-200 rounded-xl py-1.5 px-3 text-slate-700 focus:outline-none focus:border-indigo-500 transition-colors duration-150 text-[11px] cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed shadow-sm font-semibold"
+                               value={item.role}
+                               onChange={(e) => handleRoleChange(item.id, e.target.value)}
+                               disabled={item.email === user.email || userDeleteLoading === item.id}
+                               className="bg-slate-100 border border-slate-300 rounded-xl py-1.5 px-3 text-slate-800 focus:outline-none focus:border-indigo-500 transition-colors duration-150 text-[11px] cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed shadow-sm font-semibold"
                             >
                               <option value="STUDENT">Student Access</option>
                               <option value="INSTRUCTOR">Instructor Access</option>
@@ -511,7 +511,7 @@ const Dashboard = () => {
                             <button
                               onClick={() => handleDeleteUser(item.id, item.name)}
                               disabled={item.email === user.email || roleUpdateLoading === item.id}
-                              className="p-2 bg-rose-50 hover:bg-rose-100 text-rose-600 disabled:opacity-30 disabled:hover:bg-rose-50 rounded-xl transition-all duration-150 cursor-pointer border border-rose-150"
+                              className="p-2 bg-rose-955/40 hover:bg-rose-900/60 text-rose-400 disabled:opacity-30 disabled:hover:bg-rose-955/40 rounded-xl transition-all duration-150 cursor-pointer border border-rose-900/50"
                               title="Delete User"
                             >
                               <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -526,34 +526,33 @@ const Dashboard = () => {
                 </tbody>
               </table>
             </div>
-
             {/* Mobile Card List View */}
-            <div className="flex flex-col gap-4 md:hidden p-4 bg-slate-50/30">
+            <div className="flex flex-col gap-4 md:hidden p-4 bg-slate-100/30">
               {users.length === 0 ? (
-                <div className="text-center text-slate-400 py-6 text-xs">
+                <div className="text-center text-slate-500 py-6 text-xs">
                   No registered users found in Auth Database.
                 </div>
               ) : (
                 users.map((item) => (
-                  <div key={item.id} className="p-4 bg-white border border-slate-200/80 rounded-2xl flex flex-col gap-3 shadow-xs">
-                    <div className="flex items-center justify-between border-b border-slate-100 pb-2.5">
-                      <span className="font-mono text-slate-400 text-[10px]">#{item.id}</span>
+                  <div key={item.id} className="p-4 bg-slate-200 border border-slate-300 rounded-2xl flex flex-col gap-3 shadow-none">
+                    <div className="flex items-center justify-between border-b border-slate-300 pb-2.5">
+                      <span className="font-mono text-slate-500 text-[10px]">#{item.id}</span>
                       <span className={`px-2 py-0.5 rounded-lg text-[9px] font-extrabold border ${
                         item.role === "ADMIN"
-                          ? "bg-rose-50 text-rose-705 border-rose-100"
+                          ? "bg-rose-955/40 text-rose-300 border-rose-900/55"
                           : item.role === "INSTRUCTOR"
-                          ? "bg-purple-50 text-purple-700 border-purple-100"
-                          : "bg-indigo-50 text-indigo-700 border-indigo-100"
+                          ? "bg-indigo-955/50 text-indigo-400 border-indigo-900/55"
+                          : "bg-indigo-955/50 text-indigo-400 border-indigo-900/55"
                       }`}>
                         {item.role}
                       </span>
                     </div>
                     <div className="flex flex-col gap-1">
-                      <h4 className="font-bold text-slate-800 text-xs truncate">{item.name}</h4>
-                      <p className="text-slate-500 text-[11px] truncate">{item.email}</p>
+                      <h4 className="font-bold text-slate-900 text-xs truncate">{item.name}</h4>
+                      <p className="text-slate-550 text-[11px] truncate">{item.email}</p>
                     </div>
-                    <div className="flex items-center justify-between border-t border-slate-100 pt-2.5 mt-1">
-                      <span className="text-[10px] text-slate-400 font-bold uppercase tracking-wider">Actions</span>
+                    <div className="flex items-center justify-between border-t border-slate-300 pt-2.5 mt-1">
+                      <span className="text-[10px] text-slate-500 font-bold uppercase tracking-wider">Actions</span>
                       <div className="flex items-center gap-2">
                         {roleUpdateLoading === item.id ? (
                           <div className="w-3.5 h-3.5 border-2 border-indigo-400 border-t-transparent rounded-full animate-spin"></div>
@@ -562,7 +561,7 @@ const Dashboard = () => {
                             value={item.role}
                             onChange={(e) => handleRoleChange(item.id, e.target.value)}
                             disabled={item.email === user.email || userDeleteLoading === item.id}
-                            className="bg-white border border-slate-200 rounded-xl py-1.5 px-3 text-slate-705 focus:outline-none focus:border-indigo-500 transition-colors duration-150 text-[11px] cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed shadow-sm font-semibold"
+                            className="bg-slate-100 border border-slate-300 rounded-xl py-1.5 px-3 text-slate-800 focus:outline-none focus:border-indigo-500 transition-colors duration-150 text-[11px] cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed shadow-sm font-semibold"
                           >
                             <option value="STUDENT">Student Access</option>
                             <option value="INSTRUCTOR">Instructor Access</option>
@@ -575,7 +574,7 @@ const Dashboard = () => {
                           <button
                             onClick={() => handleDeleteUser(item.id, item.name)}
                             disabled={item.email === user.email || roleUpdateLoading === item.id}
-                            className="p-2 bg-rose-50 hover:bg-rose-100 text-rose-600 disabled:opacity-30 disabled:hover:bg-rose-50 rounded-xl transition-all duration-150 cursor-pointer border border-rose-150"
+                            className="p-2 bg-rose-955/40 hover:bg-rose-900/60 text-rose-400 disabled:opacity-30 disabled:hover:bg-rose-955/40 rounded-xl transition-all duration-150 cursor-pointer border border-rose-900/50"
                             title="Delete User"
                           >
                             <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -596,25 +595,25 @@ const Dashboard = () => {
         <div>
           <h2 className="text-xs font-bold uppercase tracking-wider text-slate-800 mb-4">Course Registry Management</h2>
           {courses.length === 0 ? (
-            <div className="p-6 text-center text-xs text-slate-500 bg-white border border-slate-200 rounded-3xl shadow-sm">
+            <div className="p-6 text-center text-xs text-slate-500 bg-slate-200 border border-slate-300 rounded-3xl shadow-none">
               No courses registered in system.
             </div>
           ) : (
-            <div className="bg-white border border-slate-200 rounded-3xl overflow-hidden shadow-sm shadow-slate-100/55 p-5">
+            <div className="bg-slate-200 border border-slate-300 rounded-3xl overflow-hidden shadow-none p-5">
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
                 {courses.map((c) => (
-                  <div key={c.id} className="p-4 bg-slate-50 rounded-2xl border border-slate-200/80 flex items-center justify-between shadow-sm shadow-slate-100">
+                  <div key={c.id} className="p-4 bg-slate-100 rounded-2xl border border-slate-300 flex items-center justify-between shadow-none">
                     <div className="min-w-0">
                       <h4 className="text-xs font-extrabold text-slate-800 truncate w-40">{c.title}</h4>
-                      <p className="text-[9px] text-slate-450 font-bold uppercase tracking-widest mt-0.5">{c.modules?.length || 0} Lessons</p>
+                      <p className="text-[9px] text-slate-500 font-bold uppercase tracking-widest mt-0.5">{c.modules?.length || 0} Lessons</p>
                     </div>
                     <div className="flex items-center gap-2">
-                      <Link to={`/courses/${c.id}`} className="px-3 py-1.5 bg-white hover:bg-slate-100 border border-slate-200 text-slate-700 hover:text-indigo-650 rounded-xl text-[10px] font-bold transition-all shadow-sm">
+                      <Link to={`/courses/${c.id}`} className="px-3 py-1.5 bg-slate-200 hover:bg-slate-300 border border-slate-300 text-slate-800 hover:text-indigo-400 rounded-xl text-[10px] font-bold transition-all shadow-sm">
                         Enter
                       </Link>
                       <button
                         onClick={() => handleDeleteCourse(c.id, c.title)}
-                        className="p-1.5 bg-rose-50 hover:bg-rose-100 active:bg-rose-200 text-rose-600 rounded-xl transition-all duration-150 cursor-pointer border border-rose-150"
+                        className="p-1.5 bg-rose-955/40 hover:bg-rose-900/60 active:bg-rose-800 text-rose-400 rounded-xl transition-all duration-150 cursor-pointer border border-rose-900/50"
                         title="Delete Course"
                       >
                         <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
