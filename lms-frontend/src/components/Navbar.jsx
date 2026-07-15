@@ -6,6 +6,12 @@ const Navbar = ({ onMenuToggle }) => {
   const { user, logout } = useAuth();
   const navigate = useNavigate();
 
+  const profileImgUrl = user?.profileImageUrl
+    ? (user.profileImageUrl.startsWith("http")
+      ? user.profileImageUrl
+      : `http://localhost:8080${user.profileImageUrl}`)
+    : null;
+
   const handleLogout = async () => {
     await logout();
     navigate("/login");
@@ -52,9 +58,17 @@ const Navbar = ({ onMenuToggle }) => {
           {/* User profile initial or picture */}
           <div
             onClick={() => navigate("/profile")}
-            className="flex items-center justify-center w-9 h-9 rounded-full bg-gradient-to-tr from-indigo-500 to-indigo-600 text-white font-black text-xs shadow-md cursor-pointer border border-indigo-400/20 hover:scale-105 transition-transform duration-200 font-display"
+            className="flex items-center justify-center w-9 h-9 rounded-full bg-gradient-to-tr from-indigo-500 to-indigo-650 text-white font-black text-xs shadow-md cursor-pointer border border-indigo-400/20 hover:scale-105 transition-transform duration-200 font-display overflow-hidden"
           >
-            {user?.name?.charAt(0).toUpperCase() || "U"}
+            {profileImgUrl ? (
+              <img
+                src={profileImgUrl}
+                alt={user?.name || "User Profile"}
+                className="w-full h-full object-cover"
+              />
+            ) : (
+              user?.name?.charAt(0).toUpperCase() || "U"
+            )}
           </div>
 
           {/* Log Out Button */}

@@ -106,19 +106,27 @@ const useProfileStore = create((set, get) => ({
   },
 
   /** Upload a profile picture. */
-  uploadProfilePicture: async () => {
+  uploadProfilePicture: async (updateUserProfileLocal, user) => {
     const { profile, selectedFile } = get();
     if (!selectedFile) return;
 
     set({ uploadLoading: true, message: { type: "", text: "" } });
     try {
       const updated = await userService.uploadProfilePicture(profile.id, selectedFile);
+      const newImgUrl = `${userService.getProfilePictureUrl(updated.id)}?t=${Date.now()}`;
       set({
         profile: updated,
         selectedFile: null,
-        profileImgUrl: `${userService.getProfilePictureUrl(updated.id)}?t=${Date.now()}`,
+        profileImgUrl: newImgUrl,
         message: { type: "success", text: "Profile picture uploaded successfully!" },
       });
+      // Propagate profileImageUrl change into auth store so Navbar/Sidebar update instantly
+      if (updateUserProfileLocal && user) {
+        updateUserProfileLocal({
+          ...user,
+          profileImageUrl: `${updated.profileImageUrl}?t=${Date.now()}`
+        });
+      }
     } catch (err) {
       console.error(err);
       set({ message: { type: "error", text: "Failed to upload image. Verify size and format." } });

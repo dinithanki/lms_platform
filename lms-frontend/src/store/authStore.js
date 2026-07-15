@@ -1,5 +1,6 @@
 import { create } from "zustand";
 import authService from "../services/authService";
+import userService from "../services/userService";
 
 /**
  * Zustand auth store — drop-in replacement for AuthContext.
@@ -26,6 +27,14 @@ const useAuthStore = create((set, get) => ({
     if (token) {
       try {
         const profile = await authService.getMe();
+        try {
+          const userDetails = await userService.getProfile();
+          if (userDetails && userDetails.profileImageUrl) {
+            profile.profileImageUrl = userDetails.profileImageUrl;
+          }
+        } catch (profileErr) {
+          console.error("Failed to fetch user profile details during initialization", profileErr);
+        }
         localStorage.setItem("user", JSON.stringify(profile));
         set({ user: profile, loading: false });
       } catch (err) {
@@ -55,6 +64,14 @@ const useAuthStore = create((set, get) => ({
       if (!data.token) throw new Error("No token returned from authentication service.");
       localStorage.setItem("token", data.token);
       const profile = await authService.getMe();
+      try {
+        const userDetails = await userService.getProfile();
+        if (userDetails && userDetails.profileImageUrl) {
+          profile.profileImageUrl = userDetails.profileImageUrl;
+        }
+      } catch (profileErr) {
+        console.error("Failed to fetch user profile details during login", profileErr);
+      }
       localStorage.setItem("user", JSON.stringify(profile));
       set({ user: profile });
       return profile;

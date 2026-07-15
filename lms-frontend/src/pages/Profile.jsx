@@ -46,7 +46,7 @@ const Profile = () => {
 
   const handleUploadPicture = (e) => {
     e.preventDefault();
-    uploadProfilePicture();
+    uploadProfilePicture(updateUserProfileLocal, user);
   };
 
   const handleDownloadCert = (courseId, title) => {
