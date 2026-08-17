@@ -1,4 +1,4 @@
-import React, { useEffect } from "react";
+import { useEffect } from "react";
 import { useDialogStore } from "../store/dialogStore";
 
 export default function CustomDialog() {
@@ -117,7 +117,7 @@ export default function CustomDialog() {
             className={`px-5 py-2.5 text-xs font-semibold uppercase tracking-wider text-white rounded-xl shadow-lg transition-all duration-200 cursor-pointer ${
               type === "confirm"
                 ? "bg-gradient-to-r from-accent-600 to-accent-500 hover:from-accent-500 hover:to-accent-400 active:scale-95 shadow-accent-500/10 hover:shadow-accent-500/20"
-                : "bg-gradient-to-r from-warn-600 to-warn-500 hover:from-warn-500 hover:to-warn-400 active:scale-95 shadow-warn-500/10 hover:shadow-warn-500/20"
+                : "bg-gradient-to-r from-warn-600 to-danger-500 hover:from-warn-500 hover:to-danger-400 active:scale-95 shadow-warn-500/10 hover:shadow-warn-500/20"
             }`}
           >
             {confirmLabel}

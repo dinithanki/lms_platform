@@ -1,9 +1,10 @@
-import React, { useEffect } from "react";
+import { useEffect } from "react";
 import { BrowserRouter } from "react-router-dom";
 import AppRoutes from "./routes/AppRoutes";
 import useAuthStore from "./store/authStore";
 import CustomDialog from "./components/CustomDialog";
 import { useDialogStore } from "./store/dialogStore";
+import AmbientBackground from "./components/AmbientBackground";
 
 // Override native window.alert globally to use custom alert box
 window.alert = (message) => {
@@ -30,6 +31,7 @@ function AuthBootstrap({ children }) {
 function App() {
   return (
     <BrowserRouter>
+      <AmbientBackground />
       <AuthBootstrap>
         <AppRoutes />
         <CustomDialog />

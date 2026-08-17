@@ -1,17 +1,26 @@
-import React from "react";
 import { Link } from "react-router-dom";
 
-const CourseCard = ({ course, isEnrolled, progress, onEnroll, isEnrolling, userRole, onDelete }) => {
+const CourseCard = ({
+  course,
+  isEnrolled,
+  progress,
+  onEnroll,
+  isEnrolling,
+  userRole,
+  onDelete,
+}) => {
   // Truncate course description for cleaner grids
   const truncateText = (text, maxLength = 120) => {
     if (!text) return "No description available.";
-    return text.length > maxLength ? `${text.substring(0, maxLength)}...` : text;
+    return text.length > maxLength
+      ? `${text.substring(0, maxLength)}...`
+      : text;
   };
 
   return (
-    <div className="bg-navy-800 border border-navy-700/40 rounded-2xl overflow-hidden flex flex-col justify-between h-full group modern-hover-card">
+    <div className="surface-card rounded-2xl overflow-hidden flex flex-col justify-between h-full group modern-hover-card">
       {/* Course Banner Overlay */}
-      <div className="h-36 bg-gradient-to-br from-navy-700 via-navy-800 to-accent-900/40 p-5 flex flex-col justify-between border-b border-navy-700/40 relative overflow-hidden">
+      <div className="h-36 bg-gradient-to-br from-navy-700 via-navy-800 to-accent-900/50 p-5 flex flex-col justify-between border-b border-navy-700/40 relative overflow-hidden">
         {/* Glow effect */}
         <div className="absolute top-0 right-0 w-24 h-24 bg-accent-500/8 rounded-full blur-2xl group-hover:bg-accent-500/15 transition-all duration-500"></div>
 
@@ -26,8 +35,18 @@ const CourseCard = ({ course, isEnrolled, progress, onEnroll, isEnrolling, userR
               className="p-1.5 bg-danger-700/30 hover:bg-danger-700/50 text-danger-400 rounded-lg transition-colors duration-150 cursor-pointer border border-danger-700/40"
               title="Delete Course"
             >
-              <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+              <svg
+                className="w-3.5 h-3.5"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth="2"
+                  d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"
+                />
               </svg>
             </button>
           )}
@@ -78,7 +97,9 @@ const CourseCard = ({ course, isEnrolled, progress, onEnroll, isEnrolling, userR
           <div className="flex flex-col gap-2 mt-1 bg-navy-850 p-3 rounded-xl border border-navy-700/30">
             <div className="flex justify-between items-center text-[11px]">
               <span className="text-navy-400 font-medium">Your Progress</span>
-              <span className="font-bold text-accent-400">{Math.round(progress)}%</span>
+              <span className="font-bold text-accent-400">
+                {Math.round(progress)}%
+              </span>
             </div>
             <div className="w-full h-1.5 bg-navy-700 rounded-full overflow-hidden">
               <div
@@ -95,7 +116,7 @@ const CourseCard = ({ course, isEnrolled, progress, onEnroll, isEnrolling, userR
             <button
               onClick={() => onEnroll(course.id)}
               disabled={isEnrolling}
-              className="flex-1 py-2.5 text-[13px] font-semibold text-white bg-accent-600 hover:bg-accent-500 active:scale-[0.99] disabled:bg-navy-700 disabled:text-navy-500 border border-transparent rounded-xl transition-all duration-200 flex items-center justify-center gap-2 cursor-pointer shadow-lg shadow-accent-600/15"
+              className="flex-1 py-2.5 text-[13px] font-semibold text-white bg-gradient-to-r from-accent-600 to-cyan-500 hover:from-accent-500 hover:to-cyan-400 active:scale-[0.99] disabled:bg-navy-700 disabled:text-navy-500 border border-transparent rounded-xl transition-all duration-200 flex items-center justify-center gap-2 cursor-pointer shadow-lg shadow-accent-600/15"
             >
               {isEnrolling ? (
                 <>
@@ -109,9 +130,11 @@ const CourseCard = ({ course, isEnrolled, progress, onEnroll, isEnrolling, userR
           ) : (
             <Link
               to={`/courses/${course.id}`}
-              className="flex-grow text-center py-2.5 text-[13px] font-semibold text-navy-200 hover:text-accent-400 bg-navy-700/50 hover:bg-navy-700 border border-navy-700/40 rounded-xl transition-all duration-200"
+              className="flex-grow text-center py-2.5 text-[13px] font-semibold text-navy-200 hover:text-accent-300 bg-navy-700/50 hover:bg-navy-700 border border-navy-700/40 rounded-xl transition-all duration-200"
             >
-              {isEnrolled || userRole !== "STUDENT" ? "Enter Course" : "View Details"}
+              {isEnrolled || userRole !== "STUDENT"
+                ? "Enter Course"
+                : "View Details"}
             </Link>
           )}
         </div>

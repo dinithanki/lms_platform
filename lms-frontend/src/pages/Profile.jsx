@@ -1,4 +1,4 @@
-import React, { useEffect } from "react";
+import { useEffect } from "react";
 import { useAuth } from "../store/authStore";
 import useProfileStore from "../store/profileStore";
 
@@ -58,7 +58,9 @@ const Profile = () => {
       <div className="flex items-center justify-center min-h-[60vh]">
         <div className="flex flex-col items-center gap-3">
           <div className="w-10 h-10 border-4 border-accent-500 border-t-transparent rounded-full animate-spin"></div>
-          <p className="text-sm text-navy-400 font-medium">Loading profile...</p>
+          <p className="text-sm text-navy-400 font-medium">
+            Loading profile...
+          </p>
         </div>
       </div>
     );
@@ -68,7 +70,7 @@ const Profile = () => {
     <div className="flex flex-col md:flex-row gap-8 animate-fadeIn max-w-5xl mx-auto">
       {/* LEFT COL: Picture, Bio Details summary */}
       <div className="w-full md:w-1/3 flex flex-col gap-6">
-        <div className="p-6 bg-navy-800 border border-navy-700/40 rounded-2xl flex flex-col items-center text-center relative overflow-hidden">
+        <div className="surface-card rounded-2xl p-6 flex flex-col items-center text-center relative overflow-hidden">
           <div className="absolute top-0 right-0 w-32 h-32 bg-accent-500/5 rounded-full blur-2xl pointer-events-none"></div>
 
           {/* Profile Picture render */}
@@ -80,13 +82,15 @@ const Profile = () => {
                 className="w-28 h-28 rounded-full object-cover border-2 border-accent-500/20 shadow-lg shadow-black/20"
               />
             ) : (
-              <div className="w-28 h-28 rounded-full bg-gradient-to-br from-accent-500 to-cyan-500 text-white font-bold text-3xl flex items-center justify-center shadow-lg shadow-accent-600/15">
+              <div className="w-28 h-28 rounded-full bg-gradient-to-br from-accent-500 to-cyan-400 text-white font-bold text-3xl flex items-center justify-center shadow-lg shadow-accent-600/15">
                 {profile?.name?.charAt(0).toUpperCase() || "U"}
               </div>
             )}
           </div>
 
-          <h2 className="text-base font-bold text-white mt-4 font-display tracking-tight leading-tight">{profile?.name}</h2>
+          <h2 className="text-base font-bold text-white mt-4 font-display tracking-tight leading-tight">
+            {profile?.name}
+          </h2>
           <span className="text-[11px] uppercase font-semibold tracking-wider text-accent-400 bg-accent-600/10 px-2.5 py-1 rounded-lg border border-accent-600/20 mt-2">
             {profile?.role}
           </span>
@@ -95,7 +99,10 @@ const Profile = () => {
           </p>
 
           {/* Upload image form */}
-          <form onSubmit={handleUploadPicture} className="w-full border-t border-navy-700/30 mt-5 pt-5 flex flex-col gap-3">
+          <form
+            onSubmit={handleUploadPicture}
+            className="w-full border-t border-navy-700/30 mt-5 pt-5 flex flex-col gap-3"
+          >
             <div className="flex flex-col gap-1.5 text-left">
               <label className="text-[11px] font-semibold text-navy-400 uppercase ml-1">
                 Upload Avatar Image
@@ -128,22 +135,27 @@ const Profile = () => {
       {/* RIGHT COL: Forms and Certificates list */}
       <div className="flex-1 flex flex-col gap-6">
         {/* Profile Info form */}
-        <div className="p-6 bg-navy-800 border border-navy-700/40 rounded-2xl">
+        <div className="surface-card rounded-2xl p-6">
           <h3 className="text-sm font-bold uppercase tracking-wider text-white mb-5 pb-2 border-b border-navy-700/30 font-display">
             Account details
           </h3>
 
           {message.text && (
-            <div className={`mb-5 flex items-start gap-2.5 px-4 py-3 rounded-xl text-sm font-medium border ${
-              message.type === "success"
-                ? "bg-success-700/20 border-success-700/30 text-success-400 animate-fadeIn"
-                : "bg-danger-700/20 border-danger-700/30 text-danger-400 animate-fadeIn"
-            }`}>
+            <div
+              className={`mb-5 flex items-start gap-2.5 px-4 py-3 rounded-xl text-sm font-medium border ${
+                message.type === "success"
+                  ? "bg-success-700/20 border-success-700/30 text-success-400 animate-fadeIn"
+                  : "bg-danger-700/20 border-danger-700/30 text-danger-400 animate-fadeIn"
+              }`}
+            >
               <span>{message.text}</span>
             </div>
           )}
 
-          <form onSubmit={handleSaveProfile} className="flex flex-col gap-5 text-sm">
+          <form
+            onSubmit={handleSaveProfile}
+            className="flex flex-col gap-5 text-sm"
+          >
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div className="flex flex-col gap-2">
                 <label className="text-[11px] font-semibold uppercase tracking-wider text-navy-400 ml-1">
@@ -213,7 +225,7 @@ const Profile = () => {
 
         {/* Student Certificates section */}
         {user?.role === "STUDENT" && (
-          <div className="p-6 bg-navy-800 border border-navy-700/40 rounded-2xl">
+          <div className="surface-card rounded-2xl p-6">
             <h3 className="text-sm font-bold uppercase tracking-wider text-white mb-4 pb-2 border-b border-navy-700/30 font-display">
               Earned Certifications
             </h3>
@@ -224,12 +236,14 @@ const Profile = () => {
               </div>
             ) : certificates.length === 0 ? (
               <div className="p-6 border border-dashed border-navy-700/50 text-center rounded-xl bg-navy-850 text-sm text-navy-400">
-                You have not completed any course programs to earn certificates yet.
+                You have not completed any course programs to earn certificates
+                yet.
               </div>
             ) : (
               <div className="flex flex-col gap-3 animate-fadeIn">
                 {certificates.map((cert) => {
-                  const courseTitle = certCourses[cert.courseId] || `Course #${cert.courseId}`;
+                  const courseTitle =
+                    certCourses[cert.courseId] || `Course #${cert.courseId}`;
                   return (
                     <div
                       key={cert.id}
@@ -237,21 +251,41 @@ const Profile = () => {
                     >
                       <div className="flex items-center gap-3">
                         <div className="p-2.5 bg-warn-600/10 text-warn-400 rounded-xl border border-warn-600/20 shrink-0">
-                          <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 14l9-5-9-5-9 5 9 5z" />
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 14l6.16-3.422a12.083 12.083 0 01.665 6.479A11.952 11.952 0 0012 20.055a11.952 11.952 0 00-6.824-2.998 12.078 12.078 0 01.665-6.479L12 14z" />
+                          <svg
+                            className="w-5 h-5"
+                            fill="none"
+                            stroke="currentColor"
+                            viewBox="0 0 24 24"
+                          >
+                            <path
+                              strokeLinecap="round"
+                              strokeLinejoin="round"
+                              strokeWidth="2"
+                              d="M12 14l9-5-9-5-9 5 9 5z"
+                            />
+                            <path
+                              strokeLinecap="round"
+                              strokeLinejoin="round"
+                              strokeWidth="2"
+                              d="M12 14l6.16-3.422a12.083 12.083 0 01.665 6.479A11.952 11.952 0 0012 20.055a11.952 11.952 0 00-6.824-2.998 12.078 12.078 0 01.665-6.479L12 14z"
+                            />
                           </svg>
                         </div>
                         <div className="min-w-0">
-                          <h4 className="text-sm font-semibold text-white truncate">{courseTitle}</h4>
+                          <h4 className="text-sm font-semibold text-white truncate">
+                            {courseTitle}
+                          </h4>
                           <span className="text-[12px] text-navy-400 font-medium block mt-0.5">
-                            Issue Date: {new Date(cert.issuedAt).toLocaleDateString()}
+                            Issue Date:{" "}
+                            {new Date(cert.issuedAt).toLocaleDateString()}
                           </span>
                         </div>
                       </div>
 
                       <button
-                        onClick={() => handleDownloadCert(cert.courseId, courseTitle)}
+                        onClick={() =>
+                          handleDownloadCert(cert.courseId, courseTitle)
+                        }
                         disabled={downloadingCertId === cert.courseId}
                         className="w-full sm:w-auto px-3.5 py-2.5 bg-navy-700/50 hover:bg-navy-700 border border-navy-700/40 text-[12px] font-semibold text-navy-200 rounded-xl flex items-center justify-center gap-1.5 cursor-pointer transition-all duration-150 disabled:opacity-50"
                       >
@@ -259,8 +293,18 @@ const Profile = () => {
                           <div className="w-3.5 h-3.5 border-2 border-navy-400 border-t-transparent rounded-full animate-spin"></div>
                         ) : (
                           <>
-                            <svg className="w-3.5 h-3.5 text-navy-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                            <svg
+                              className="w-3.5 h-3.5 text-navy-400"
+                              fill="none"
+                              stroke="currentColor"
+                              viewBox="0 0 24 24"
+                            >
+                              <path
+                                strokeLinecap="round"
+                                strokeLinejoin="round"
+                                strokeWidth="2.5"
+                                d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
+                              />
                             </svg>
                             Download PDF
                           </>

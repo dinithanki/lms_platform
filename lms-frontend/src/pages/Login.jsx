@@ -1,6 +1,7 @@
-import React, { useState } from "react";
+import { useState } from "react";
 import { Link, useNavigate, useLocation } from "react-router-dom";
 import { useAuth } from "../store/authStore";
+import AuthShowcase from "../components/AuthShowcase";
 
 const Login = () => {
   const { login } = useAuth();
@@ -31,7 +32,7 @@ const Login = () => {
       console.error(err);
       setError(
         err.response?.data?.message ||
-          "Authentication failed. Please verify your credentials."
+          "Authentication failed. Please verify your credentials.",
       );
     } finally {
       setLoading(false);
@@ -39,19 +40,17 @@ const Login = () => {
   };
 
   return (
-    <div className="flex min-h-screen bg-navy-900 font-sans">
+    <div className="app-shell flex min-h-screen bg-transparent font-sans">
       {/* LEFT COLUMN: The login form */}
       <div className="w-full lg:w-1/2 flex items-center justify-center p-6 sm:p-12 relative overflow-hidden">
-        {/* Background Decorative Mesh for Left side */}
-        <div className="absolute top-1/4 left-1/4 w-[25rem] h-[25rem] bg-accent-600/5 rounded-full blur-3xl animate-pulse -z-10"></div>
-        <div className="absolute bottom-1/4 right-1/4 w-[25rem] h-[25rem] bg-purple-600/5 rounded-full blur-3xl -z-10"></div>
+        <div className="absolute inset-0 bg-[radial-gradient(circle_at_top,rgba(46,126,247,0.08),transparent_42%),radial-gradient(circle_at_bottom_left,rgba(20,184,214,0.05),transparent_32%)]" />
 
-        <div className="w-full max-w-md bg-navy-850 border border-navy-700/40 rounded-[2rem] p-6 sm:p-10 shadow-2xl shadow-black/30 z-10">
+        <div className="relative z-10 w-full max-w-md surface-card rounded-[2rem] p-6 sm:p-10 shadow-2xl">
           {/* Header */}
           <div className="flex flex-col items-center mb-8">
-            <div className="flex items-center justify-center w-12 h-12 rounded-2xl bg-gradient-to-br from-accent-500 to-cyan-500 shadow-lg shadow-accent-600/20 text-white mb-4 transform hover:rotate-6 transition-transform duration-300">
+            <div className="icon-surface h-12 w-12 text-white mb-4 transform hover:rotate-6 transition-transform duration-300">
               <svg
-                className="w-7 h-7"
+                className="w-7 h-7 text-accent-300"
                 fill="none"
                 stroke="currentColor"
                 viewBox="0 0 24 24"
@@ -65,10 +64,10 @@ const Login = () => {
               </svg>
             </div>
             <h1 className="text-2xl font-bold text-white tracking-tight font-display text-center">
-              Welcome back
+              Sign In
             </h1>
             <p className="text-sm text-navy-300 mt-2 text-center">
-              Access your courses, quizzes, and certificates
+              Access your learning workspace
             </p>
           </div>
 
@@ -178,64 +177,19 @@ const Login = () => {
               to="/register"
               className="text-accent-400 hover:text-accent-300 font-semibold ml-1.5 transition-colors duration-200"
             >
-              Sign Up
+              Create one
             </Link>
           </div>
         </div>
       </div>
 
       {/* RIGHT COLUMN: The decorative illustration / image */}
-      <div className="hidden lg:flex flex-col justify-between w-1/2 bg-navy-950 p-16 relative overflow-hidden">
-        {/* Background Image with dark overlay */}
-        <div
-          className="absolute inset-0 bg-cover bg-center opacity-15"
-          style={{
-            backgroundImage: `url('https://images.unsplash.com/photo-1516321318423-f06f85e504b3?q=80&w=1200&auto=format&fit=crop')`,
-          }}
-        ></div>
-        <div className="absolute inset-0 bg-gradient-to-tr from-navy-950 via-navy-900/95 to-accent-900/30"></div>
-
-        {/* Brand Header */}
-        <div className="relative z-10 flex items-center gap-3">
-          <div className="flex items-center justify-center w-10 h-10 rounded-xl bg-gradient-to-br from-accent-500 to-cyan-500 shadow-md text-white">
-            <svg
-              className="w-5 h-5"
-              fill="none"
-              stroke="currentColor"
-              viewBox="0 0 24 24"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth="2.5"
-                d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"
-              />
-            </svg>
-          </div>
-          <span className="text-lg font-bold text-white tracking-tight font-display">
-            LearnSphere
-          </span>
-        </div>
-
-        {/* Motivational Message */}
-        <div className="relative z-10 my-auto max-w-lg">
-          <span className="text-[11px] uppercase tracking-widest font-semibold px-3 py-1.5 bg-accent-600/15 text-accent-300 border border-accent-600/25 rounded-full">
-            Accelerate your learning
-          </span>
-          <h2 className="text-4xl font-bold text-white leading-tight font-display mt-5">
-            Master demand-driven technical skills today.
-          </h2>
-          <p className="text-navy-300 mt-4 text-[15px] leading-relaxed max-w-md">
-            Join the premium microservices training platform. Resourced syllabus, automated quiz scoring, and downloadable course certificates.
-          </p>
-        </div>
-
-        {/* Bottom Credits */}
-        <div className="relative z-10 flex items-center justify-between text-sm text-navy-500 font-medium">
-          <span>© 2026 LearnSphere Inc.</span>
-          <span>Core Microservices LMS</span>
-        </div>
-      </div>
+      <AuthShowcase
+        eyebrow="Accelerate your learning"
+        title="A cleaner workspace for courses, quizzes, and certificates."
+        copy="Join a focused LMS built for fast access, clear navigation, and a professional learning experience."
+        variant="login"
+      />
     </div>
   );
 };

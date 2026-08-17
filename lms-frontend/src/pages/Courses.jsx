@@ -1,7 +1,6 @@
 import React, { useEffect } from "react";
 import { useAuth } from "../store/authStore";
 import useCourseStore from "../store/courseStore";
-import quizService from "../services/quizService";
 import CourseCard from "../components/CourseCard";
 import { useDialogStore } from "../store/dialogStore";
 
@@ -35,23 +34,29 @@ const Courses = () => {
   };
 
   const handleDeleteCourse = async (courseId, courseTitle) => {
-    const confirmed = await useDialogStore.getState().showConfirm(
-      `Are you sure you want to permanently delete course "${courseTitle}"? This will delete all modules, progress, enrollments, quiz results, certificates, and the quiz associated with this course.`,
-      "Delete Course"
-    );
+    const confirmed = await useDialogStore
+      .getState()
+      .showConfirm(
+        `Are you sure you want to permanently delete course "${courseTitle}"? This will delete all modules, progress, enrollments, quiz results, certificates, and the quiz associated with this course.`,
+        "Delete Course",
+      );
     if (!confirmed) return;
     try {
       await deleteCourse(courseId);
       alert("Course successfully deleted.");
     } catch (err) {
-      alert(err.response?.data?.message || "Failed to delete the course. Please try again.");
+      alert(
+        err.response?.data?.message ||
+          "Failed to delete the course. Please try again.",
+      );
     }
   };
 
   const filteredCourses = courses.filter(
     (c) =>
       c.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      (c.description && c.description.toLowerCase().includes(searchTerm.toLowerCase()))
+      (c.description &&
+        c.description.toLowerCase().includes(searchTerm.toLowerCase())),
   );
 
   const enrolledIds = enrolledCourses.map((c) => c.id);
@@ -61,7 +66,9 @@ const Courses = () => {
       <div className="flex items-center justify-center min-h-[60vh]">
         <div className="flex flex-col items-center gap-3">
           <div className="w-10 h-10 border-4 border-accent-500 border-t-transparent rounded-full animate-spin"></div>
-          <p className="text-sm text-navy-400 font-medium">Loading course catalog...</p>
+          <p className="text-sm text-navy-400 font-medium">
+            Loading course catalog...
+          </p>
         </div>
       </div>
     );
@@ -70,11 +77,14 @@ const Courses = () => {
   return (
     <div className="flex flex-col gap-6 animate-fadeIn">
       {/* Title Header and Search Bar */}
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-navy-700/30 pb-5">
+      <div className="surface-card rounded-2xl flex flex-col md:flex-row md:items-center justify-between gap-4 border border-navy-700/30 p-5 md:p-6">
         <div>
-          <h1 className="text-xl md:text-2xl font-bold text-white font-display tracking-tight leading-tight">Course Catalog</h1>
+          <h1 className="text-xl md:text-2xl font-bold text-white font-display tracking-tight leading-tight">
+            Course Catalog
+          </h1>
           <p className="text-sm text-navy-400 mt-1.5">
-            Browse through all learning courses available in the LMS microservices platform
+            Browse through all learning courses available in the LMS
+            microservices platform
           </p>
         </div>
 

@@ -1,4 +1,3 @@
-import React from "react";
 import { useAuth } from "../store/authStore";
 import { useNavigate } from "react-router-dom";
 
@@ -7,9 +6,9 @@ const Navbar = ({ onMenuToggle }) => {
   const navigate = useNavigate();
 
   const profileImgUrl = user?.profileImageUrl
-    ? (user.profileImageUrl.startsWith("http")
+    ? user.profileImageUrl.startsWith("http")
       ? user.profileImageUrl
-      : `http://localhost:8080${user.profileImageUrl}`)
+      : `http://localhost:8080${user.profileImageUrl}`
     : null;
 
   const handleLogout = async () => {
@@ -23,18 +22,29 @@ const Navbar = ({ onMenuToggle }) => {
         {/* Mobile Hamburger menu toggle */}
         <button
           onClick={onMenuToggle}
-          className="p-2 text-navy-400 hover:text-accent-400 hover:bg-navy-700/50 rounded-lg md:hidden transition-colors cursor-pointer"
+          className="icon-surface h-10 w-10 text-navy-300 hover:text-accent-300 md:hidden transition-colors cursor-pointer"
           aria-label="Toggle menu"
         >
-          <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 6h16M4 12h16M4 18h16" />
+          <svg
+            className="w-5 h-5"
+            fill="none"
+            stroke="currentColor"
+            viewBox="0 0 24 24"
+          >
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              strokeWidth="2"
+              d="M4 6h16M4 12h16M4 18h16"
+            />
           </svg>
         </button>
 
         {/* Title */}
         <div>
           <h2 className="text-sm font-medium text-navy-100 hidden md:block">
-            Welcome back, <span className="font-bold gradient-text">{user?.name}</span> 👋
+            Welcome back,{" "}
+            <span className="font-bold gradient-text">{user?.name}</span> 👋
           </h2>
           <h2 className="text-xs font-bold tracking-widest text-accent-400 md:hidden uppercase font-display">
             LearnSphere
@@ -58,7 +68,7 @@ const Navbar = ({ onMenuToggle }) => {
           {/* User profile initial or picture */}
           <div
             onClick={() => navigate("/profile")}
-            className="flex items-center justify-center w-9 h-9 rounded-full bg-gradient-to-br from-accent-500 to-cyan-500 text-white font-bold text-xs shadow-lg shadow-accent-600/20 cursor-pointer border border-accent-400/20 hover:scale-105 transition-transform duration-200 overflow-hidden"
+            className="flex items-center justify-center w-9 h-9 rounded-full bg-gradient-to-br from-accent-500 to-cyan-400 text-white font-bold text-xs shadow-lg shadow-accent-600/20 cursor-pointer border border-accent-400/20 hover:scale-105 transition-transform duration-200 overflow-hidden"
           >
             {profileImgUrl ? (
               <img
@@ -74,7 +84,7 @@ const Navbar = ({ onMenuToggle }) => {
           {/* Log Out Button */}
           <button
             onClick={handleLogout}
-            className="flex items-center justify-center p-2 text-navy-400 hover:text-danger-400 hover:bg-navy-700/50 rounded-lg transition-all duration-200 cursor-pointer"
+            className="icon-surface h-10 w-10 text-navy-300 hover:text-danger-400 transition-all duration-200 cursor-pointer"
             title="Log Out"
           >
             <svg
