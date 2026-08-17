@@ -10,7 +10,7 @@ const Register = () => {
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [role, setRole] = useState("STUDENT"); // Default role
+  const [role, setRole] = useState("STUDENT");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
 
@@ -29,6 +29,7 @@ const Register = () => {
     }
 
     setLoading(true);
+
     try {
       await register(name, email, password, role);
       navigate("/dashboard");
@@ -44,17 +45,17 @@ const Register = () => {
   };
 
   return (
-    <div className="app-shell flex min-h-screen bg-transparent font-sans">
+    <div className="app-shell flex h-screen overflow-hidden bg-transparent font-sans">
       {/* LEFT COLUMN: Registration form */}
-      <div className="w-full lg:w-1/2 flex items-center justify-center p-6 sm:p-12 relative overflow-hidden">
+      <div className="w-full lg:w-1/2 flex items-center justify-center px-4 py-4 sm:px-6 relative overflow-hidden">
         <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_right,rgba(124,58,237,0.08),transparent_40%),radial-gradient(circle_at_bottom_left,rgba(46,126,247,0.05),transparent_34%)]" />
 
-        <div className="relative z-10 w-full max-w-md surface-card rounded-[2rem] p-6 sm:p-10 shadow-2xl">
+        <div className="relative z-10 w-full max-w-md surface-card rounded-[1.5rem] p-5 sm:p-6 shadow-2xl">
           {/* Header */}
-          <div className="flex flex-col items-center mb-6">
-            <div className="icon-surface h-12 w-12 text-white mb-4 transform hover:rotate-6 transition-transform duration-300">
+          <div className="flex flex-col items-center mb-4">
+            <div className="icon-surface h-10 w-10 text-white mb-2 transform hover:rotate-6 transition-transform duration-300">
               <svg
-                className="w-7 h-7 text-accent-300"
+                className="w-6 h-6 text-accent-300"
                 fill="none"
                 stroke="currentColor"
                 viewBox="0 0 24 24"
@@ -67,18 +68,21 @@ const Register = () => {
                 />
               </svg>
             </div>
+
             <h1 className="text-2xl font-bold text-white tracking-tight font-display text-center">
               Sign Up
             </h1>
-            <p className="text-sm text-navy-300 mt-2 text-center">
+
+            <p className="text-sm text-navy-300 mt-1.5 text-center">
               Create your learner or instructor profile
             </p>
           </div>
 
           {/* Form */}
-          <form onSubmit={handleSubmit} className="flex flex-col gap-4">
+          <form onSubmit={handleSubmit} className="flex flex-col gap-3">
+            {/* Error */}
             {error && (
-              <div className="flex items-start gap-2.5 bg-danger-700/20 border border-danger-700/40 text-danger-400 px-4 py-3 rounded-xl text-sm leading-relaxed">
+              <div className="flex items-start gap-2.5 bg-danger-700/20 border border-danger-700/40 text-danger-400 px-3.5 py-2.5 rounded-xl text-sm leading-relaxed">
                 <svg
                   className="w-4 h-4 shrink-0 mt-0.5"
                   fill="none"
@@ -92,14 +96,17 @@ const Register = () => {
                     d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
                   />
                 </svg>
+
                 <span className="font-medium">{error}</span>
               </div>
             )}
 
-            <div className="flex flex-col gap-2">
+            {/* Full Name */}
+            <div className="flex flex-col gap-1.5">
               <label className="text-[11px] font-semibold uppercase tracking-wider text-navy-400 ml-1">
                 Full Name
               </label>
+
               <div className="relative">
                 <span className="absolute inset-y-0 left-0 flex items-center pl-3.5 text-navy-500">
                   <svg
@@ -116,21 +123,24 @@ const Register = () => {
                     />
                   </svg>
                 </span>
+
                 <input
                   type="text"
                   value={name}
                   onChange={(e) => setName(e.target.value)}
-                  className="w-full bg-navy-800 border border-navy-700/50 focus:border-accent-500 focus:ring-2 focus:ring-accent-500/20 rounded-xl py-3 pl-11 pr-4 text-sm text-navy-100 placeholder-navy-500 transition-all duration-200"
+                  className="w-full bg-navy-800 border border-navy-700/50 focus:border-accent-500 focus:ring-2 focus:ring-accent-500/20 rounded-xl py-2.5 pl-11 pr-4 text-sm text-navy-100 placeholder-navy-500 transition-all duration-200"
                   placeholder="John Doe"
                   required
                 />
               </div>
             </div>
 
-            <div className="flex flex-col gap-2">
+            {/* Email */}
+            <div className="flex flex-col gap-1.5">
               <label className="text-[11px] font-semibold uppercase tracking-wider text-navy-400 ml-1">
                 Email Address
               </label>
+
               <div className="relative">
                 <span className="absolute inset-y-0 left-0 flex items-center pl-3.5 text-navy-500">
                   <svg
@@ -147,21 +157,24 @@ const Register = () => {
                     />
                   </svg>
                 </span>
+
                 <input
                   type="email"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
-                  className="w-full bg-navy-800 border border-navy-700/50 focus:border-accent-500 focus:ring-2 focus:ring-accent-500/20 rounded-xl py-3 pl-11 pr-4 text-sm text-navy-100 placeholder-navy-500 transition-all duration-200"
+                  className="w-full bg-navy-800 border border-navy-700/50 focus:border-accent-500 focus:ring-2 focus:ring-accent-500/20 rounded-xl py-2.5 pl-11 pr-4 text-sm text-navy-100 placeholder-navy-500 transition-all duration-200"
                   placeholder="you@example.com"
                   required
                 />
               </div>
             </div>
 
-            <div className="flex flex-col gap-2">
+            {/* Password */}
+            <div className="flex flex-col gap-1.5">
               <label className="text-[11px] font-semibold uppercase tracking-wider text-navy-400 ml-1">
                 Password
               </label>
+
               <div className="relative">
                 <span className="absolute inset-y-0 left-0 flex items-center pl-3.5 text-navy-500">
                   <svg
@@ -178,26 +191,29 @@ const Register = () => {
                     />
                   </svg>
                 </span>
+
                 <input
                   type="password"
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
-                  className="w-full bg-navy-800 border border-navy-700/50 focus:border-accent-500 focus:ring-2 focus:ring-accent-500/20 rounded-xl py-3 pl-11 pr-4 text-sm text-navy-100 placeholder-navy-500 transition-all duration-200"
+                  className="w-full bg-navy-800 border border-navy-700/50 focus:border-accent-500 focus:ring-2 focus:ring-accent-500/20 rounded-xl py-2.5 pl-11 pr-4 text-sm text-navy-100 placeholder-navy-500 transition-all duration-200"
                   placeholder="Min. 6 characters"
                   required
                 />
               </div>
             </div>
 
-            <div className="flex flex-col gap-2">
+            {/* Role */}
+            <div className="flex flex-col gap-1.5">
               <label className="text-[11px] font-semibold uppercase tracking-wider text-navy-400 ml-1">
                 Join Workspace As
               </label>
-              <div className="grid grid-cols-2 gap-2 bg-navy-800 p-1.5 rounded-xl border border-navy-700/50">
+
+              <div className="grid grid-cols-2 gap-2 bg-navy-800 p-1 rounded-xl border border-navy-700/50">
                 <button
                   type="button"
                   onClick={() => setRole("STUDENT")}
-                  className={`py-2.5 text-[12px] truncate px-1 font-semibold rounded-lg transition-all duration-150 cursor-pointer ${
+                  className={`py-2 text-[12px] truncate px-1 font-semibold rounded-lg transition-all duration-150 cursor-pointer ${
                     role === "STUDENT"
                       ? "bg-accent-600 text-white shadow-md"
                       : "text-navy-400 hover:text-navy-200"
@@ -205,10 +221,11 @@ const Register = () => {
                 >
                   Student
                 </button>
+
                 <button
                   type="button"
                   onClick={() => setRole("INSTRUCTOR")}
-                  className={`py-2.5 text-[12px] truncate px-1 font-semibold rounded-lg transition-all duration-150 cursor-pointer ${
+                  className={`py-2 text-[12px] truncate px-1 font-semibold rounded-lg transition-all duration-150 cursor-pointer ${
                     role === "INSTRUCTOR"
                       ? "bg-accent-600 text-white shadow-md"
                       : "text-navy-400 hover:text-navy-200"
@@ -219,10 +236,11 @@ const Register = () => {
               </div>
             </div>
 
+            {/* Submit */}
             <button
               type="submit"
               disabled={loading}
-              className="w-full bg-accent-600 hover:bg-accent-500 active:scale-[0.98] disabled:bg-navy-700 disabled:text-navy-500 text-white font-semibold text-sm rounded-xl py-3.5 mt-2 transition-all duration-200 flex items-center justify-center gap-2 shadow-lg shadow-accent-600/20 cursor-pointer"
+              className="w-full bg-accent-600 hover:bg-accent-500 active:scale-[0.98] disabled:bg-navy-700 disabled:text-navy-500 text-white font-semibold text-sm rounded-xl py-3 mt-1 transition-all duration-200 flex items-center justify-center gap-2 shadow-lg shadow-accent-600/20 cursor-pointer"
             >
               {loading ? (
                 <>
@@ -236,8 +254,9 @@ const Register = () => {
           </form>
 
           {/* Footer */}
-          <div className="flex justify-center mt-5 text-sm text-navy-400">
+          <div className="flex justify-center mt-4 text-sm text-navy-400">
             <span>Already have an account?</span>
+
             <Link
               to="/login"
               className="text-accent-400 hover:text-accent-300 font-semibold ml-1.5 transition-colors duration-200"
@@ -248,7 +267,7 @@ const Register = () => {
         </div>
       </div>
 
-      {/* RIGHT COLUMN: The decorative illustration / image */}
+      {/* RIGHT COLUMN: Decorative illustration / image */}
       <AuthShowcase
         eyebrow="Join the catalog"
         title="Build credentials with a focused, professional learning layout."
