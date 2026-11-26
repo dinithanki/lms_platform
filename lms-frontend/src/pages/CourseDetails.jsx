@@ -250,11 +250,11 @@ const CourseDetails = () => {
   return (
     <div className="flex flex-col gap-6 animate-fadeIn max-w-5xl mx-auto">
       {/* Course Banner Header */}
-      <div className="p-6 md:p-8 bg-gradient-to-br from-accent-900/50 via-navy-800 to-navy-850 border border-navy-700/40 rounded-2xl relative overflow-hidden flex flex-col justify-between gap-6">
+      <div className="course-detail-banner p-6 md:p-8 bg-gradient-to-br from-accent-900/50 via-navy-800 to-navy-850 border border-navy-700/40 rounded-2xl relative overflow-hidden flex flex-col justify-between gap-6">
         <div className="absolute top-0 right-0 w-[30rem] h-[30rem] bg-accent-500/5 rounded-full blur-3xl pointer-events-none"></div>
 
         <div>
-          <span className="text-[11px] uppercase font-semibold tracking-widest px-2.5 py-1.5 bg-accent-600/15 text-accent-300 border border-accent-600/25 rounded-full w-fit">
+          <span className="course-detail-badge text-[11px] uppercase font-semibold tracking-widest px-2.5 py-1.5 bg-accent-600/15 text-accent-300 border border-accent-600/25 rounded-full w-fit">
             Course details
           </span>
           <h1 className="text-xl md:text-2xl font-bold text-white mt-3.5 font-display tracking-tight leading-tight">{course.title}</h1>
@@ -279,20 +279,20 @@ const CourseDetails = () => {
 
         {/* Student Progress Banner */}
         {user.role === "STUDENT" && isEnrolled && progress && (
-          <div className="flex flex-col sm:flex-row sm:items-center gap-4 sm:gap-6 bg-navy-700/30 border border-navy-700/30 p-4 rounded-xl w-full sm:w-fit backdrop-blur-sm">
+          <div className="course-progress-panel flex flex-col sm:flex-row sm:items-center gap-4 sm:gap-6 bg-navy-700/30 border border-navy-700/30 p-4 rounded-xl w-full sm:w-fit backdrop-blur-sm">
             <div className="flex flex-col gap-1">
               <span className="text-[11px] uppercase font-semibold text-navy-400 tracking-wider">Your Progression</span>
               <span className="text-sm font-semibold text-white">
                 {progress.completedModulesCount} / {progress.totalModulesCount} Modules Completed
               </span>
             </div>
-            <div className="w-full sm:w-48 h-2.5 bg-navy-700 rounded-full overflow-hidden">
+            <div className="course-progress-track w-full sm:w-48 h-2.5 bg-navy-700 rounded-full overflow-hidden">
               <div
-                className="h-full bg-gradient-to-r from-accent-500 to-cyan-500 rounded-full transition-all duration-500"
+                className="course-progress-fill h-full bg-gradient-to-r from-accent-500 to-cyan-500 rounded-full transition-all duration-500"
                 style={{ width: `${progress.progressPercent}%` }}
               ></div>
             </div>
-            <span className="text-sm font-bold text-accent-400">{Math.round(progress.progressPercent)}%</span>
+            <span className="course-progress-percent text-sm font-bold text-accent-400">{Math.round(progress.progressPercent)}%</span>
           </div>
         )}
       </div>

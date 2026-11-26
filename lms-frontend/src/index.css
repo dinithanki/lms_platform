@@ -189,6 +189,33 @@
 :root:not(.dark) .dashboard-admin-banner .pointer-events-none {
   opacity: 0.22;
 }
+:root:not(.dark) .course-detail-banner {
+  background: #ffffff !important;
+  border-color: #e2e8f0 !important;
+  box-shadow: 0 1px 3px rgb(15 23 42 / 5%), 0 12px 28px -24px rgb(15 23 42 / 18%);
+}
+:root:not(.dark) .course-detail-banner > .pointer-events-none {
+  opacity: 0.2;
+}
+:root:not(.dark) .course-detail-badge {
+  background: #eff6ff !important;
+  border-color: #bfdbfe !important;
+  color: #1d4ed8 !important;
+}
+:root:not(.dark) .course-progress-panel {
+  background: #f8fbff !important;
+  border-color: #dbeafe !important;
+  backdrop-filter: none;
+}
+:root:not(.dark) .course-progress-track {
+  background: #dbeafe !important;
+}
+:root:not(.dark) .course-progress-fill {
+  background: #2563eb !important;
+}
+:root:not(.dark) .course-progress-percent {
+  color: #1d4ed8 !important;
+}
 
 /* Preserve the current pages' light-surface text contrast until their redesign phase. */
 .app-shell :not(button):not(a).text-white,
