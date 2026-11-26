@@ -34,6 +34,7 @@ const Navbar = ({ onMenuToggle, onSidebarToggle, isSidebarCollapsed }) => {
     { label: "Dashboard", path: "/dashboard" }, { label: "Course catalog", path: "/courses" },
     ...(user?.role === "STUDENT" ? [{ label: "My learning", path: "/my-courses" }] : []),
     ...(user?.role === "ADMIN" ? [{ label: "User management", path: "/admin/users" }] : []),
+    ...(user?.role === "ADMIN" ? [{ label: "Course management", path: "/admin/courses" }] : []),
     { label: "My profile", path: "/profile" },
   ].filter((item) => item.label.toLowerCase().includes(query.trim().toLowerCase())), [query, user?.role]);
 

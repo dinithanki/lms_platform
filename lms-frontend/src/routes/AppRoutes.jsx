@@ -14,6 +14,7 @@ import MyCourses from "../pages/MyCourses";
 import Profile from "../pages/Profile";
 import NotFound from "../pages/NotFound";
 import UserManagement from "../pages/UserManagement";
+import CourseManagement from "../pages/CourseManagement";
 
 const DashboardLayout = () => {
   const [isSidebarOpen, setIsSidebarOpen] = React.useState(false);
@@ -68,6 +69,7 @@ const AppRoutes = () => {
           {/* Admin-only account management */}
           <Route element={<ProtectedRoute allowedRoles={["ADMIN"]} />}>
             <Route path="/admin/users" element={<UserManagement />} />
+            <Route path="/admin/courses" element={<CourseManagement />} />
           </Route>
 
           {/* Student-only routes */}
