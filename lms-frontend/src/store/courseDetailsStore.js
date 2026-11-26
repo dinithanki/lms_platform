@@ -56,7 +56,7 @@ const useCourseDetailsStore = create((set, get) => ({
 
             if (modules && modules.length > 0) {
               const incomplete = modules.find(
-                (m) => !prog.completedModuleIds || !prog.completedModuleIds.includes(m.id)
+                (m) => !prog.completedModuleIds || !prog.completedModuleIds.some((completedId) => String(completedId) === String(m.id))
               );
               set({ selectedModule: incomplete || modules[0] });
             }

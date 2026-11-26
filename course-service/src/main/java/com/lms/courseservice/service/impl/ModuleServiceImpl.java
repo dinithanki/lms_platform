@@ -137,6 +137,13 @@ public class ModuleServiceImpl implements ModuleService {
         dto.setStudentId(studentId);
         dto.setCourseId(courseId);
         dto.setCompletedModulesCount(completedModules);
+        List<Long> completedModuleIds = totalModules == 0 ? List.of() : moduleProgressRepository
+                .findByStudentIdAndModuleIdIn(studentId, modules.stream().map(Module::getId).collect(Collectors.toList()))
+                .stream()
+                .filter(ModuleProgress::isCompleted)
+                .map(ModuleProgress::getModuleId)
+                .collect(Collectors.toList());
+        dto.setCompletedModuleIds(completedModuleIds);
         dto.setTotalModulesCount(totalModules);
         dto.setProgressPercentage(progressPercentage);
         dto.setQuizUnlocked(quizUnlocked);

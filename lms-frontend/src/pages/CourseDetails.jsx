@@ -369,7 +369,7 @@ const CourseDetails = () => {
                               )}
                             </div>
                             <div className="shrink-0">
-                              {progress && progress.completedModuleIds && progress.completedModuleIds.includes(selectedModule.id) ? (
+                              {progress?.completedModuleIds?.some((completedId) => String(completedId) === String(selectedModule.id)) ? (
                                 <span className="flex items-center gap-1.5 px-4 py-2 bg-success-700/20 text-success-400 border border-success-700/30 rounded-xl text-sm font-semibold">
                                   <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="3" d="M5 13l4 4L19 7" />
@@ -400,7 +400,7 @@ const CourseDetails = () => {
                     <h3 className="text-[12px] font-bold uppercase tracking-wider text-navy-400 mb-1 pl-1">Course Curriculum</h3>
                     <div className="flex flex-col gap-3 relative pl-3.5 border-l border-navy-700/40">
                       {course.modules.map((mod, index) => {
-                        const isCompleted = progress && progress.completedModuleIds && progress.completedModuleIds.includes(mod.id);
+                        const isCompleted = progress?.completedModuleIds?.some((completedId) => String(completedId) === String(mod.id)) ?? false;
                         const isSelected = selectedModule && selectedModule.id === mod.id;
                         return (
                           <div
@@ -423,9 +423,19 @@ const CourseDetails = () => {
                                 : "bg-navy-800 border-navy-700/40 hover:border-navy-600"
                             }`}>
                               <div className="flex-1 min-w-0">
-                                <h4 className={`text-sm font-semibold truncate ${isSelected ? "text-accent-400" : "text-navy-100"}`}>
-                                  {mod.title}
-                                </h4>
+                                <div className="flex items-center justify-between gap-2">
+                                  <h4 className={`text-sm font-semibold truncate ${isSelected ? "text-accent-400" : "text-navy-100"}`}>
+                                    {mod.title}
+                                  </h4>
+                                  {isCompleted && (
+                                    <span className="inline-flex shrink-0 items-center gap-1 rounded-md border border-success-700/30 bg-success-700/20 px-2 py-0.5 text-[10px] font-semibold text-success-400">
+                                      <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M5 13l4 4L19 7" />
+                                      </svg>
+                                      Completed
+                                    </span>
+                                  )}
+                                </div>
                                 <div className="flex items-center gap-2.5 mt-1.5 text-[12px] text-navy-400 font-medium">
                                   <span className="flex items-center gap-0.5 text-accent-400">
                                     <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">

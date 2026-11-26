@@ -38,7 +38,7 @@ class CertificateTemplateRenderingTest {
         assertTrue(html.contains("for successfully meeting all academic requirements"));
         assertTrue(html.contains("and passing the final examinations for the course"));
         assertTrue(html.contains("class=\"course-name\""));
-        assertTrue(html.contains("class=\"cert-score\""));
+        assertTrue(html.contains("class=\"score-line\""));
 
         ByteArrayOutputStream output = new ByteArrayOutputStream();
         PdfRendererBuilder builder = new PdfRendererBuilder();
