@@ -25,15 +25,15 @@ const AmbientBackground = () => {
       aria-hidden="true"
       className="pointer-events-none fixed inset-0 -z-10 overflow-hidden"
     >
-      <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_left,rgba(46,126,247,0.18),transparent_30%),radial-gradient(circle_at_top_right,rgba(20,184,214,0.16),transparent_28%),linear-gradient(180deg,rgba(3,7,18,1)_0%,rgba(9,17,31,1)_45%,rgba(3,7,18,1)_100%)]" />
-      <div className="absolute inset-0 panel-grid opacity-[0.22] mix-blend-soft-light" />
+      <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_left,rgba(99,102,241,0.18),transparent_28%),radial-gradient(circle_at_top_right,rgba(6,182,212,0.14),transparent_26%),linear-gradient(180deg,rgba(250,252,255,1)_0%,rgba(240,245,250,1)_48%,rgba(247,250,253,1)_100%)]" />
+      <div className="absolute inset-0 panel-grid opacity-[0.22] mix-blend-multiply" />
 
-      <div className="hero-orb hero-orb-slow left-[-8rem] top-[12vh] h-72 w-72 bg-accent-500/18" />
-      <div className="hero-orb hero-orb-fast right-[-5rem] top-[18vh] h-80 w-80 bg-cyan-500/14" />
-      <div className="hero-orb hero-orb-slow bottom-[-7rem] left-[32%] h-96 w-96 bg-purple-500/12" />
+      <div className="hero-orb hero-orb-slow -left-32 top-[12vh] h-72 w-72 bg-accent-500/16" />
+      <div className="hero-orb hero-orb-fast -right-20 top-[18vh] h-80 w-80 bg-cyan-500/12" />
+      <div className="hero-orb hero-orb-slow -bottom-28 left-[32%] h-96 w-96 bg-purple-500/10" />
 
       <div
-        className="absolute h-56 w-56 rounded-full bg-white/8 blur-3xl transition-transform duration-200 ease-out"
+        className="absolute h-56 w-56 rounded-full bg-white/60 blur-3xl transition-transform duration-200 ease-out"
         style={{
           left: "var(--pointer-x, 50vw)",
           top: "var(--pointer-y, 36vh)",
@@ -41,7 +41,7 @@ const AmbientBackground = () => {
         }}
       />
 
-      <div className="absolute inset-0 bg-[linear-gradient(135deg,rgba(255,255,255,0.02),transparent_25%,rgba(255,255,255,0.02)_50%,transparent_75%)] opacity-30 [mask-image:linear-gradient(180deg,black,transparent_92%)]" />
+      <div className="absolute inset-0 bg-[linear-gradient(135deg,rgba(255,255,255,0.45),transparent_25%,rgba(255,255,255,0.32)_50%,transparent_75%)] opacity-35 mask-[linear-gradient(180deg,black,transparent_92%)]" />
     </div>
   );
 };

@@ -16,12 +16,30 @@ import NotFound from "../pages/NotFound";
 
 const DashboardLayout = () => {
   const [isSidebarOpen, setIsSidebarOpen] = React.useState(false);
+  const [isSidebarCollapsed, setIsSidebarCollapsed] = React.useState(false);
+
+  const handleMenuToggle = () => {
+    if (window.innerWidth < 768) {
+      setIsSidebarOpen((current) => !current);
+      return;
+    }
+
+    setIsSidebarCollapsed((current) => !current);
+  };
 
   return (
     <div className="app-shell flex min-h-screen bg-transparent text-navy-200 font-sans">
-      <Sidebar isOpen={isSidebarOpen} onClose={() => setIsSidebarOpen(false)} />
+      <Sidebar
+        isOpen={isSidebarOpen}
+        isCollapsed={isSidebarCollapsed}
+        onClose={() => setIsSidebarOpen(false)}
+      />
       <div className="flex-1 flex flex-col min-w-0 overflow-hidden">
-        <Navbar onMenuToggle={() => setIsSidebarOpen(!isSidebarOpen)} />
+        <Navbar
+          onMenuToggle={handleMenuToggle}
+          onSidebarToggle={() => setIsSidebarCollapsed((current) => !current)}
+          isSidebarCollapsed={isSidebarCollapsed}
+        />
         <main className="relative z-10 flex-1 overflow-y-auto p-4 md:p-6 lg:p-8">
           <Outlet />
         </main>

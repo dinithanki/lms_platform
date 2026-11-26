@@ -1,7 +1,7 @@
 import { useAuth } from "../store/authStore";
 import { useNavigate } from "react-router-dom";
 
-const Navbar = ({ onMenuToggle }) => {
+const Navbar = ({ onMenuToggle, onSidebarToggle, isSidebarCollapsed }) => {
   const { user, logout } = useAuth();
   const navigate = useNavigate();
 
@@ -40,6 +40,36 @@ const Navbar = ({ onMenuToggle }) => {
           </svg>
         </button>
 
+        <button
+          onClick={onSidebarToggle}
+          className="hidden md:inline-flex icon-surface h-10 w-10 text-navy-400 hover:text-accent-500 transition-colors cursor-pointer"
+          aria-label={isSidebarCollapsed ? "Expand sidebar" : "Collapse sidebar"}
+          title={isSidebarCollapsed ? "Expand sidebar" : "Collapse sidebar"}
+        >
+          <svg
+            className="w-5 h-5"
+            fill="none"
+            stroke="currentColor"
+            viewBox="0 0 24 24"
+          >
+            {isSidebarCollapsed ? (
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth="2"
+                d="M9 6l6 6-6 6"
+              />
+            ) : (
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth="2"
+                d="M15 6l-6 6 6 6"
+              />
+            )}
+          </svg>
+        </button>
+
         {/* Title */}
         <div>
           <h2 className="text-sm font-medium text-navy-100 hidden md:block">
@@ -56,7 +86,7 @@ const Navbar = ({ onMenuToggle }) => {
       <div className="flex items-center gap-3">
         {/* User Card */}
         <div className="flex items-center gap-3">
-          <div className="flex flex-col text-right hidden sm:flex">
+          <div className="flex flex-col text-right">
             <span className="text-[13px] font-semibold text-navy-100">
               {user?.name}
             </span>
@@ -68,7 +98,7 @@ const Navbar = ({ onMenuToggle }) => {
           {/* User profile initial or picture */}
           <div
             onClick={() => navigate("/profile")}
-            className="flex items-center justify-center w-9 h-9 rounded-full bg-gradient-to-br from-accent-500 to-cyan-400 text-white font-bold text-xs shadow-lg shadow-accent-600/20 cursor-pointer border border-accent-400/20 hover:scale-105 transition-transform duration-200 overflow-hidden"
+            className="flex items-center justify-center w-9 h-9 rounded-full bg-linear-to-br from-accent-500 to-cyan-400 text-white font-bold text-xs shadow-lg shadow-accent-600/20 cursor-pointer border border-accent-400/20 hover:scale-105 transition-transform duration-200 overflow-hidden"
           >
             {profileImgUrl ? (
               <img
@@ -88,7 +118,7 @@ const Navbar = ({ onMenuToggle }) => {
             title="Log Out"
           >
             <svg
-              className="w-[18px] h-[18px]"
+              className="w-4.5 h-4.5"
               fill="none"
               stroke="currentColor"
               viewBox="0 0 24 24"
