@@ -2,6 +2,14 @@ import { create } from "zustand";
 import authService from "../services/authService";
 import userService from "../services/userService";
 
+const mergeProfileDetails = (authProfile, userProfile) => ({
+  ...authProfile,
+  // Editable profile fields are stored by User Service; Auth Service /me may
+  // still contain the original registration name in its separate user record.
+  name: userProfile?.name || authProfile?.name,
+  profileImageUrl: userProfile?.profileImageUrl || authProfile?.profileImageUrl,
+});
+
 /**
  * Zustand auth store — drop-in replacement for AuthContext.
  * Exports `useAuth` so every existing consumer only needs a 1-line import swap.
@@ -29,9 +37,7 @@ const useAuthStore = create((set, get) => ({
         const profile = await authService.getMe();
         try {
           const userDetails = await userService.getProfile();
-          if (userDetails && userDetails.profileImageUrl) {
-            profile.profileImageUrl = userDetails.profileImageUrl;
-          }
+          Object.assign(profile, mergeProfileDetails(profile, userDetails));
         } catch (profileErr) {
           console.error("Failed to fetch user profile details during initialization", profileErr);
         }
@@ -66,9 +72,7 @@ const useAuthStore = create((set, get) => ({
       const profile = await authService.getMe();
       try {
         const userDetails = await userService.getProfile();
-        if (userDetails && userDetails.profileImageUrl) {
-          profile.profileImageUrl = userDetails.profileImageUrl;
-        }
+        Object.assign(profile, mergeProfileDetails(profile, userDetails));
       } catch (profileErr) {
         console.error("Failed to fetch user profile details during login", profileErr);
       }
@@ -92,6 +96,12 @@ const useAuthStore = create((set, get) => ({
       if (!data.token) throw new Error("No token returned after registration.");
       localStorage.setItem("token", data.token);
       const profile = await authService.getMe();
+      try {
+        const userDetails = await userService.getProfile();
+        Object.assign(profile, mergeProfileDetails(profile, userDetails));
+      } catch (profileErr) {
+        console.error("Failed to fetch user profile details after registration", profileErr);
+      }
       localStorage.setItem("user", JSON.stringify(profile));
       set({ user: profile });
       return profile;

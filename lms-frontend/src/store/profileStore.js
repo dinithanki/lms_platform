@@ -92,10 +92,11 @@ const useProfileStore = create((set, get) => ({
 
     set({ saveLoading: true, message: { type: "", text: "" } });
     try {
-      const updated = await userService.updateProfile(profile.id, name, phone, bio);
-      set({ profile: updated });
-      // Propagate name change into auth store so Navbar/Sidebar update instantly
-      updateUserProfileLocal({ ...user, name: updated.name });
+      const updated = await userService.updateProfile(profile.id, name.trim(), phone, bio);
+      const savedName = updated?.name || name.trim();
+      set({ profile: updated, name: savedName });
+      // Propagate the persisted name so Navbar/Sidebar update instantly too.
+      updateUserProfileLocal({ ...user, name: savedName });
       set({ message: { type: "success", text: "Profile updated successfully!" } });
     } catch (err) {
       console.error(err);

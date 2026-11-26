@@ -1,172 +1,56 @@
 import { NavLink } from "react-router-dom";
 import { useAuth } from "../store/authStore";
 
+const Icon = ({ name, className = "h-5 w-5" }) => {
+  const paths = {
+    home: <><rect x="3" y="3" width="8" height="8" rx="2"/><rect x="13" y="3" width="8" height="5" rx="2"/><rect x="13" y="10" width="8" height="11" rx="2"/><rect x="3" y="13" width="8" height="8" rx="2"/></>,
+    book: <><path d="M4 5.5A2.5 2.5 0 0 1 6.5 3H20v16H6.5A2.5 2.5 0 0 0 4 21z"/><path d="M4 5.5v13A2.5 2.5 0 0 1 6.5 16H20M8 7h8"/></>,
+    profile: <><circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/></>,
+    menu: <><path d="M4 6h16M4 12h16M4 18h16"/></>,
+  };
+  return <svg aria-hidden="true" className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">{paths[name]}</svg>;
+};
+
 const Sidebar = ({ isOpen, isCollapsed, onClose }) => {
   const { user } = useAuth();
+  const links = [
+    { to: "/dashboard", label: "Overview", icon: "home" },
+    { to: "/courses", label: "Course catalog", icon: "book" },
+    ...(user?.role === "STUDENT" ? [{ to: "/my-courses", label: "My learning", icon: "book" }] : []),
+    { to: "/profile", label: "My profile", icon: "profile" },
+  ];
 
-  const getNavLinkClass = ({ isActive }) => {
-    const baseClass =
-      "flex items-center gap-3 px-4 py-3 text-[13px] font-semibold rounded-xl transition-all duration-200 border";
-    return isActive
-      ? `${baseClass} bg-accent-600/10 text-accent-400 border-accent-600/20`
-      : `${baseClass} text-navy-300 hover:text-accent-400 hover:bg-navy-700/60 border-transparent`;
-  };
-
-  return (
-    <>
-      {/* Mobile Sidebar backdrop */}
-      {isOpen && (
-        <div
-          className="fixed inset-0 z-40 bg-navy-950/70 backdrop-blur-sm md:hidden"
-          onClick={onClose}
-        ></div>
-      )}
-
-      <aside
-        className={`fixed inset-y-0 left-0 z-50 w-65 min-h-screen surface-card-strong flex flex-col justify-between transition-all duration-300 md:translate-x-0 md:static md:flex md:shadow-none ${
-          isOpen ? "translate-x-0" : "-translate-x-full"
-        } ${isCollapsed ? "md:w-21 md:px-3" : "md:w-65"}`}
-      >
-        {/* Upper Logo / Links Section */}
-        <div className="flex flex-col gap-8 px-5 py-6">
-          {/* Brand Logo */}
-          <div className={`flex items-center gap-3 select-none px-1 ${isCollapsed ? "md:justify-center" : ""}`}>
-            <div className="icon-surface h-10 w-10 text-white shadow-lg shadow-accent-600/20 transform hover:rotate-6 transition-transform duration-300">
-              <svg
-                className="w-5 h-5 text-accent-300"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth="2.5"
-                  d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"
-                />
-              </svg>
-            </div>
-            <div className={isCollapsed ? "md:hidden" : ""}>
-              <h1 className="text-[15px] font-bold tracking-tight leading-tight font-display gradient-text">
-                LearnSphere
-              </h1>
-              <span className="text-[10px] text-navy-400 font-medium tracking-wider uppercase block mt-0.5">
-                LMS Platform
-              </span>
-            </div>
-          </div>
-
-          {/* Navigation Menu */}
-          <nav className="flex flex-col gap-1.5" onClick={onClose}>
-            <NavLink
-              to="/dashboard"
-              className={`${getNavLinkClass} ${isCollapsed ? "md:justify-center md:px-3" : ""}`}
-            >
-              <svg
-                className="w-4.5 h-4.5"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth="2"
-                  d="M4 6a2 2 0 012-2h2a2 2 0 012 2v4a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v4a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v4a2 2 0 01-2 2H6a2 2 0 01-2-2v-4zM14 16a2 2 0 012-2h2a2 2 0 012 2v4a2 2 0 01-2 2h-2a2 2 0 01-2-2v-4z"
-                />
-              </svg>
-              <span className={isCollapsed ? "md:hidden" : ""}>Dashboard</span>
-            </NavLink>
-
-            <NavLink
-              to="/courses"
-              className={`${getNavLinkClass} ${isCollapsed ? "md:justify-center md:px-3" : ""}`}
-            >
-              <svg
-                className="w-4.5 h-4.5"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth="2"
-                  d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"
-                />
-              </svg>
-              <span className={isCollapsed ? "md:hidden" : ""}>Browse Catalog</span>
-            </NavLink>
-
-            {/* Student specific route */}
-            {user?.role === "STUDENT" && (
-              <NavLink
-                to="/my-courses"
-                className={`${getNavLinkClass} ${isCollapsed ? "md:justify-center md:px-3" : ""}`}
-              >
-                <svg
-                  className="w-4.5 h-4.5"
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth="2"
-                    d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"
-                  />
-                </svg>
-                <span className={isCollapsed ? "md:hidden" : ""}>My Courses</span>
-              </NavLink>
-            )}
-
-            <NavLink
-              to="/profile"
-              className={`${getNavLinkClass} ${isCollapsed ? "md:justify-center md:px-3" : ""}`}
-            >
-              <svg
-                className="w-4.5 h-4.5"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth="2"
-                  d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"
-                />
-              </svg>
-              <span className={isCollapsed ? "md:hidden" : ""}>My Profile</span>
-            </NavLink>
-          </nav>
+  return <>
+    {isOpen && <button type="button" aria-label="Close navigation" className="fixed inset-0 z-40 bg-slate-950/40 md:hidden" onClick={onClose}/>}
+    <aside aria-label="Main navigation" className={`fixed inset-y-0 left-0 z-50 flex w-[272px] flex-col border-r border-[var(--app-border)] bg-[var(--app-surface)] transition-[transform,width] duration-200 md:static md:translate-x-0 ${isOpen ? "translate-x-0" : "-translate-x-full"} ${isCollapsed ? "md:w-[84px]" : "md:w-[256px]"}`}>
+      <div className={`flex h-[72px] items-center gap-3 border-b border-[var(--app-border)] px-5 ${isCollapsed ? "md:justify-center md:px-3" : ""}`}>
+        <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-[var(--app-primary)] text-sm font-bold text-white shadow-sm">L</div>
+        <div className={isCollapsed ? "md:hidden" : ""}>
+          <div className="text-[15px] font-bold tracking-tight text-[var(--app-heading)]">LearnSphere</div>
+          <div className="text-xs text-[var(--app-muted)]">Learning platform</div>
         </div>
+        <button type="button" className="ml-auto rounded-lg p-2 text-[var(--app-muted)] hover:bg-[var(--app-surface-muted)] md:hidden" onClick={onClose} aria-label="Close menu"><Icon name="menu" className="h-4 w-4"/></button>
+      </div>
 
-        {/* Role specific sidebar card */}
-        <div className={`surface-card mx-4 mb-6 rounded-2xl p-4 flex flex-col gap-2.5 ${isCollapsed ? "md:hidden" : ""}`}>
-          <div className="flex items-center gap-2">
-            <span className="relative flex h-2 w-2">
-              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-success-400 opacity-75"></span>
-              <span className="relative inline-flex rounded-full h-2 w-2 bg-success-500"></span>
-            </span>
-            <span className="text-[10px] uppercase font-semibold tracking-widest text-navy-400">
-              System Live
-            </span>
-          </div>
-          <p className="text-[11px] text-navy-400 font-medium">Logged in as:</p>
-          <div className="flex items-center justify-between mt-0.5">
-            <span className="text-[13px] font-semibold text-navy-100 truncate w-28">
-              {user?.name}
-            </span>
-            <span className="text-[10px] uppercase px-2.5 py-1 rounded-lg font-semibold text-accent-400 bg-accent-600/10 border border-accent-600/20">
-              {user?.role}
-            </span>
+      <div className={`px-4 pt-7 ${isCollapsed ? "md:px-3" : ""}`}>
+        <div className={`mb-3 px-3 text-[11px] font-semibold uppercase tracking-[.12em] text-[var(--app-muted)] ${isCollapsed ? "md:hidden" : ""}`}>Workspace</div>
+        <nav className="flex flex-col gap-1" onClick={onClose}>
+          {links.map(({ to, label, icon }) => <NavLink key={to} to={to} title={isCollapsed ? label : undefined} className={({ isActive }) => `flex min-h-11 items-center gap-3 rounded-lg px-3 text-sm font-medium transition-colors ${isActive ? "bg-[var(--app-primary-light)] text-[var(--app-primary)]" : "text-[var(--app-body)] hover:bg-[var(--app-surface-muted)] hover:text-[var(--app-heading)]"} ${isCollapsed ? "md:justify-center md:px-0" : ""}`}>
+            <Icon name={icon} className="h-[18px] w-[18px] shrink-0"/><span className={isCollapsed ? "md:hidden" : ""}>{label}</span>
+          </NavLink>)}
+        </nav>
+      </div>
+
+      <div className="mt-auto p-4">
+        <div className={`rounded-xl border border-[var(--app-border)] bg-[var(--app-surface-muted)] p-3 ${isCollapsed ? "md:hidden" : ""}`}>
+          <div className="flex items-center gap-3">
+            <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-blue-100 text-sm font-semibold text-blue-700">{user?.name?.trim()?.charAt(0)?.toUpperCase() || "U"}</div>
+            <div className="min-w-0"><div className="truncate text-sm font-semibold text-[var(--app-heading)]">{user?.name || "Learner"}</div><div className="truncate text-xs text-[var(--app-muted)]">{user?.role || "Member"}</div></div>
           </div>
         </div>
-      </aside>
-    </>
-  );
+      </div>
+    </aside>
+  </>;
 };
 
 export default Sidebar;
