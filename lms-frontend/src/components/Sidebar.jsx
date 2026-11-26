@@ -1,5 +1,7 @@
 import { NavLink } from "react-router-dom";
 import { useAuth } from "../store/authStore";
+import BrandLogo from "./BrandLogo";
+import { DEFAULT_AVATAR_URL } from "../constants/profile";
 
 const Icon = ({ name, className = "h-5 w-5" }) => {
   const paths = {
@@ -30,7 +32,7 @@ const Sidebar = ({ isOpen, isCollapsed, onClose }) => {
     {isOpen && <button type="button" aria-label="Close navigation" className="fixed inset-0 z-40 bg-slate-950/40 md:hidden" onClick={onClose}/>}
     <aside aria-label="Main navigation" className={`fixed inset-y-0 left-0 z-50 flex w-[272px] flex-col border-r border-[var(--app-border)] bg-[var(--app-surface)] transition-[transform,width] duration-200 md:static md:translate-x-0 ${isOpen ? "translate-x-0" : "-translate-x-full"} ${isCollapsed ? "md:w-[84px]" : "md:w-[256px]"}`}>
       <div className={`flex h-[72px] items-center gap-3 border-b border-[var(--app-border)] px-5 ${isCollapsed ? "md:justify-center md:px-3" : ""}`}>
-        <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-[var(--app-primary)] text-sm font-bold text-white shadow-sm">L</div>
+        <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-[var(--app-primary)] text-white shadow-sm"><BrandLogo className="h-6 w-6"/></div>
         <div className={isCollapsed ? "md:hidden" : ""}>
           <div className="text-[15px] font-bold tracking-tight text-[var(--app-heading)]">LearnSphere</div>
           <div className="text-xs text-[var(--app-muted)]">Learning platform</div>
@@ -50,7 +52,7 @@ const Sidebar = ({ isOpen, isCollapsed, onClose }) => {
       <div className="mt-auto p-4">
         <div className={`rounded-xl border border-[var(--app-border)] bg-[var(--app-surface-muted)] p-3 ${isCollapsed ? "md:hidden" : ""}`}>
           <div className="flex items-center gap-3">
-            <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-blue-100 text-sm font-semibold text-blue-700">{user?.name?.trim()?.charAt(0)?.toUpperCase() || "U"}</div>
+            <div className="h-9 w-9 shrink-0 overflow-hidden rounded-full bg-blue-50"><img src={user?.profileImageUrl ? (user.profileImageUrl.startsWith("http") ? user.profileImageUrl : `${import.meta.env.VITE_API_BASE_URL || "http://localhost:8080"}${user.profileImageUrl.startsWith("/") ? "" : "/"}${user.profileImageUrl}`) : DEFAULT_AVATAR_URL} alt={`${user?.name || "User"} profile`} className="h-full w-full object-cover" onError={(event) => { if (!event.currentTarget.src.endsWith(DEFAULT_AVATAR_URL)) event.currentTarget.src = DEFAULT_AVATAR_URL; }}/></div>
             <div className="min-w-0"><div className="truncate text-sm font-semibold text-[var(--app-heading)]">{user?.name || "Learner"}</div><div className="truncate text-xs text-[var(--app-muted)]">{user?.role || "Member"}</div></div>
           </div>
         </div>

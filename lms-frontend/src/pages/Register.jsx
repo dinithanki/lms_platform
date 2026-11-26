@@ -2,6 +2,7 @@ import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "../store/authStore";
 import AuthShowcase from "../components/AuthShowcase";
+import BrandLogo from "../components/BrandLogo";
 
 const Register = () => {
   const { register } = useAuth();
@@ -10,7 +11,6 @@ const Register = () => {
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [role, setRole] = useState("STUDENT");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
 
@@ -18,7 +18,7 @@ const Register = () => {
     e.preventDefault();
     setError("");
 
-    if (!name || !email || !password || !role) {
+    if (!name || !email || !password) {
       setError("Please fill in all fields.");
       return;
     }
@@ -31,7 +31,7 @@ const Register = () => {
     setLoading(true);
 
     try {
-      await register(name, email, password, role);
+      await register(name, email, password, "STUDENT");
       navigate("/dashboard");
     } catch (err) {
       console.error(err);
@@ -53,20 +53,8 @@ const Register = () => {
         <div className="relative z-10 w-full max-w-md surface-card rounded-[1.5rem] p-5 sm:p-6 shadow-2xl">
           {/* Header */}
           <div className="flex flex-col items-center mb-4">
-            <div className="icon-surface h-10 w-10 text-white mb-2 transform hover:rotate-6 transition-transform duration-300">
-              <svg
-                className="w-6 h-6 text-accent-300"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth="2.5"
-                  d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"
-                />
-              </svg>
+            <div className="icon-surface h-10 w-10 text-[var(--app-primary)] mb-2 transform hover:rotate-6 transition-transform duration-300">
+              <BrandLogo className="w-6 h-6" />
             </div>
 
             <h1 className="text-2xl font-bold text-white tracking-tight font-display text-center">
@@ -74,7 +62,7 @@ const Register = () => {
             </h1>
 
             <p className="text-sm text-navy-300 mt-1.5 text-center">
-              Create your learner or instructor profile
+              Create your learner profile
             </p>
           </div>
 
@@ -203,39 +191,6 @@ const Register = () => {
               </div>
             </div>
 
-            {/* Role */}
-            <div className="flex flex-col gap-1.5">
-              <label className="text-[11px] font-semibold uppercase tracking-wider text-navy-400 ml-1">
-                Join Workspace As
-              </label>
-
-              <div className="grid grid-cols-2 gap-2 bg-navy-800 p-1 rounded-xl border border-navy-700/50">
-                <button
-                  type="button"
-                  onClick={() => setRole("STUDENT")}
-                  className={`py-2 text-[12px] truncate px-1 font-semibold rounded-lg transition-all duration-150 cursor-pointer ${
-                    role === "STUDENT"
-                      ? "bg-accent-600 text-white shadow-md"
-                      : "text-navy-400 hover:text-navy-200"
-                  }`}
-                >
-                  Student
-                </button>
-
-                <button
-                  type="button"
-                  onClick={() => setRole("INSTRUCTOR")}
-                  className={`py-2 text-[12px] truncate px-1 font-semibold rounded-lg transition-all duration-150 cursor-pointer ${
-                    role === "INSTRUCTOR"
-                      ? "bg-accent-600 text-white shadow-md"
-                      : "text-navy-400 hover:text-navy-200"
-                  }`}
-                >
-                  Instructor
-                </button>
-              </div>
-            </div>
-
             {/* Submit */}
             <button
               type="submit"
@@ -271,7 +226,7 @@ const Register = () => {
       <AuthShowcase
         eyebrow="Join the catalog"
         title="Build credentials with a focused, professional learning layout."
-        copy="Create an account, choose a role, and start using a streamlined LMS experience in minutes."
+        copy="Create a learner account and start using a streamlined LMS experience in minutes."
         variant="register"
       />
     </div>

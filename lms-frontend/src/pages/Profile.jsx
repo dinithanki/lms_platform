@@ -1,6 +1,7 @@
 import { useEffect } from "react";
 import { useAuth } from "../store/authStore";
 import useProfileStore from "../store/profileStore";
+import { DEFAULT_AVATAR_URL } from "../constants/profile";
 
 const Profile = () => {
   const { user, updateUserProfileLocal } = useAuth();
@@ -75,17 +76,12 @@ const Profile = () => {
 
           {/* Profile Picture render */}
           <div className="relative group mt-2">
-            {profileImgUrl ? (
-              <img
-                src={profileImgUrl}
-                alt={profile.name}
-                className="w-28 h-28 rounded-full object-cover border-2 border-accent-500/20 shadow-lg shadow-black/20"
-              />
-            ) : (
-              <div className="w-28 h-28 rounded-full bg-gradient-to-br from-accent-500 to-cyan-400 text-white font-bold text-3xl flex items-center justify-center shadow-lg shadow-accent-600/15">
-                {profile?.name?.charAt(0).toUpperCase() || "U"}
-              </div>
-            )}
+            <img
+              src={profileImgUrl || DEFAULT_AVATAR_URL}
+              alt={`${profile?.name || "User"} profile`}
+              onError={(event) => { if (!event.currentTarget.src.endsWith(DEFAULT_AVATAR_URL)) event.currentTarget.src = DEFAULT_AVATAR_URL; }}
+              className="w-28 h-28 rounded-full object-cover border-2 border-accent-500/20 shadow-lg shadow-black/20"
+            />
           </div>
 
           <h2 className="text-base font-bold text-white mt-4 font-display tracking-tight leading-tight">
