@@ -16,25 +16,28 @@
             color: #2c3e50;
         }
         .cert-container {
-            width: 10in;
-            height: 7.5in;
-            margin: 0.4in auto;
+            width: 10.6in;
+            height: 8.1in;
+            margin: 0.2in;
             background-color: #ffffff;
-            border: 20px solid #1a365d; /* Dark navy border */
+            border: 14px solid #1a365d;
             position: relative;
             box-sizing: border-box;
+            overflow: hidden;
         }
         .cert-inner-border {
-            border: 4px double #d4af37; /* Double gold border */
-            height: 100%;
-            width: 100%;
+            position: absolute;
+            top: 14px;
+            left: 14px;
+            width: 10in;
+            height: 7.5in;
+            border: 4px double #d4af37;
             box-sizing: border-box;
-            padding: 40px;
-            position: relative;
+            padding: 22px 30px;
         }
         .cert-header {
             text-align: center;
-            margin-top: 20px;
+            margin-top: 8px;
         }
         .gold-seal {
             color: #d4af37;
@@ -62,34 +65,44 @@
             font-weight: bold;
             color: #2c3e50;
             border-bottom: 2px solid #d4af37;
-            display: inline-block;
-            padding-bottom: 5px;
-            margin-bottom: 25px;
-            min-width: 350px;
+            display: block;
+            width: 88%;
+            box-sizing: border-box;
+            padding: 0 12px 5px;
+            margin: 0 auto 18px;
             text-align: center;
+            overflow-wrap: break-word;
         }
         .cert-text {
             font-size: 18px;
-            line-height: 1.6;
-            margin: 15px auto;
-            max-width: 650px;
+            line-height: 1.5;
+            margin: 24px auto 0;
+            max-width: 680px;
             text-align: center;
         }
         .course-name {
             font-size: 26px;
             font-weight: bold;
             color: #1a365d;
-            margin: 10px 0;
+            line-height: 1.25;
+            margin: 16px auto;
+            text-align: center;
         }
         .cert-score {
             font-size: 18px;
             font-weight: bold;
             color: #27ae60;
-            margin-top: 15px;
+            line-height: 1.5;
+            margin: 0 auto;
+            text-align: center;
         }
         .cert-footer {
-            margin-top: 60px;
-            width: 100%;
+            position: absolute;
+            left: 24px;
+            right: 24px;
+            bottom: 20px;
+            width: auto;
+            margin: 0;
         }
         .footer-table {
             width: 100%;
@@ -143,8 +156,11 @@
             </div>
 
             <div class="cert-text">
-                for successfully meeting all academic requirements and passing the final examinations for the course:
-                <div class="course-name" th:text="${courseName}">Spring Boot Microservices Architect</div>
+                for successfully meeting all academic requirements<br />
+                and passing the final examinations for the course
+            </div>
+            <div class="course-name" th:text="${courseName}">Spring Boot Microservices Architect</div>
+            <div class="cert-score">
                 with an overall passing grade of <span th:text="${#numbers.formatDecimal(score, 1, 1)} + '%'">85.0%</span>.
             </div>
 
@@ -157,13 +173,14 @@
                         </td>
                         <td class="center-seal">
                             <!-- A CSS styled seal since we don't have images -->
-                            <div style="color: #d4af37; font-size: 32px; font-weight: bold;">★ ★ ★</div>
+                            <div style="color: #d4af37; font-size: 18px; font-weight: bold; letter-spacing: 3px;">LMS</div>
                             <div style="color: #1a365d; font-size: 11px; letter-spacing: 2px; text-transform: uppercase;">Verified Graduate</div>
                         </td>
                         <td class="right-sig">
+                            <div class="sig-name">Dinith</div>
                             <div class="sig-line"></div>
-                            <div class="sig-title">Program Director</div>
-                            <div>LMS Academy Certification Board</div>
+                            <div class="sig-title">Dinith Pamunuwatte</div>
+                            <div>Programme Director</div>
                         </td>
                     </tr>
                 </table>

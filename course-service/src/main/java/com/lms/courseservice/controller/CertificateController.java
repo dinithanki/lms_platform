@@ -20,8 +20,9 @@ public class CertificateController {
     @GetMapping("/{studentId}/{courseId}")
     public ResponseEntity<byte[]> getCertificatePdf(
             @PathVariable Long studentId,
-            @PathVariable Long courseId) {
-        byte[] pdfBytes = certificateService.getCertificatePdf(studentId, courseId);
+            @PathVariable Long courseId,
+            @RequestHeader(value = HttpHeaders.AUTHORIZATION, required = false) String authorization) {
+        byte[] pdfBytes = certificateService.getCertificatePdf(studentId, courseId, authorization);
 
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_PDF);

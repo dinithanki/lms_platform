@@ -11,6 +11,10 @@ import com.lms.courseservice.service.CourseService;
 import com.lms.courseservice.service.ModuleService;
 import com.lms.courseservice.util.CertificateGenerator;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpMethod;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.client.RestTemplate;
@@ -48,7 +52,7 @@ public class CertificateServiceImpl implements CertificateService {
 
     @Override
     @Transactional
-    public byte[] getCertificatePdf(Long studentId, Long courseId) {
+    public byte[] getCertificatePdf(Long studentId, Long courseId, String authorization) {
         // 1. Verify course existence
         Course course = courseService.getCourseEntityById(courseId);
 
@@ -88,7 +92,7 @@ public class CertificateServiceImpl implements CertificateService {
         }
 
         // 5. Fetch student name from User Service (with fallback)
-        String studentName = fetchStudentName(studentId);
+        String studentName = fetchStudentName(studentId, authorization);
 
         // 6. Format issue date
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("MMMM dd, yyyy");
@@ -101,6 +105,8 @@ public class CertificateServiceImpl implements CertificateService {
         templateModel.put("score", certificate.getScore());
         templateModel.put("certificateId", certificate.getCertificateId());
         templateModel.put("issueDate", formattedDate);
+        DateTimeFormatter issueDateTimeFormatter = DateTimeFormatter.ofPattern("MMMM dd, yyyy 'at' hh:mm a");
+        templateModel.put("issueDateTime", certificate.getIssuedDate().format(issueDateTimeFormatter));
 
         // 8. Generate and return PDF bytes
         return certificateGenerator.generateCertificatePdf(templateModel);
@@ -112,11 +118,23 @@ public class CertificateServiceImpl implements CertificateService {
         return certificateRepository.findByStudentId(studentId);
     }
 
-    private String fetchStudentName(Long studentId) {
+    private String fetchStudentName(Long studentId, String authorization) {
         try {
-            Map<?, ?> response = restTemplate.getForObject(USER_SERVICE_URL + studentId, Map.class);
-            if (response != null && response.containsKey("name")) {
-                return (String) response.get("name");
+            HttpHeaders headers = new HttpHeaders();
+            if (authorization != null && !authorization.isBlank()) {
+                headers.set(HttpHeaders.AUTHORIZATION, authorization);
+            }
+            ResponseEntity<Map> userResponse = restTemplate.exchange(
+                    USER_SERVICE_URL + studentId,
+                    HttpMethod.GET,
+                    new HttpEntity<>(headers),
+                    Map.class);
+            Map<?, ?> response = userResponse.getBody();
+            if (response != null) {
+                Object name = response.get("name");
+                if (name != null && !name.toString().isBlank()) {
+                    return name.toString().trim();
+                }
             }
         } catch (Exception e) {
             // Log failure & fall back gracefully to a generic display name
