@@ -7,6 +7,8 @@ import com.lms.courseservice.exception.CourseNotFoundException;
 import com.lms.courseservice.mapper.CourseMapper;
 import com.lms.courseservice.repository.*;
 import com.lms.courseservice.service.CourseService;
+import com.lms.courseservice.security.LmsPrincipal;
+import com.lms.courseservice.security.OwnershipChecks;
 import com.lms.courseservice.entity.Module;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -38,8 +40,9 @@ public class CourseServiceImpl implements CourseService {
 
     @Override
     @Transactional
-    public CourseResponseDTO createCourse(CourseRequestDTO dto) {
+    public CourseResponseDTO createCourse(CourseRequestDTO dto, Long ownerId) {
         Course course = courseMapper.toEntity(dto);
+        course.setOwnerId(ownerId);
         Course savedCourse = courseRepository.save(course);
         return courseMapper.toResponseDTO(savedCourse);
     }
@@ -68,8 +71,9 @@ public class CourseServiceImpl implements CourseService {
 
     @Override
     @Transactional
-    public void deleteCourse(Long id) {
+    public void deleteCourse(Long id, LmsPrincipal principal) {
         Course course = getCourseEntityById(id);
+        OwnershipChecks.requireCourseOwner(principal, course.getOwnerId());
 
         // 1. Delete associated enrollments
         enrollmentRepository.deleteByCourseId(id);

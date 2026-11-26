@@ -17,10 +17,14 @@ import com.lms.quizservice.mapper.QuizMapper;
 import com.lms.quizservice.repository.AttemptRepository;
 import com.lms.quizservice.repository.QuizRepository;
 import com.lms.quizservice.service.QuizService;
+import com.lms.quizservice.security.LmsPrincipal;
 import com.lms.quizservice.util.ScoreCalculator;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.http.HttpStatus;
+import org.springframework.web.server.ResponseStatusException;
+import feign.FeignException;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -48,10 +52,11 @@ public class QuizServiceImpl implements QuizService {
 
     @Override
     @Transactional
-    public QuizResponseDTO createQuiz(QuizRequestDTO dto) {
+    public QuizResponseDTO createQuiz(QuizRequestDTO dto, LmsPrincipal principal) {
         if (dto.getCourseId() == null) {
             throw new IllegalArgumentException("Course ID must not be null");
         }
+        requireCourseCreationAccess(dto.getCourseId(), principal);
         if (quizRepository.existsByCourseId(dto.getCourseId())) {
             throw new IllegalStateException("A quiz already exists for course ID " + dto.getCourseId());
         }
@@ -62,12 +67,16 @@ public class QuizServiceImpl implements QuizService {
 
     @Override
     @Transactional
-    public QuizResponseDTO updateQuiz(Long id, QuizRequestDTO dto) {
+    public QuizResponseDTO updateQuiz(Long id, QuizRequestDTO dto, LmsPrincipal principal) {
         Quiz quiz = quizRepository.findById(id)
                 .orElseThrow(() -> new QuizNotFoundException("Quiz with ID " + id + " not found"));
+        requireQuizManagementAccess(id, principal);
         
         if (dto.getCourseId() == null) {
             throw new IllegalArgumentException("Course ID must not be null");
+        }
+        if (!quiz.getCourseId().equals(dto.getCourseId())) {
+            requireCourseCreationAccess(dto.getCourseId(), principal);
         }
 
         // Ensure that courseId can't be changed to one that already has a quiz (unless it's the same course)
@@ -86,11 +95,11 @@ public class QuizServiceImpl implements QuizService {
 
     @Override
     @Transactional
-    public void deleteQuiz(Long id) {
-        if (!quizRepository.existsById(id)) {
-            throw new QuizNotFoundException("Quiz with ID " + id + " not found");
-        }
-        quizRepository.deleteById(id);
+    public void deleteQuiz(Long id, LmsPrincipal principal) {
+        Quiz quiz = quizRepository.findById(id)
+                .orElseThrow(() -> new QuizNotFoundException("Quiz with ID " + id + " not found"));
+        requireQuizManagementAccess(id, principal);
+        quizRepository.delete(quiz);
     }
 
     @Override
@@ -126,6 +135,52 @@ public class QuizServiceImpl implements QuizService {
 
     @Override
     @Transactional(readOnly = true)
+    public void requireQuizManagementAccess(Long quizId, LmsPrincipal principal) {
+        Quiz quiz = quizRepository.findById(quizId)
+                .orElseThrow(() -> new QuizNotFoundException("Quiz with ID " + quizId + " not found"));
+        if (principal == null) {
+            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Authentication is required");
+        }
+        if ("ADMIN".equals(principal.role())) return;
+        requireCourseOwnership(quiz.getCourseId(), principal);
+    }
+
+    @Override
+    public void requireCourseOwnership(Long courseId, LmsPrincipal principal) {
+        if (principal == null) {
+            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Authentication is required");
+        }
+        if ("ADMIN".equals(principal.role())) return;
+        if (!"INSTRUCTOR".equals(principal.role())) {
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Only administrators or course owners may manage quizzes");
+        }
+        Long ownerId = loadCourseOwner(courseId);
+        if (ownerId == null || !ownerId.equals(principal.id())) {
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "You may only manage quizzes for courses you own");
+        }
+    }
+
+    private void requireCourseCreationAccess(Long courseId, LmsPrincipal principal) {
+        if (principal == null) {
+            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Authentication is required");
+        }
+        if ("ADMIN".equals(principal.role())) {
+            loadCourseOwner(courseId);
+            return;
+        }
+        requireCourseOwnership(courseId, principal);
+    }
+
+    private Long loadCourseOwner(Long courseId) {
+        try {
+            return courseClient.getCourseOwnerId(courseId);
+        } catch (FeignException.NotFound ex) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Course with ID " + courseId + " not found");
+        }
+    }
+
+    @Override
+    @Transactional(readOnly = true)
     public QuizResponseDTO getQuizById(Long id) {
         Quiz quiz = quizRepository.findById(id)
                 .orElseThrow(() -> new QuizNotFoundException("Quiz with ID " + id + " not found"));
@@ -134,9 +189,10 @@ public class QuizServiceImpl implements QuizService {
 
     @Override
     @Transactional
-    public QuizResponseDTO publishQuiz(Long id) {
+    public QuizResponseDTO publishQuiz(Long id, LmsPrincipal principal) {
         Quiz quiz = quizRepository.findById(id)
                 .orElseThrow(() -> new QuizNotFoundException("Quiz with ID " + id + " not found"));
+        requireQuizManagementAccess(id, principal);
         quiz.setPublished(true);
         Quiz savedQuiz = quizRepository.save(quiz);
         return quizMapper.toResponseDTO(savedQuiz);

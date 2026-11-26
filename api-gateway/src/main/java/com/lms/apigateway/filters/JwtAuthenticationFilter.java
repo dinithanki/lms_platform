@@ -20,6 +20,8 @@ import org.springframework.web.server.ServerWebExchange;
 import reactor.core.publisher.Mono;
 
 import java.util.List;
+import java.util.Map;
+import org.springframework.http.HttpMethod;
 
 @Slf4j
 @Component
@@ -30,11 +32,11 @@ public class JwtAuthenticationFilter implements GlobalFilter, Ordered {
     private final ObjectMapper objectMapper;
 
     // List of public endpoints that bypass authentication checking
-    private static final List<String> PUBLIC_ENDPOINTS = List.of(
-            "/api/auth/login",
-            "/api/auth/register",
-            "/api/auth/token/refresh",
-            "/api/auth/validate"
+    private static final Map<String, List<HttpMethod>> PUBLIC_ENDPOINTS = Map.of(
+            "/api/auth/login", List.of(HttpMethod.POST),
+            "/api/auth/register", List.of(HttpMethod.POST),
+            "/api/auth/token/refresh", List.of(HttpMethod.POST),
+            "/api/auth/validate", List.of(HttpMethod.GET, HttpMethod.POST)
     );
 
     @Override
@@ -43,7 +45,7 @@ public class JwtAuthenticationFilter implements GlobalFilter, Ordered {
         String path = request.getPath().value();
 
         // 1. Skip validation for public endpoints
-        if (isPublicEndpoint(path)) {
+        if (isPublicEndpoint(path, request.getMethod())) {
             log.debug("Bypassing authentication for public path: {}", path);
             return chain.filter(exchange);
         }
@@ -72,8 +74,19 @@ public class JwtAuthenticationFilter implements GlobalFilter, Ordered {
         }
 
         // 4. Extract User Details
-        String role = jwtUtil.extractRole(token);
-        String username = jwtUtil.extractUsername(token);
+        String role;
+        String username;
+        Long userId;
+        try {
+            role = jwtUtil.extractRole(token);
+            username = jwtUtil.extractUsername(token);
+            userId = jwtUtil.extractUserId(token);
+        } catch (RuntimeException e) {
+            return handleUnauthorized(exchange, "Invalid or expired JWT token");
+        }
+        if (username == null || userId == null || role == null) {
+            return handleUnauthorized(exchange, "Invalid or expired JWT token");
+        }
         log.debug("Authenticated user: {} with role: {} for route: {}", username, role, path);
 
         // 5. Basic RBAC (Role-based access control check)
@@ -87,13 +100,14 @@ public class JwtAuthenticationFilter implements GlobalFilter, Ordered {
         ServerHttpRequest mutatedRequest = request.mutate()
                 .header("X-User-Name", username)
                 .header("X-User-Role", role)
+                .header("X-User-Id", userId.toString())
                 .build();
 
         return chain.filter(exchange.mutate().request(mutatedRequest).build());
     }
 
-    private boolean isPublicEndpoint(String path) {
-        return PUBLIC_ENDPOINTS.stream().anyMatch(path::startsWith);
+    private boolean isPublicEndpoint(String path, HttpMethod method) {
+        return PUBLIC_ENDPOINTS.getOrDefault(path, List.of()).contains(method);
     }
 
     private Mono<Void> handleUnauthorized(ServerWebExchange exchange, String message) {

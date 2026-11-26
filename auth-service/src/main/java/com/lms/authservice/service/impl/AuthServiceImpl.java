@@ -11,6 +11,7 @@ import com.lms.authservice.repository.UserRepository;
 import com.lms.authservice.security.JwtUtil;
 import com.lms.authservice.service.AuthService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -25,6 +26,7 @@ import java.util.Optional;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.stream.Collectors;
+import jakarta.annotation.PostConstruct;
 
 @Service
 public class AuthServiceImpl implements AuthService {
@@ -40,6 +42,16 @@ public class AuthServiceImpl implements AuthService {
 
     @Autowired
     private RestTemplate restTemplate;
+
+    @Value("${app.auth-service.token:}")
+    private String authServiceToken;
+
+    @PostConstruct
+    void validateServiceTokenConfiguration() {
+        if (authServiceToken == null || authServiceToken.getBytes(java.nio.charset.StandardCharsets.UTF_8).length < 32) {
+            throw new IllegalStateException("LMS_AUTH_SERVICE_TOKEN must contain at least 32 UTF-8 bytes");
+        }
+    }
 
     @Override
     @Transactional
@@ -69,6 +81,7 @@ public class AuthServiceImpl implements AuthService {
         try {
             HttpHeaders headers = new HttpHeaders();
             headers.setContentType(MediaType.APPLICATION_JSON);
+            headers.set("X-Auth-Service-Token", authServiceToken);
             HttpEntity<Map<String, Object>> entity = new HttpEntity<>(profileRequest, headers);
             
             restTemplate.postForEntity("http://localhost:8082/api/users", entity, Void.class);
@@ -137,6 +150,7 @@ public class AuthServiceImpl implements AuthService {
         try {
             HttpHeaders headers = new HttpHeaders();
             headers.setContentType(MediaType.APPLICATION_JSON);
+            headers.set("X-Auth-Service-Token", authServiceToken);
             Map<String, String> body = new HashMap<>();
             body.put("role", role.trim().toUpperCase());
             HttpEntity<Map<String, String>> requestEntity = new HttpEntity<>(body, headers);

@@ -20,4 +20,7 @@ public interface CourseClient {
             @PathVariable("id") Long id,
             @RequestParam("studentId") Long studentId,
             @RequestParam("score") double score);
+
+    @org.springframework.web.bind.annotation.GetMapping("/internal/courses/{id}/owner")
+    Long getCourseOwnerId(@PathVariable("id") Long id);
 }

@@ -3,11 +3,13 @@ package com.lms.courseservice.controller;
 import com.lms.courseservice.dto.request.CourseRequestDTO;
 import com.lms.courseservice.dto.response.CourseResponseDTO;
 import com.lms.courseservice.service.CourseService;
+import com.lms.courseservice.security.LmsPrincipal;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 
 import java.util.List;
 
@@ -19,8 +21,10 @@ public class CourseController {
     private CourseService courseService;
 
     @PostMapping
-    public ResponseEntity<CourseResponseDTO> createCourse(@Valid @RequestBody CourseRequestDTO dto) {
-        CourseResponseDTO response = courseService.createCourse(dto);
+    public ResponseEntity<CourseResponseDTO> createCourse(
+            @Valid @RequestBody CourseRequestDTO dto,
+            @AuthenticationPrincipal LmsPrincipal principal) {
+        CourseResponseDTO response = courseService.createCourse(dto, principal.id());
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
 
@@ -37,8 +41,10 @@ public class CourseController {
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> deleteCourse(@PathVariable Long id) {
-        courseService.deleteCourse(id);
+    public ResponseEntity<Void> deleteCourse(
+            @PathVariable Long id,
+            @AuthenticationPrincipal LmsPrincipal principal) {
+        courseService.deleteCourse(id, principal);
         return ResponseEntity.noContent().build();
     }
 }

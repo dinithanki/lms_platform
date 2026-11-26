@@ -9,4 +9,5 @@ public interface QuestionService {
     QuestionResponseDTO editQuestion(Long id, QuestionRequestDTO dto);
     void deleteQuestion(Long id);
     List<QuestionResponseDTO> getQuestionsByQuizId(Long quizId);
+    Long getQuizIdByQuestionId(Long questionId);
 }

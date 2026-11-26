@@ -15,6 +15,8 @@ import com.lms.courseservice.repository.ModuleRepository;
 import com.lms.courseservice.repository.QuizResultRepository;
 import com.lms.courseservice.service.CourseService;
 import com.lms.courseservice.service.ModuleService;
+import com.lms.courseservice.security.LmsPrincipal;
+import com.lms.courseservice.security.OwnershipChecks;
 import com.lms.courseservice.util.ProgressCalculator;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -48,8 +50,9 @@ public class ModuleServiceImpl implements ModuleService {
 
     @Override
     @Transactional
-    public ModuleResponseDTO createModule(Long courseId, ModuleRequestDTO dto) {
+    public ModuleResponseDTO createModule(Long courseId, ModuleRequestDTO dto, LmsPrincipal principal) {
         Course course = courseService.getCourseEntityById(courseId);
+        OwnershipChecks.requireCourseOwner(principal, course.getOwnerId());
         Module module = moduleMapper.toEntity(dto);
         module.setCourse(course);
         Module savedModule = moduleRepository.save(module);
@@ -166,9 +169,10 @@ public class ModuleServiceImpl implements ModuleService {
 
     @Override
     @Transactional
-    public ModuleResponseDTO updateModule(Long moduleId, ModuleRequestDTO dto) {
+    public ModuleResponseDTO updateModule(Long moduleId, ModuleRequestDTO dto, LmsPrincipal principal) {
         Module module = moduleRepository.findById(moduleId)
                 .orElseThrow(() -> new IllegalArgumentException("Module with ID " + moduleId + " not found"));
+        OwnershipChecks.requireCourseOwner(principal, module.getCourse().getOwnerId());
         moduleMapper.updateEntityFromDto(dto, module);
         Module updatedModule = moduleRepository.save(module);
         return moduleMapper.toResponseDTO(updatedModule);

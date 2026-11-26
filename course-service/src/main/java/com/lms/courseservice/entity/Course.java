@@ -26,6 +26,11 @@ public class Course {
     @Column(columnDefinition = "TEXT")
     private String description;
 
+    // User Service owns account records, so keep only the authenticated user id here.
+    // Nullable to preserve access to courses that predate ownership tracking.
+    @Column(name = "owner_id")
+    private Long ownerId;
+
     @OneToMany(mappedBy = "course", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Module> modules = new ArrayList<>();
 }

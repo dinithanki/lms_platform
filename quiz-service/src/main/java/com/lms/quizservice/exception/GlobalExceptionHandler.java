@@ -23,6 +23,18 @@ public class GlobalExceptionHandler {
         return ResponseEntity.status(HttpStatus.NOT_FOUND).body(error);
     }
 
+    @ExceptionHandler(org.springframework.web.server.ResponseStatusException.class)
+    public ResponseEntity<Map<String, Object>> handleResponseStatusException(
+            org.springframework.web.server.ResponseStatusException ex) {
+        HttpStatus status = HttpStatus.valueOf(ex.getStatusCode().value());
+        Map<String, Object> error = new HashMap<>();
+        error.put("timestamp", LocalDateTime.now());
+        error.put("status", status.value());
+        error.put("error", status.getReasonPhrase());
+        error.put("message", ex.getReason());
+        return ResponseEntity.status(status).body(error);
+    }
+
     @ExceptionHandler(AttemptLimitException.class)
     public ResponseEntity<Map<String, Object>> handleAttemptLimit(AttemptLimitException ex) {
         Map<String, Object> error = new HashMap<>();

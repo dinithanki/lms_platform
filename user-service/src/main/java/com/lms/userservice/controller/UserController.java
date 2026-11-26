@@ -40,7 +40,12 @@ public class UserController {
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<UserProfileResponseDTO> getUserProfileById(@PathVariable Long id) {
+    public ResponseEntity<UserProfileResponseDTO> getUserProfileById(
+            @PathVariable Long id, @AuthenticationPrincipal UserPrincipal principal) {
+        if (principal == null || (!principal.getId().equals(id) && !"ADMIN".equalsIgnoreCase(principal.getRole()))) {
+            throw new org.springframework.web.server.ResponseStatusException(HttpStatus.FORBIDDEN,
+                    "You may only view your own profile");
+        }
         User user = userService.getUserById(id);
         return ResponseEntity.ok(convertToDTO(user));
     }

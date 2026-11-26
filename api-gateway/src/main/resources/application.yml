@@ -47,3 +47,6 @@ logging:
     org.springframework.web.reactive: INFO
     reactor.netty: INFO
     com.lms.apigateway: DEBUG
+
+jwt:
+  secret: ${LMS_JWT_SECRET:}

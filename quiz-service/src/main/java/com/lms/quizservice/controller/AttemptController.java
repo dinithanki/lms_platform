@@ -2,9 +2,12 @@ package com.lms.quizservice.controller;
 
 import com.lms.quizservice.dto.response.QuizResultResponseDTO;
 import com.lms.quizservice.service.AttemptService;
+import com.lms.quizservice.security.LmsPrincipal;
+import com.lms.quizservice.security.OwnershipChecks;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import java.util.List;
 
 @RestController
@@ -17,7 +20,9 @@ public class AttemptController {
     @GetMapping("/{studentId}")
     public ResponseEntity<List<QuizResultResponseDTO>> getQuizResults(
             @PathVariable Long studentId,
-            @RequestParam(required = false) Long quizId) {
+            @RequestParam(required = false) Long quizId,
+            @AuthenticationPrincipal LmsPrincipal principal) {
+        OwnershipChecks.requireSelfOrAdmin(principal, studentId);
         
         List<QuizResultResponseDTO> response;
         if (quizId != null) {

@@ -81,4 +81,12 @@ public class QuestionServiceImpl implements QuestionService {
                 .map(questionMapper::toResponseDTO)
                 .collect(Collectors.toList());
     }
+
+    @Override
+    @Transactional(readOnly = true)
+    public Long getQuizIdByQuestionId(Long questionId) {
+        return questionRepository.findById(questionId)
+                .orElseThrow(() -> new IllegalArgumentException("Question with ID " + questionId + " not found"))
+                .getQuiz().getId();
+    }
 }
