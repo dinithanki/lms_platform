@@ -6,6 +6,7 @@ const Icon = ({ name, className = "h-5 w-5" }) => {
     home: <><rect x="3" y="3" width="8" height="8" rx="2"/><rect x="13" y="3" width="8" height="5" rx="2"/><rect x="13" y="10" width="8" height="11" rx="2"/><rect x="3" y="13" width="8" height="8" rx="2"/></>,
     book: <><path d="M4 5.5A2.5 2.5 0 0 1 6.5 3H20v16H6.5A2.5 2.5 0 0 0 4 21z"/><path d="M4 5.5v13A2.5 2.5 0 0 1 6.5 16H20M8 7h8"/></>,
     profile: <><circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/></>,
+    users: <><path d="M16 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="10" cy="7" r="4"/><path d="M20 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75"/></>,
     menu: <><path d="M4 6h16M4 12h16M4 18h16"/></>,
   };
   return <svg aria-hidden="true" className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">{paths[name]}</svg>;
@@ -17,6 +18,7 @@ const Sidebar = ({ isOpen, isCollapsed, onClose }) => {
     { to: "/dashboard", label: "Overview", icon: "home" },
     { to: "/courses", label: "Course catalog", icon: "book" },
     ...(user?.role === "STUDENT" ? [{ to: "/my-courses", label: "My learning", icon: "book" }] : []),
+    ...(user?.role === "ADMIN" ? [{ to: "/admin/users", label: "User management", icon: "users" }] : []),
     { to: "/profile", label: "My profile", icon: "profile" },
   ];
 

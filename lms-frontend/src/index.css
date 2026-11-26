@@ -216,6 +216,9 @@
 :root:not(.dark) .course-progress-percent {
   color: #1d4ed8 !important;
 }
+.app-shell .course-card-banner-title {
+  color: #ffffff !important;
+}
 
 /* Preserve the current pages' light-surface text contrast until their redesign phase. */
 .app-shell :not(button):not(a).text-white,

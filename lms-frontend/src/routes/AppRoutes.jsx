@@ -13,6 +13,7 @@ import CourseDetails from "../pages/CourseDetails";
 import MyCourses from "../pages/MyCourses";
 import Profile from "../pages/Profile";
 import NotFound from "../pages/NotFound";
+import UserManagement from "../pages/UserManagement";
 
 const DashboardLayout = () => {
   const [isSidebarOpen, setIsSidebarOpen] = React.useState(false);
@@ -63,6 +64,11 @@ const AppRoutes = () => {
           <Route path="/courses" element={<Courses />} />
           <Route path="/courses/:id" element={<CourseDetails />} />
           <Route path="/profile" element={<Profile />} />
+
+          {/* Admin-only account management */}
+          <Route element={<ProtectedRoute allowedRoles={["ADMIN"]} />}>
+            <Route path="/admin/users" element={<UserManagement />} />
+          </Route>
 
           {/* Student-only routes */}
           <Route element={<ProtectedRoute allowedRoles={["STUDENT"]} />}>

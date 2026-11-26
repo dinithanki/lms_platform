@@ -8,6 +8,8 @@ import authService from "../services/authService";
 const useDashboardStore = create((set) => ({
   // ── Admin State ────────────────────────────────────────────────────────────
   users: [],
+  usersLoading: false,
+  usersError: "",
   roleUpdateLoading: null,   // userId currently being updated
   userDeleteLoading: null,   // userId currently being deleted
 
@@ -21,11 +23,15 @@ const useDashboardStore = create((set) => ({
 
   /** Fetch all registered users (admin only). */
   fetchUsers: async () => {
+    set({ usersLoading: true, usersError: "" });
     try {
       const allUsers = await authService.getAllUsers();
-      set({ users: allUsers });
+      set({ users: allUsers, usersError: "" });
     } catch (err) {
       console.error("Failed to fetch users:", err);
+      set({ usersError: "Could not load registered users." });
+    } finally {
+      set({ usersLoading: false });
     }
   },
 
@@ -71,6 +77,8 @@ const useDashboardStore = create((set) => ({
   reset: () =>
     set({
       users: [],
+      usersLoading: false,
+      usersError: "",
       roleUpdateLoading: null,
       userDeleteLoading: null,
       showCreateModal: false,

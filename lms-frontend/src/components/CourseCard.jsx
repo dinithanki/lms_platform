@@ -1,4 +1,22 @@
+import { useState } from "react";
 import { Link } from "react-router-dom";
+
+const getYouTubeId = (value) => {
+  if (!value || typeof value !== "string") return null;
+  try {
+    const url = new URL(value.startsWith("http") ? value : `https://${value}`);
+    const host = url.hostname.replace(/^www\./, "").toLowerCase();
+    let id = null;
+    if (host === "youtu.be") id = url.pathname.split("/").filter(Boolean)[0];
+    if (host === "youtube.com" || host === "m.youtube.com" || host === "youtube-nocookie.com") {
+      if (url.pathname === "/watch") id = url.searchParams.get("v");
+      else id = url.pathname.match(/^\/(?:embed|shorts|live)\/([^/?]+)/)?.[1];
+    }
+    return id && /^[\w-]{11}$/.test(id) ? id : null;
+  } catch {
+    return null;
+  }
+};
 
 const CourseCard = ({
   course,
@@ -9,6 +27,10 @@ const CourseCard = ({
   userRole,
   onDelete,
 }) => {
+  const [thumbnailFailed, setThumbnailFailed] = useState(false);
+  const firstLesson = course.modules?.[0];
+  const youtubeId = getYouTubeId(firstLesson?.videoUrl);
+  const thumbnailUrl = youtubeId ? `https://img.youtube.com/vi/${youtubeId}/hqdefault.jpg` : null;
   // Truncate course description for cleaner grids
   const truncateText = (text, maxLength = 120) => {
     if (!text) return "No description available.";
@@ -20,11 +42,25 @@ const CourseCard = ({
   return (
     <div className="surface-card rounded-2xl overflow-hidden flex flex-col justify-between h-full group modern-hover-card">
       {/* Course Banner Overlay */}
-      <div className="h-36 bg-gradient-to-br from-navy-700 via-navy-800 to-accent-900/50 p-5 flex flex-col justify-between border-b border-navy-700/40 relative overflow-hidden">
-        {/* Glow effect */}
-        <div className="absolute top-0 right-0 w-24 h-24 bg-accent-500/8 rounded-full blur-2xl group-hover:bg-accent-500/15 transition-all duration-500"></div>
+      <div className="relative h-44 overflow-hidden border-b border-[var(--app-border)] bg-gradient-to-br from-blue-950 via-blue-900 to-slate-800 p-5">
+        {thumbnailUrl && !thumbnailFailed ? (
+          <img
+            src={thumbnailUrl}
+            alt={`${course.title} video thumbnail`}
+            loading="lazy"
+            className="absolute inset-0 h-full w-full object-cover transition-transform duration-300 group-hover:scale-[1.03]"
+            onError={() => setThumbnailFailed(true)}
+          />
+        ) : (
+          <div aria-hidden="true" className="absolute inset-0 flex items-center justify-center bg-[radial-gradient(circle_at_75%_20%,rgba(96,165,250,0.32),transparent_32%),linear-gradient(135deg,#172554,#1e3a8a_55%,#0f172a)]">
+            <div className="flex h-14 w-14 items-center justify-center rounded-2xl border border-white/20 bg-white/10 text-xl font-bold text-white/90 shadow-lg backdrop-blur-sm">
+              {course.title?.trim()?.charAt(0)?.toUpperCase() || "L"}
+            </div>
+          </div>
+        )}
+        <div aria-hidden="true" className="absolute inset-0 bg-gradient-to-t from-slate-950/85 via-slate-950/10 to-slate-950/10" />
 
-        <div className="flex justify-between items-start z-10">
+        <div className="relative z-10 flex justify-between items-start">
           {userRole === "ADMIN" && onDelete && (
             <button
               onClick={(e) => {
@@ -51,7 +87,7 @@ const CourseCard = ({
             </button>
           )}
         </div>
-        <h3 className="text-[15px] font-bold text-navy-50 line-clamp-2 leading-snug group-hover:text-accent-300 transition-colors duration-300 z-10 font-display">
+        <h3 className="course-card-banner-title relative z-10 line-clamp-2 text-[15px] font-bold leading-snug text-white font-display">
           {course.title}
         </h3>
       </div>
@@ -80,10 +116,6 @@ const CourseCard = ({
             </svg>
             {course.modules ? course.modules.length : 0} Modules
           </span>
-          <span className="flex items-center gap-1.5 text-navy-400">
-            <span>•</span>
-            <span>Self-paced</span>
-          </span>
           {isEnrolled && (
             <span className="text-success-400 font-semibold flex items-center gap-1.5">
               <span className="w-1.5 h-1.5 rounded-full bg-success-500"></span>
@@ -93,7 +125,7 @@ const CourseCard = ({
         </div>
 
         {/* Progress Bar (Visible only to students enrolled in the course) */}
-        {isEnrolled && progress !== undefined && (
+        {userRole === "STUDENT" && isEnrolled && progress != null && (
           <div className="flex flex-col gap-2 mt-1 bg-navy-850 p-3 rounded-xl border border-navy-700/30">
             <div className="flex justify-between items-center text-[11px]">
               <span className="text-navy-400 font-medium">Your Progress</span>

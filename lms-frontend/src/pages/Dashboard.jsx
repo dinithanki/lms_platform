@@ -7,6 +7,38 @@ import CourseCard from "../components/CourseCard";
 import { Link } from "react-router-dom";
 import { useDialogStore } from "../store/dialogStore";
 
+const MetricCard = ({ label, value, detail, tone = "blue", icon = "book" }) => {
+  const tones = {
+    blue: "bg-blue-50 text-blue-700 dark:bg-blue-950/50 dark:text-blue-300",
+    green: "bg-green-50 text-green-700 dark:bg-green-950/50 dark:text-green-300",
+    violet: "bg-violet-50 text-violet-700 dark:bg-violet-950/50 dark:text-violet-300",
+    amber: "bg-amber-50 text-amber-800 dark:bg-amber-950/50 dark:text-amber-300",
+  };
+  const icons = {
+    users: <><path d="M16 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="10" cy="7" r="4"/><path d="M20 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75"/></>,
+    book: <><path d="M4 5.5A2.5 2.5 0 0 1 6.5 3H20v16H6.5A2.5 2.5 0 0 0 4 21z"/><path d="M4 5.5v13A2.5 2.5 0 0 1 6.5 16H20M8 7h8"/></>,
+    check: <><circle cx="12" cy="12" r="9"/><path d="m8 12 2.5 2.5L16 9"/></>,
+    chart: <><path d="M3 3v18h18"/><path d="m19 9-5 5-4-4-5 5"/></>,
+    award: <><circle cx="12" cy="8" r="6"/><path d="m8.2 13-1 8 4.8-2.8 4.8 2.8-1-8"/></>,
+    layers: <><path d="m12 3 9 5-9 5-9-5 9-5Z"/><path d="m3 12 9 5 9-5M3 16l9 5 9-5"/></>,
+    teaching: <><rect x="3" y="4" width="18" height="12" rx="2"/><path d="M12 16v5m-4 0h8M8 9h8m-8 3h5"/></>,
+  };
+  return (
+    <div className="rounded-2xl border border-[var(--app-border)] bg-[var(--app-surface)] p-5 shadow-sm">
+      <div className="flex items-start justify-between gap-3">
+        <div className="min-w-0">
+          <p className="text-sm font-medium text-[var(--app-muted)]">{label}</p>
+          <p className="mt-2 text-3xl font-semibold tracking-tight text-[var(--app-heading)]">{value}</p>
+          {detail && <p className="mt-1 text-xs text-[var(--app-muted)]">{detail}</p>}
+        </div>
+        <span aria-hidden="true" className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-xl ${tones[tone] || tones.blue}`}>
+          <svg className="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">{icons[icon] || icons.book}</svg>
+        </span>
+      </div>
+    </div>
+  );
+};
+
 const Dashboard = () => {
   const { user } = useAuth();
 
@@ -26,6 +58,7 @@ const Dashboard = () => {
   // Dashboard/admin store
   const {
     users,
+    usersError,
     roleUpdateLoading,
     userDeleteLoading,
     showCreateModal,
@@ -43,7 +76,7 @@ const Dashboard = () => {
   } = useDashboardStore();
 
   // Certificate count — student only (derived from enrolled courses + quiz store)
-  const [certificatesCount, setCertificatesCount] = React.useState(0);
+  const [certificatesCount, setCertificatesCount] = React.useState(null);
 
   useEffect(() => {
     fetchDashboardData();
@@ -62,7 +95,7 @@ const Dashboard = () => {
         const certs = await quizService.getCertificatesByStudent(user.id);
         setCertificatesCount(certs?.length || 0);
       } catch {
-        setCertificatesCount(0);
+        setCertificatesCount(null);
       }
     }
   };
@@ -141,10 +174,27 @@ const Dashboard = () => {
     );
   }
 
+  if (error) {
+    return (
+      <div className="mx-auto max-w-xl rounded-2xl border border-red-200 bg-[var(--app-surface)] p-8 text-center shadow-sm">
+        <h1 className="text-lg font-semibold text-[var(--app-heading)]">Dashboard data is unavailable</h1>
+        <p className="mt-2 text-sm text-[var(--app-muted)]">{error}</p>
+        <button type="button" onClick={fetchDashboardData} className="mt-5 rounded-lg bg-blue-600 px-4 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-blue-700">Try again</button>
+      </div>
+    );
+  }
+
   // ─── STUDENT DASHBOARD ────────────────────────────────────────────────────
   if (user.role === "STUDENT") {
     const enrolledIds = enrolledCourses.map((c) => c.id);
     const availableCourses = courses.filter((c) => !enrolledIds.includes(c.id));
+    const progressValues = enrolledCourses
+      .map((course) => studentProgress[course.id])
+      .filter((value) => Number.isFinite(value));
+    const completedCourses = progressValues.filter((value) => value >= 100).length;
+    const averageProgress = progressValues.length
+      ? Math.round(progressValues.reduce((total, value) => total + value, 0) / progressValues.length)
+      : null;
 
     return (
       <div className="flex flex-col gap-8 animate-fadeIn">
@@ -172,66 +222,16 @@ const Dashboard = () => {
           </div>
         </div>
 
-        {/* Stats Widgets Grid */}
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-5">
-          <div className="p-5 bg-navy-800 border border-navy-700/40 rounded-2xl flex items-center gap-4 hover:border-accent-600/30 transition-all duration-250 group">
-            <div className="p-3 bg-accent-600/10 text-accent-400 rounded-xl group-hover:scale-105 transition-transform duration-200">
-              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
-              </svg>
-            </div>
-            <div>
-              <span className="text-[11px] uppercase font-semibold tracking-wider text-navy-400 block">Enrolled Courses</span>
-              <div className="flex items-baseline gap-2 mt-0.5">
-                <p className="text-2xl font-bold text-white font-display">{enrolledCourses.length}</p>
-                {enrolledCourses.length > 0 && (
-                  <span className="text-[10px] font-semibold text-accent-400 bg-accent-600/10 px-2 py-0.5 rounded-md">
-                    +1 Ongoing
-                  </span>
-                )}
-              </div>
-            </div>
-          </div>
-          <div className="p-5 bg-navy-800 border border-navy-700/40 rounded-2xl flex items-center gap-4 hover:border-success-600/30 transition-all duration-250 group">
-            <div className="p-3 bg-success-600/10 text-success-400 rounded-xl group-hover:scale-105 transition-transform duration-200">
-              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 12l2 2 4-4M7.835 4.697a3.42 3.42 0 001.946-.806 3.42 3.42 0 014.438 0 3.42 3.42 0 001.946.806 3.42 3.42 0 010 4.438 3.42 3.42 0 00-.806 1.946 3.42 3.42 0 01-3.138 3.138 3.42 3.42 0 00-1.946.806 3.42 3.42 0 01-4.438 0 3.42 3.42 0 00-1.946-.806 3.42 3.42 0 01-3.138-3.138z" />
-              </svg>
-            </div>
-            <div>
-              <span className="text-[11px] uppercase font-semibold tracking-wider text-navy-400 block">Certificates Earned</span>
-              <div className="flex items-baseline gap-2 mt-0.5">
-                <p className="text-2xl font-bold text-white font-display">{certificatesCount}</p>
-                {certificatesCount > 0 && (
-                  <span className="text-[10px] font-semibold text-success-400 bg-success-600/10 px-2 py-0.5 rounded-md">
-                    Verified
-                  </span>
-                )}
-              </div>
-            </div>
-          </div>
-          <div className="p-5 bg-navy-800 border border-navy-700/40 rounded-2xl flex items-center gap-4 hover:border-accent-600/30 transition-all duration-250 group">
-            <div className="p-3 bg-accent-600/10 text-accent-400 rounded-xl group-hover:scale-105 transition-transform duration-200">
-              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M13 10V3L4 14h7v7l9-11h-7z" />
-              </svg>
-            </div>
-            <div>
-              <span className="text-[11px] uppercase font-semibold tracking-wider text-navy-400 block">LMS Catalog Size</span>
-              <div className="flex items-baseline gap-2 mt-0.5">
-                <p className="text-2xl font-bold text-white font-display">{courses.length}</p>
-                <span className="text-[10px] font-semibold text-accent-400 bg-accent-600/10 px-2 py-0.5 rounded-md">
-                  Published
-                </span>
-              </div>
-            </div>
-          </div>
-        </div>
-
+        <section aria-label="Your learning summary" className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
+          <MetricCard label="Enrolled courses" value={enrolledCourses.length} detail="Courses on your learning list" tone="blue" icon="book" />
+          <MetricCard label="Completed courses" value={progressValues.length ? completedCourses : "—"} detail={progressValues.length ? `Based on ${progressValues.length} courses with progress data` : "Progress data unavailable"} tone="green" icon="check" />
+          <MetricCard label="Average progress" value={averageProgress == null ? "—" : `${averageProgress}%`} detail={progressValues.length ? `Across ${progressValues.length} courses with available progress` : "Progress data unavailable"} tone="violet" icon="chart" />
+          <MetricCard label="Certificates earned" value={certificatesCount == null ? "—" : certificatesCount} detail={certificatesCount == null ? "Certificate data unavailable" : "From your completed learning"} tone="amber" icon="award" />
+        </section>
         {/* Enrolled Courses */}
         <div>
           <div className="flex items-center justify-between mb-4">
-            <h2 className="text-sm font-bold uppercase tracking-wider text-white font-display">My Enrolled Lectures</h2>
+            <h2 className="text-sm font-bold uppercase tracking-wider text-white font-display">My Courses</h2>
             {enrolledCourses.length > 0 && (
               <Link to="/my-courses" className="text-sm text-accent-400 hover:text-accent-300 font-semibold transition-colors">
                 View All Courses
@@ -242,7 +242,7 @@ const Dashboard = () => {
             <div className="p-10 border border-dashed border-navy-700/50 bg-navy-800/50 text-center rounded-2xl">
               <p className="text-sm text-navy-400">You are not enrolled in any study courses yet.</p>
               <Link to="/courses" className="inline-block mt-4 px-4 py-2.5 bg-accent-600 hover:bg-accent-500 text-white rounded-xl text-sm font-semibold transition-all shadow-lg shadow-accent-600/15">
-                Browse Recommended Courses
+                Browse Course Catalog
               </Link>
             </div>
           ) : (
@@ -257,14 +257,14 @@ const Dashboard = () => {
         {/* Available Courses */}
         <div>
           <div className="flex items-center justify-between mb-4">
-            <h2 className="text-sm font-bold uppercase tracking-wider text-white font-display">Recommended For You</h2>
+            <h2 className="text-sm font-bold uppercase tracking-wider text-white font-display">Available Courses</h2>
             <Link to="/courses" className="text-sm text-accent-400 hover:text-accent-300 font-semibold transition-colors">
               Explore Full Library
             </Link>
           </div>
           {availableCourses.length === 0 ? (
             <div className="p-8 text-center text-sm text-navy-400 bg-navy-800/50 border border-navy-700/40 rounded-2xl">
-              You are currently enrolled in all available curricular programs!
+              You are currently enrolled in all courses in the catalog.
             </div>
           ) : (
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -280,6 +280,8 @@ const Dashboard = () => {
 
   // ─── INSTRUCTOR DASHBOARD ─────────────────────────────────────────────────
   if (user.role === "INSTRUCTOR") {
+    const moduleCount = courses.reduce((total, course) => total + (course.modules?.length || 0), 0);
+    const coursesWithModules = courses.filter((course) => (course.modules?.length || 0) > 0).length;
     return (
       <div className="flex flex-col gap-8 animate-fadeIn">
         {/* Premium Banner */}
@@ -309,48 +311,14 @@ const Dashboard = () => {
           </div>
         </div>
 
-        {/* Stats Grid */}
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-5">
-          <div className="p-5 bg-navy-800 border border-navy-700/40 rounded-2xl flex items-center gap-4 hover:border-accent-600/30 transition-all duration-200 group">
-            <div className="p-3 bg-accent-600/10 text-accent-400 rounded-xl group-hover:scale-105 transition-transform duration-200">
-              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
-              </svg>
-            </div>
-            <div>
-              <span className="text-[11px] uppercase font-semibold tracking-wider text-navy-400 block">Managed Courses</span>
-              <p className="text-xl font-bold text-white mt-0.5">{courses.length}</p>
-            </div>
-          </div>
-          <div className="p-5 bg-navy-800 border border-navy-700/40 rounded-2xl flex items-center gap-4 hover:border-accent-600/30 transition-all duration-200 group">
-            <div className="p-3 bg-accent-600/10 text-accent-400 rounded-xl group-hover:scale-105 transition-transform duration-200">
-              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 6h16M4 10h16M4 14h16M4 18h16" />
-              </svg>
-            </div>
-            <div>
-              <span className="text-[11px] uppercase font-semibold tracking-wider text-navy-400 block">Syllabus Chapters</span>
-              <p className="text-xl font-bold text-white mt-0.5">
-                {courses.reduce((acc, c) => acc + (c.modules?.length || 0), 0)}
-              </p>
-            </div>
-          </div>
-          <div className="p-5 bg-navy-800 border border-navy-700/40 rounded-2xl flex items-center gap-4 hover:border-warn-600/30 transition-all duration-200 group">
-            <div className="p-3 bg-warn-600/10 text-warn-400 rounded-xl group-hover:scale-105 transition-transform duration-200">
-              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 113.536 0V19h2v2h-4v-2h2v-2.03a5.008 5.008 0 01-3.536-1.864z" />
-              </svg>
-            </div>
-            <div>
-              <span className="text-[11px] uppercase font-semibold tracking-wider text-navy-400 block">Quiz Assessments</span>
-              <p className="text-xl font-bold text-white mt-0.5">Active</p>
-            </div>
-          </div>
-        </div>
-
+        <section aria-label="Course catalog summary" className="grid grid-cols-1 gap-4 sm:grid-cols-3">
+          <MetricCard label="Courses in catalog" value={courses.length} detail="All courses returned by the course service" tone="blue" icon="book" />
+          <MetricCard label="Modules in catalog" value={moduleCount} detail="Across available course records" tone="violet" icon="layers" />
+          <MetricCard label="Courses with modules" value={coursesWithModules} detail="Courses with at least one lesson" tone="green" icon="check" />
+        </section>
         {/* Course Listing */}
         <div>
-          <h2 className="text-sm font-bold uppercase tracking-wider text-white mb-4 font-display">Course Curriculums</h2>
+          <h2 className="text-sm font-bold uppercase tracking-wider text-white mb-4 font-display">Course Catalog</h2>
           {courses.length === 0 ? (
             <div className="p-10 border border-dashed border-navy-700/50 bg-navy-800/50 text-center rounded-2xl">
               <p className="text-sm text-navy-400">No courses created yet.</p>
@@ -404,6 +372,8 @@ const Dashboard = () => {
 
   // ─── ADMIN DASHBOARD ──────────────────────────────────────────────────────
   if (user.role === "ADMIN") {
+    const studentUsers = users.filter((account) => account.role === "STUDENT").length;
+    const instructorUsers = users.filter((account) => account.role === "INSTRUCTOR").length;
     return (
       <div className="flex flex-col gap-8 animate-fadeIn">
         {/* Premium Control Banner */}
@@ -417,189 +387,25 @@ const Dashboard = () => {
             </span>
             <h1 className="text-xl md:text-2xl font-bold text-white mt-3.5 font-display tracking-tight leading-tight">Administrator Dashboard</h1>
             <p className="text-sm text-navy-300 mt-1.5 max-w-xl leading-relaxed">
-              Global control deck for allocating user roles, auditing system profiles, managing registered courses, and monitoring cluster microservices.
+              Review registered accounts, update access roles, and manage platform users.
             </p>
           </div>
         </div>
 
-        {/* System Stats */}
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-5">
-          <div className="p-5 bg-navy-800 border border-navy-700/40 rounded-2xl flex items-center gap-4 hover:border-accent-600/30 transition-all duration-250 group">
-            <div className="p-3 bg-accent-600/10 text-accent-400 rounded-xl group-hover:scale-105 transition-transform duration-200">
-              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" />
-              </svg>
-            </div>
-            <div>
-              <span className="text-[11px] uppercase font-semibold tracking-wider text-navy-400 block">System Members</span>
-              <p className="text-2xl font-bold text-white font-display mt-0.5">{users.length}</p>
-            </div>
-          </div>
-          <div className="p-5 bg-navy-800 border border-navy-700/40 rounded-2xl flex items-center gap-4 hover:border-accent-600/30 transition-all duration-250 group">
-            <div className="p-3 bg-accent-600/10 text-accent-400 rounded-xl group-hover:scale-105 transition-transform duration-200">
-              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
-              </svg>
-            </div>
-            <div>
-              <span className="text-[11px] uppercase font-semibold tracking-wider text-navy-400 block">Total Curriculums</span>
-              <p className="text-2xl font-bold text-white font-display mt-0.5">{courses.length}</p>
-            </div>
-          </div>
-          <div className="p-5 bg-navy-800 border border-navy-700/40 rounded-2xl flex items-center gap-4 hover:border-success-600/30 transition-all duration-250 group">
-            <div className="p-3 bg-success-600/10 text-success-400 rounded-xl group-hover:scale-105 transition-transform duration-200">
-              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 12l2 2 4-4M7.835 4.697a3.42 3.42 0 001.946-.806 3.42 3.42 0 014.438 0 3.42 3.42 0 001.946.806 3.42 3.42 0 013.138 3.138 3.42 3.42 0 00.806 1.946 3.42 3.42 0 010 4.438 3.42 3.42 0 00-.806 1.946 3.42 3.42 0 01-3.138 3.138 3.42 3.42 0 00-1.946.806 3.42 3.42 0 01-4.438 0 3.42 3.42 0 00-1.946-.806 3.42 3.42 0 01-3.138-3.138z" />
-              </svg>
-            </div>
-            <div>
-              <span className="text-[11px] uppercase font-semibold tracking-wider text-navy-400 block">Microservices</span>
-              <p className="text-2xl font-bold text-white font-display mt-0.5">Online</p>
-            </div>
-          </div>
-        </div>
+        <section aria-label="Platform summary" className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
+          <MetricCard label="Registered users" value={usersError ? "—" : users.length} detail={usersError || "Accounts returned by Auth Service"} tone="blue" icon="users" />
+          <MetricCard label="Students" value={usersError ? "—" : studentUsers} detail="Student accounts" tone="green" icon="book" />
+          <MetricCard label="Instructors" value={usersError ? "—" : instructorUsers} detail="Instructor accounts" tone="violet" icon="teaching" />
+          <MetricCard label="Courses in catalog" value={courses.length} detail="Course Service records" tone="amber" icon="layers" />
+        </section>
 
-        {/* User Management Table */}
-        <div>
-          <h2 className="text-sm font-bold uppercase tracking-wider text-white mb-4 font-display">Manage System Users</h2>
-          <div className="bg-navy-800 border border-navy-700/40 rounded-2xl overflow-hidden">
-            {/* Desktop Table View */}
-            <div className="hidden md:block overflow-x-auto">
-              <table className="w-full text-left text-sm border-collapse">
-                <thead>
-                  <tr className="bg-navy-850 border-b border-navy-700/40 text-[11px] uppercase font-semibold tracking-wider text-navy-400">
-                    <th className="px-6 py-4">ID</th>
-                    <th className="px-6 py-4">Name</th>
-                    <th className="px-6 py-4">Email Address</th>
-                    <th className="px-6 py-4">Current Role</th>
-                    <th className="px-6 py-4 text-right">Access Actions</th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-navy-700/30">
-                  {users.length === 0 ? (
-                    <tr>
-                      <td colSpan="5" className="px-6 py-8 text-center text-navy-400">
-                        No registered users found in Auth Database.
-                      </td>
-                    </tr>
-                  ) : (
-                    users.map((item) => (
-                      <tr key={item.id} className="hover:bg-navy-700/20 transition-colors duration-150">
-                        <td className="px-6 py-4 font-mono text-navy-400">#{item.id}</td>
-                        <td className="px-6 py-4 font-semibold text-white">{item.name}</td>
-                        <td className="px-6 py-4 text-navy-300">{item.email}</td>
-                        <td className="px-6 py-4">
-                          <span className={`px-2.5 py-1 rounded-lg text-[10px] font-semibold border ${
-                            item.role === "ADMIN"
-                              ? "bg-danger-700/20 text-danger-400 border-danger-700/30"
-                              : item.role === "INSTRUCTOR"
-                              ? "bg-purple-700/20 text-purple-400 border-purple-700/30"
-                              : "bg-accent-600/10 text-accent-400 border-accent-600/20"
-                          }`}>
-                            {item.role}
-                          </span>
-                        </td>
-                        <td className="px-6 py-4 text-right flex items-center justify-end gap-3 min-h-[50px]">
-                          {roleUpdateLoading === item.id ? (
-                            <div className="w-3.5 h-3.5 border-2 border-accent-400 border-t-transparent rounded-full animate-spin"></div>
-                          ) : (
-                            <select
-                               value={item.role}
-                               onChange={(e) => handleRoleChange(item.id, e.target.value)}
-                               disabled={item.email === user.email || userDeleteLoading === item.id}
-                               className="bg-navy-850 border border-navy-700/50 rounded-xl py-1.5 px-3 text-navy-100 focus:outline-none focus:border-accent-500 transition-colors duration-150 text-[12px] cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed font-medium"
-                            >
-                              <option value="STUDENT">Student Access</option>
-                              <option value="INSTRUCTOR">Instructor Access</option>
-                              <option value="ADMIN">Admin Access</option>
-                            </select>
-                          )}
-                          {userDeleteLoading === item.id ? (
-                            <div className="w-3.5 h-3.5 border-2 border-danger-500 border-t-transparent rounded-full animate-spin"></div>
-                          ) : (
-                            <button
-                              onClick={() => handleDeleteUser(item.id, item.name)}
-                              disabled={item.email === user.email || roleUpdateLoading === item.id}
-                              className="p-2 bg-danger-700/20 hover:bg-danger-700/40 text-danger-400 disabled:opacity-30 rounded-xl transition-all duration-150 cursor-pointer border border-danger-700/30"
-                              title="Delete User"
-                            >
-                              <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-                              </svg>
-                            </button>
-                          )}
-                        </td>
-                      </tr>
-                    ))
-                  )}
-                </tbody>
-              </table>
-            </div>
-            {/* Mobile Card List View */}
-            <div className="flex flex-col gap-4 md:hidden p-4">
-              {users.length === 0 ? (
-                <div className="text-center text-navy-400 py-6 text-sm">
-                  No registered users found in Auth Database.
-                </div>
-              ) : (
-                users.map((item) => (
-                  <div key={item.id} className="p-4 bg-navy-850 border border-navy-700/40 rounded-xl flex flex-col gap-3">
-                    <div className="flex items-center justify-between border-b border-navy-700/30 pb-2.5">
-                      <span className="font-mono text-navy-400 text-[11px]">#{item.id}</span>
-                      <span className={`px-2.5 py-1 rounded-lg text-[10px] font-semibold border ${
-                        item.role === "ADMIN"
-                          ? "bg-danger-700/20 text-danger-400 border-danger-700/30"
-                          : item.role === "INSTRUCTOR"
-                          ? "bg-purple-700/20 text-purple-400 border-purple-700/30"
-                          : "bg-accent-600/10 text-accent-400 border-accent-600/20"
-                      }`}>
-                        {item.role}
-                      </span>
-                    </div>
-                    <div className="flex flex-col gap-1">
-                      <h4 className="font-semibold text-white text-sm truncate">{item.name}</h4>
-                      <p className="text-navy-400 text-[12px] truncate">{item.email}</p>
-                    </div>
-                    <div className="flex items-center justify-between border-t border-navy-700/30 pt-2.5 mt-1">
-                      <span className="text-[11px] text-navy-400 font-semibold uppercase tracking-wider">Actions</span>
-                      <div className="flex items-center gap-2">
-                        {roleUpdateLoading === item.id ? (
-                          <div className="w-3.5 h-3.5 border-2 border-accent-400 border-t-transparent rounded-full animate-spin"></div>
-                        ) : (
-                          <select
-                            value={item.role}
-                            onChange={(e) => handleRoleChange(item.id, e.target.value)}
-                            disabled={item.email === user.email || userDeleteLoading === item.id}
-                            className="bg-navy-800 border border-navy-700/50 rounded-xl py-1.5 px-3 text-navy-100 focus:outline-none focus:border-accent-500 transition-colors duration-150 text-[12px] cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed font-medium"
-                          >
-                            <option value="STUDENT">Student Access</option>
-                            <option value="INSTRUCTOR">Instructor Access</option>
-                            <option value="ADMIN">Admin Access</option>
-                          </select>
-                        )}
-                        {userDeleteLoading === item.id ? (
-                          <div className="w-3.5 h-3.5 border-2 border-danger-500 border-t-transparent rounded-full animate-spin"></div>
-                        ) : (
-                          <button
-                            onClick={() => handleDeleteUser(item.id, item.name)}
-                            disabled={item.email === user.email || roleUpdateLoading === item.id}
-                            className="p-2 bg-danger-700/20 hover:bg-danger-700/40 text-danger-400 disabled:opacity-30 rounded-xl transition-all duration-150 cursor-pointer border border-danger-700/30"
-                            title="Delete User"
-                          >
-                            <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-                            </svg>
-                          </button>
-                        )}
-                      </div>
-                    </div>
-                  </div>
-                ))
-              )}
-            </div>
+        <section className="rounded-2xl border border-[var(--app-border)] bg-[var(--app-surface)] p-5 shadow-sm sm:flex sm:items-center sm:justify-between sm:gap-6">
+          <div>
+            <h2 className="text-base font-semibold text-[var(--app-heading)]">User management</h2>
+            <p className="mt-1 text-sm text-[var(--app-muted)]">Search accounts, review roles, update access, and remove accounts when needed.</p>
           </div>
-        </div>
-
+          <Link to="/admin/users" className="mt-4 inline-flex min-h-10 items-center justify-center rounded-lg bg-blue-600 px-4 py-2 text-sm font-semibold text-white transition-colors hover:bg-blue-700 sm:mt-0">Manage users</Link>
+        </section>
         {/* Course Management */}
         <div>
           <h2 className="text-sm font-bold uppercase tracking-wider text-white mb-4 font-display">Course Registry Management</h2>

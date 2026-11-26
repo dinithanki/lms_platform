@@ -37,7 +37,8 @@ const useCourseStore = create((set, get) => ({
             const prog = await courseService.getCourseProgress(c.id, user.id);
             progressMap[c.id] = prog.progressPercent;
           } catch {
-            progressMap[c.id] = 0;
+            // Keep unavailable progress distinguishable from real 0% progress.
+            progressMap[c.id] = null;
           }
         }
         set({ studentProgress: progressMap });
