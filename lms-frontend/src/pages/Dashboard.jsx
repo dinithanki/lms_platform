@@ -149,13 +149,13 @@ const Dashboard = () => {
     return (
       <div className="flex flex-col gap-8 animate-fadeIn">
         {/* Modern Interactive Banner */}
-        <div className="relative p-6 md:p-8 bg-gradient-to-br from-accent-900/60 via-navy-800 to-navy-850 rounded-2xl overflow-hidden flex flex-col md:flex-row md:items-center justify-between gap-6 border border-navy-700/40">
+        <div className="dashboard-role-banner relative p-6 md:p-8 bg-gradient-to-br from-accent-900/60 via-navy-800 to-navy-850 rounded-2xl overflow-hidden flex flex-col md:flex-row md:items-center justify-between gap-6 border border-navy-700/40">
           {/* Glassmorphic glows */}
           <div className="absolute -top-12 -right-12 w-72 h-72 bg-accent-500/8 rounded-full blur-3xl pointer-events-none"></div>
           <div className="absolute -bottom-16 -left-16 w-56 h-56 bg-cyan-500/8 rounded-full blur-2xl pointer-events-none"></div>
           
           <div className="relative z-10 flex-1">
-            <span className="text-[11px] uppercase tracking-widest font-semibold px-3 py-1.5 bg-accent-600/15 text-accent-300 border border-accent-600/25 rounded-full">
+            <span className="dashboard-role-banner-badge dashboard-student-banner-badge text-[11px] uppercase tracking-widest font-semibold px-3 py-1.5 bg-accent-600/15 text-accent-300 border border-accent-600/25 rounded-full">
               Student Workspace
             </span>
             <h1 className="text-xl md:text-2xl font-bold text-white mt-3.5 font-display tracking-tight leading-tight">
@@ -166,7 +166,7 @@ const Dashboard = () => {
             </p>
           </div>
           <div className="relative z-10 shrink-0">
-            <Link to="/courses" className="px-5 py-3 bg-white/10 hover:bg-white/15 backdrop-blur-sm text-white rounded-xl text-sm font-semibold transition-all duration-200 shadow-lg inline-block border border-white/10">
+            <Link to="/courses" className="dashboard-role-banner-action px-5 py-3 bg-white/10 hover:bg-white/15 backdrop-blur-sm text-white rounded-xl text-sm font-semibold transition-all duration-200 shadow-lg inline-block border border-white/10">
               Explore Catalog
             </Link>
           </div>
@@ -283,12 +283,12 @@ const Dashboard = () => {
     return (
       <div className="flex flex-col gap-8 animate-fadeIn">
         {/* Premium Banner */}
-        <div className="relative p-6 md:p-8 bg-gradient-to-br from-purple-700/40 via-navy-800 to-navy-850 border border-navy-700/40 rounded-2xl overflow-hidden flex flex-col md:flex-row md:items-center justify-between gap-6">
+        <div className="dashboard-role-banner relative p-6 md:p-8 bg-gradient-to-br from-purple-700/40 via-navy-800 to-navy-850 border border-navy-700/40 rounded-2xl overflow-hidden flex flex-col md:flex-row md:items-center justify-between gap-6">
           <div className="absolute -top-12 -right-12 w-72 h-72 bg-purple-500/8 rounded-full blur-3xl pointer-events-none"></div>
           <div className="absolute -bottom-16 -left-16 w-56 h-56 bg-accent-500/5 rounded-full blur-2xl pointer-events-none"></div>
           
           <div className="relative z-10 flex-1">
-            <span className="text-[11px] uppercase tracking-widest font-semibold px-3 py-1.5 bg-purple-600/15 text-purple-300 border border-purple-600/25 rounded-full">
+            <span className="dashboard-role-banner-badge dashboard-instructor-banner-badge text-[11px] uppercase tracking-widest font-semibold px-3 py-1.5 bg-purple-600/15 text-purple-300 border border-purple-600/25 rounded-full">
               Instructor Panel
             </span>
             <h1 className="text-xl md:text-2xl font-bold text-white mt-3.5 font-display">Instructor Console</h1>
@@ -299,7 +299,7 @@ const Dashboard = () => {
           <div className="relative z-10 shrink-0">
             <button
               onClick={openCreateModal}
-              className="px-5 py-3 bg-white/10 hover:bg-white/15 backdrop-blur-sm text-white rounded-xl text-sm font-semibold transition-all duration-200 shadow-lg flex items-center gap-2 cursor-pointer border border-white/10"
+              className="dashboard-role-banner-action px-5 py-3 bg-white/10 hover:bg-white/15 backdrop-blur-sm text-white rounded-xl text-sm font-semibold transition-all duration-200 shadow-lg flex items-center gap-2 cursor-pointer border border-white/10"
             >
               <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M12 4v16m8-8H4" />
@@ -407,12 +407,12 @@ const Dashboard = () => {
     return (
       <div className="flex flex-col gap-8 animate-fadeIn">
         {/* Premium Control Banner */}
-        <div className="relative p-6 md:p-8 bg-gradient-to-br from-accent-900/50 via-navy-800 to-navy-850 rounded-2xl overflow-hidden flex flex-col md:flex-row md:items-center justify-between gap-6 border border-navy-700/40">
+        <div className="dashboard-admin-banner relative p-6 md:p-8 bg-gradient-to-br from-accent-900/50 via-navy-800 to-navy-850 rounded-2xl overflow-hidden flex flex-col md:flex-row md:items-center justify-between gap-6 border border-navy-700/40">
           <div className="absolute -top-12 -right-12 w-72 h-72 bg-accent-500/8 rounded-full blur-3xl pointer-events-none"></div>
           <div className="absolute -bottom-16 -left-16 w-56 h-56 bg-cyan-500/5 rounded-full blur-2xl pointer-events-none"></div>
           
           <div className="relative z-10 flex-1">
-            <span className="text-[11px] uppercase tracking-widest font-semibold px-3 py-1.5 bg-accent-600/15 text-accent-300 border border-accent-600/25 rounded-full">
+            <span className="dashboard-admin-banner-badge text-[11px] uppercase tracking-widest font-semibold px-3 py-1.5 bg-accent-600/15 text-accent-300 border border-accent-600/25 rounded-full">
               System Admin
             </span>
             <h1 className="text-xl md:text-2xl font-bold text-white mt-3.5 font-display tracking-tight leading-tight">Administrator Dashboard</h1>

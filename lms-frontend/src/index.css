@@ -150,6 +150,46 @@
   .ui-skeleton::after { content: ""; position: absolute; inset: 0; transform: translateX(-100%); background: linear-gradient(90deg, transparent, rgb(255 255 255 / 55%), transparent); animation: skeleton-shimmer 1.5s infinite; }
 }
 
+/* The admin hero uses a dark treatment in dark mode and a calm white surface in light mode. */
+:root:not(.dark) .dashboard-admin-banner {
+  background: #ffffff !important;
+  border-color: #e2e8f0 !important;
+  box-shadow: 0 1px 3px rgb(15 23 42 / 5%), 0 12px 28px -24px rgb(15 23 42 / 18%);
+}
+:root:not(.dark) .dashboard-admin-banner-badge {
+  background: #eff6ff !important;
+  border-color: #bfdbfe !important;
+  color: #1d4ed8 !important;
+}
+:root:not(.dark) .dashboard-role-banner {
+  background: #ffffff !important;
+  border-color: #e2e8f0 !important;
+  box-shadow: 0 1px 3px rgb(15 23 42 / 5%), 0 12px 28px -24px rgb(15 23 42 / 18%);
+}
+:root:not(.dark) .dashboard-student-banner-badge {
+  background: #eff6ff !important;
+  border-color: #bfdbfe !important;
+  color: #1d4ed8 !important;
+}
+:root:not(.dark) .dashboard-instructor-banner-badge {
+  background: #f5f3ff !important;
+  border-color: #ddd6fe !important;
+  color: #6d28d9 !important;
+}
+:root:not(.dark) .dashboard-role-banner-action {
+  background: #2563eb !important;
+  border-color: #2563eb !important;
+  color: #ffffff !important;
+  box-shadow: 0 4px 10px rgb(37 99 235 / 18%);
+}
+:root:not(.dark) .dashboard-role-banner-action:hover {
+  background: #1d4ed8 !important;
+  border-color: #1d4ed8 !important;
+}
+:root:not(.dark) .dashboard-admin-banner .pointer-events-none {
+  opacity: 0.22;
+}
+
 /* Preserve the current pages' light-surface text contrast until their redesign phase. */
 .app-shell :not(button):not(a).text-white,
 .app-shell :not(button):not(a).text-navy-100 { color: var(--app-heading) !important; }
