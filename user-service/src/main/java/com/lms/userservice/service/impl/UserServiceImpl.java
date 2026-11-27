@@ -29,7 +29,12 @@ public class UserServiceImpl implements UserService {
     @Override
     @Transactional
     public User createUser(UserCreateRequestDTO dto) {
-        if (userRepository.findById(dto.getId()).isPresent()) {
+        User existingById = userRepository.findById(dto.getId()).orElse(null);
+        if (existingById != null && existingById.getEmail().equalsIgnoreCase(dto.getEmail())) {
+            // A retry of the same Auth Service request is already satisfied. Leave the profile unchanged.
+            return existingById;
+        }
+        if (existingById != null) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Profile already exists with id: " + dto.getId());
         }
         
