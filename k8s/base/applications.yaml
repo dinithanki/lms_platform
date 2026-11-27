@@ -93,6 +93,10 @@ kind: Service
 metadata:
   name: auth-service
   namespace: lms
+  annotations:
+    prometheus.io/scrape: "true"
+    prometheus.io/path: "/actuator/prometheus"
+    prometheus.io/port: "8081"
 spec:
   type: ClusterIP
   selector:
@@ -199,6 +203,10 @@ kind: Service
 metadata:
   name: user-service
   namespace: lms
+  annotations:
+    prometheus.io/scrape: "true"
+    prometheus.io/path: "/actuator/prometheus"
+    prometheus.io/port: "8082"
 spec:
   type: ClusterIP
   selector:
@@ -294,6 +302,10 @@ kind: Service
 metadata:
   name: course-service
   namespace: lms
+  annotations:
+    prometheus.io/scrape: "true"
+    prometheus.io/path: "/actuator/prometheus"
+    prometheus.io/port: "8083"
 spec:
   type: ClusterIP
   selector:
@@ -387,6 +399,10 @@ kind: Service
 metadata:
   name: quiz-service
   namespace: lms
+  annotations:
+    prometheus.io/scrape: "true"
+    prometheus.io/path: "/actuator/prometheus"
+    prometheus.io/port: "8084"
 spec:
   type: ClusterIP
   selector:

@@ -7,6 +7,17 @@ on:
   pull_request:
     branches:
       - main
+  workflow_dispatch:
+    inputs:
+      publish_services:
+        description: Comma-separated services to publish; empty publishes none
+        required: false
+        type: string
+        default: ''
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
 
 permissions:
   contents: read
@@ -55,10 +66,12 @@ jobs:
       SPRING_KAFKA_LISTENER_AUTO_STARTUP: "false"
     steps:
       - name: Check out source
-        uses: actions/checkout@v4
+        uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803
+        with:
+          persist-credentials: false
 
       - name: Set up Java 17 and Maven cache
-        uses: actions/setup-java@v4
+        uses: actions/setup-java@b6effb05e454b25005698d916606bdc6ffcbf961
         with:
           distribution: temurin
           java-version: "17"
@@ -79,10 +92,12 @@ jobs:
     timeout-minutes: 15
     steps:
       - name: Check out source
-        uses: actions/checkout@v4
+        uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803
+        with:
+          persist-credentials: false
 
       - name: Set up Node.js and npm cache
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@249970729cb0ef3589644e2896645e5dc5ba9c38
         with:
           node-version: "22"
           cache: npm
@@ -115,10 +130,12 @@ jobs:
           - lms-frontend
     steps:
       - name: Check out source
-        uses: actions/checkout@v4
+        uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803
+        with:
+          persist-credentials: false
 
       - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v3
+        uses: docker/setup-buildx-action@8d2750c68a42422c14e847fe6c8ac0403b4cbd6f
 
       - name: Derive image name
         id: image
@@ -132,7 +149,7 @@ jobs:
           echo "name=ghcr.io/${owner}/${repo}-${SERVICE}" >> "$GITHUB_OUTPUT"
 
       - name: Build Docker image
-        uses: docker/build-push-action@v6
+        uses: docker/build-push-action@10e90e3645eae34f1e60eeb005ba3a3d33f178e8
         with:
           context: ./${{ matrix.service }}
           file: ./${{ matrix.service }}/Dockerfile
@@ -141,13 +158,103 @@ jobs:
           cache-from: type=gha,scope=${{ matrix.service }}
           cache-to: type=gha,mode=max,scope=${{ matrix.service }}
 
+  select-images:
+    name: Select images to publish
+    runs-on: ubuntu-latest
+    outputs:
+      publish: ${{ steps.select.outputs.publish }}
+      services: ${{ steps.select.outputs.services }}
+    steps:
+      - name: Check out source
+        uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+
+      - id: select
+        name: Select changed or requested services
+        env:
+          EVENT_NAME: ${{ github.event_name }}
+          BEFORE: ${{ github.event.before }}
+          HEAD: ${{ github.sha }}
+          REQUESTED_SERVICES: ${{ inputs.publish_services }}
+        run: |
+          python3 - <<'PY'
+          import json
+          import os
+          import subprocess
+          import sys
+
+          allowed = {
+              "api-gateway",
+              "auth-service",
+              "user-service",
+              "course-service",
+              "quiz-service",
+              "lms-frontend",
+          }
+          selected = set()
+
+          if os.environ["EVENT_NAME"] == "workflow_dispatch":
+              requested = os.environ.get("REQUESTED_SERVICES", "").strip()
+              if requested:
+                  selected = {
+                      item.strip()
+                      for item in requested.split(",")
+                      if item.strip()
+                  }
+                  invalid = selected - allowed
+                  if invalid:
+                      print(
+                          "Invalid service selection; use only the supported service names.",
+                          file=sys.stderr,
+                      )
+                      sys.exit(1)
+          elif os.environ["EVENT_NAME"] == "push":
+              before = os.environ.get("BEFORE", "")
+              if before and set(before) != {"0"}:
+                  result = subprocess.run(
+                      [
+                          "git",
+                          "diff",
+                          "--name-only",
+                          "--no-renames",
+                          before,
+                          os.environ["HEAD"],
+                          "--",
+                      ],
+                      check=True,
+                      capture_output=True,
+                      text=True,
+                  )
+                  for path in result.stdout.splitlines():
+                      service = path.split("/", 1)[0]
+                      if service in allowed:
+                          selected.add(service)
+
+          selected = sorted(selected)
+          with open(os.environ["GITHUB_OUTPUT"], "a", encoding="utf-8") as output:
+              output.write(f"publish={'true' if selected else 'false'}\n")
+              output.write(
+                  f"services={json.dumps(selected or ['auth-service'])}\n"
+              )
+          print(
+              "Selected services: "
+              + (", ".join(selected) if selected else "(none)")
+          )
+          PY
+
   publish-images:
     name: Publish ${{ matrix.service }} to GHCR
-    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    if: >-
+      needs.select-images.outputs.publish == 'true' &&
+      github.ref == 'refs/heads/main' &&
+      (github.event_name == 'push' || github.event_name == 'workflow_dispatch')
     needs:
       - backend-tests
       - frontend-build
       - docker-build
+      - select-images
     runs-on: ubuntu-latest
     timeout-minutes: 45
     permissions:
@@ -156,19 +263,15 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        service:
-          - api-gateway
-          - auth-service
-          - user-service
-          - course-service
-          - quiz-service
-          - lms-frontend
+        service: ${{ fromJSON(needs.select-images.outputs.services) }}
     steps:
       - name: Check out source
-        uses: actions/checkout@v4
+        uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803
+        with:
+          persist-credentials: false
 
       - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v3
+        uses: docker/setup-buildx-action@8d2750c68a42422c14e847fe6c8ac0403b4cbd6f
 
       - name: Derive image name
         id: image
@@ -182,14 +285,14 @@ jobs:
           echo "name=ghcr.io/${owner}/${repo}-${SERVICE}" >> "$GITHUB_OUTPUT"
 
       - name: Log in to GitHub Container Registry
-        uses: docker/login-action@v3
+        uses: docker/login-action@c94ce9fb468520275223c153574b00df6fe4bcc9
         with:
           registry: ghcr.io
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Build and publish Docker image
-        uses: docker/build-push-action@v6
+        uses: docker/build-push-action@10e90e3645eae34f1e60eeb005ba3a3d33f178e8
         with:
           context: ./${{ matrix.service }}
           file: ./${{ matrix.service }}/Dockerfile
