@@ -52,10 +52,12 @@ jwt:
   secret: ${LMS_JWT_SECRET:}
 
 management:
+  server:
+    port: 9080
   endpoints:
     web:
       exposure:
-        include: health
+        include: health,prometheus
   endpoint:
     health:
       probes:

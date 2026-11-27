@@ -32,10 +32,12 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         String requestPath = request.getRequestURI().substring(request.getContextPath().length());
         boolean publicHealth = requestPath.equals("/actuator/health")
                 || requestPath.startsWith("/actuator/health/");
+        boolean publicPrometheus = "GET".equals(request.getMethod())
+                && requestPath.equals("/actuator/prometheus");
         boolean publicCatalog = "GET".equals(request.getMethod())
                 && (requestPath.matches("/courses(?:/\\d+)?")
                 || requestPath.matches("/courses/\\d+/modules"));
-        if (token == null && (publicHealth || publicCatalog)) {
+        if (token == null && (publicHealth || publicPrometheus || publicCatalog)) {
             chain.doFilter(request, response);
             return;
         }

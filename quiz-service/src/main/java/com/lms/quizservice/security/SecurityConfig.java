@@ -24,6 +24,7 @@ public class SecurityConfig {
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/actuator/health", "/actuator/health/**").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/actuator/prometheus").permitAll()
                         .requestMatchers(HttpMethod.POST, "/quizzes", "/quizzes/*/publish", "/questions").hasAnyRole("ADMIN", "INSTRUCTOR")
                         .requestMatchers(HttpMethod.PUT, "/quizzes/*", "/questions/*").hasAnyRole("ADMIN", "INSTRUCTOR")
                         .requestMatchers(HttpMethod.DELETE, "/quizzes/*", "/questions/*").hasAnyRole("ADMIN", "INSTRUCTOR")

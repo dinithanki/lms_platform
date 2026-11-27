@@ -28,7 +28,9 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         String requestPath = request.getRequestURI().substring(request.getContextPath().length());
         boolean publicHealth = requestPath.equals("/actuator/health")
                 || requestPath.startsWith("/actuator/health/");
-        if (token == null && publicHealth) {
+        boolean publicPrometheus = "GET".equals(request.getMethod())
+                && requestPath.equals("/actuator/prometheus");
+        if (token == null && (publicHealth || publicPrometheus)) {
             chain.doFilter(request, response);
             return;
         }

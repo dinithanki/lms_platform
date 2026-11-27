@@ -202,6 +202,8 @@ services:
       USER_SERVICE_URL: http://user-service:8082
       COURSE_SERVICE_URL: http://course-service:8083
       QUIZ_SERVICE_URL: http://quiz-service:8084
+    expose:
+      - "9080"
     ports:
       - "${LMS_GATEWAY_PORT:-8085}:8080"
     networks:
@@ -216,7 +218,7 @@ services:
       quiz-service:
         condition: service_healthy
     healthcheck:
-      test: ["CMD-SHELL", "curl --fail --silent http://127.0.0.1:8080/actuator/health >/dev/null"]
+      test: ["CMD-SHELL", "curl --fail --silent http://127.0.0.1:9080/actuator/health >/dev/null"]
       interval: 10s
       timeout: 5s
       retries: 12
@@ -244,6 +246,38 @@ services:
       start_period: 10s
     restart: unless-stopped
 
+  prometheus:
+    image: prom/prometheus:v3.5.0
+    command:
+      - --config.file=/etc/prometheus/prometheus.yml
+      - --storage.tsdb.path=/prometheus
+      - --storage.tsdb.retention.time=15d
+    ports:
+      - "127.0.0.1:9090:9090"
+    volumes:
+      - ./monitoring/prometheus/prometheus.yml:/etc/prometheus/prometheus.yml:ro
+      - lms_prometheus_data:/prometheus
+    networks:
+      - lms-backend
+    restart: unless-stopped
+
+  grafana:
+    image: grafana/grafana:12.0.0
+    environment:
+      GF_SECURITY_ADMIN_PASSWORD: ${GRAFANA_ADMIN_PASSWORD:?Set GRAFANA_ADMIN_PASSWORD in .env}
+      GF_USERS_ALLOW_SIGN_UP: "false"
+    ports:
+      - "127.0.0.1:3002:3000"
+    volumes:
+      - lms_grafana_data:/var/lib/grafana
+      - ./monitoring/grafana/provisioning:/etc/grafana/provisioning:ro
+      - ./monitoring/grafana/dashboards:/var/lib/grafana/dashboards:ro
+    networks:
+      - lms-backend
+    depends_on:
+      - prometheus
+    restart: unless-stopped
+
 networks:
   lms-backend:
     name: lms-platform-backend
@@ -257,3 +291,7 @@ volumes:
     name: lms-platform-postgres-data
   lms_user_uploads:
     name: lms-platform-user-uploads
+  lms_prometheus_data:
+    name: lms-platform-prometheus-data
+  lms_grafana_data:
+    name: lms-platform-grafana-data
