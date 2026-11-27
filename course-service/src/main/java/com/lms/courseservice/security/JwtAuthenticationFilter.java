@@ -30,10 +30,12 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         }
         String token = bearerToken(request);
         String requestPath = request.getRequestURI().substring(request.getContextPath().length());
+        boolean publicHealth = requestPath.equals("/actuator/health")
+                || requestPath.startsWith("/actuator/health/");
         boolean publicCatalog = "GET".equals(request.getMethod())
                 && (requestPath.matches("/courses(?:/\\d+)?")
                 || requestPath.matches("/courses/\\d+/modules"));
-        if (token == null && publicCatalog) {
+        if (token == null && (publicHealth || publicCatalog)) {
             chain.doFilter(request, response);
             return;
         }

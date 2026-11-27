@@ -31,6 +31,7 @@ public class SecurityConfig {
         return http.csrf(csrf -> csrf.disable())
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(auth -> auth
+                        .requestMatchers("/actuator/health", "/actuator/health/**").permitAll()
                         .requestMatchers(HttpMethod.GET, "/internal/courses/*/owner").hasRole("QUIZ_SERVICE")
                         .requestMatchers(HttpMethod.GET, "/courses", "/courses/*", "/courses/*/modules").permitAll()
                         .requestMatchers(HttpMethod.POST, "/courses").hasAnyRole("ADMIN", "INSTRUCTOR")

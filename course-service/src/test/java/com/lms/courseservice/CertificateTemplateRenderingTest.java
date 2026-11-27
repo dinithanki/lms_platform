@@ -2,8 +2,8 @@ package com.lms.courseservice;
 
 import com.openhtmltopdf.pdfboxout.PdfRendererBuilder;
 import org.junit.jupiter.api.Test;
-import org.thymeleaf.TemplateEngine;
 import org.thymeleaf.context.Context;
+import org.thymeleaf.spring6.SpringTemplateEngine;
 import org.thymeleaf.templatemode.TemplateMode;
 import org.thymeleaf.templateresolver.ClassLoaderTemplateResolver;
 
@@ -23,7 +23,7 @@ class CertificateTemplateRenderingTest {
         resolver.setTemplateMode(TemplateMode.HTML);
         resolver.setCharacterEncoding("UTF-8");
 
-        TemplateEngine templateEngine = new TemplateEngine();
+        SpringTemplateEngine templateEngine = new SpringTemplateEngine();
         templateEngine.setTemplateResolver(resolver);
 
         Context context = new Context();

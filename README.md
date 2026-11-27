@@ -1,6 +1,6 @@
 # LearnSphere LMS Platform
 
-LearnSphere is an ongoing Learning Management System built as a microservices-based platform. It combines a React/Vite frontend with a set of Spring Boot backend services to support authentication, course management, quizzes, user administration, and notifications.
+LearnSphere is an ongoing Learning Management System built as a microservices-based platform. It combines a React/Vite frontend with five Spring Boot services for API routing, authentication, user profiles, courses, and quizzes.
 
 > Status: This project is actively under development. Some features, UI flows, and backend integrations may still be evolving.
 
@@ -21,7 +21,6 @@ The platform is designed for:
 - `user-service/` - User profile and account-related service.
 - `course-service/` - Course, module, enrollment, and course-content management.
 - `quiz-service/` - Quiz, assessment, and certificate-related functionality.
-- `notification-service/` - Notification delivery and messaging support.
 - `lms-frontend/` - React/Vite user interface for the LMS.
 
 ## Key Features
@@ -124,15 +123,12 @@ Manages course data, enrollment, and course-related content.
 
 Handles quizzes, quiz results, and certificate issuance or retrieval.
 
-### `notification-service`
-
-Supports notification workflows and messaging.
-
 ## Prerequisites
 
 - Node.js 18+ recommended
 - Java 17+ recommended
 - Maven 3.9+ or the included Maven wrapper
+- Docker Desktop with Docker Compose
 - A browser for the frontend UI
 
 ## Getting Started
@@ -160,10 +156,9 @@ cd course-service
 
 cd quiz-service
 ./mvnw spring-boot:run
-
-cd notification-service
-./mvnw spring-boot:run
 ```
+
+Local services use environment variables for database passwords, JWT secrets, and service tokens. Set these before starting Spring Boot. For locally running Kafka, use `KAFKA_BOOTSTRAP_SERVERS=localhost:9092`.
 
 If you are on Windows and prefer the wrapper script:
 
@@ -182,6 +177,25 @@ npm run dev
 ### 3. Open the application
 
 By default, Vite runs the frontend on the local development server shown in the terminal output. Make sure the backend services and gateway are running before signing in.
+
+## Docker Compose
+
+The LMS uses its own Compose project, PostgreSQL 18 instance, private database volume, and four logical databases. It connects to the existing `kafka_default` network and does not create or manage a Kafka broker. PostgreSQL is not published to the host. Existing PostgreSQL data is not mounted or modified; the restore process reads the supplied backups read-only and refuses to restore into non-empty target databases.
+
+From the repository root in PowerShell:
+
+```powershell
+.\scripts\new-lms-env.ps1
+docker compose --project-name lms-platform --file docker-compose.lms.yml config --quiet
+docker compose --project-name lms-platform --file docker-compose.lms.yml build
+.\scripts\restore-lms-databases.ps1
+docker compose --project-name lms-platform --file docker-compose.lms.yml up -d
+docker compose --project-name lms-platform --file docker-compose.lms.yml ps
+```
+
+The environment-generation script refuses to overwrite an existing `.env`; keep that file private. The restore script starts only the LMS PostgreSQL service, checks all four custom-format backups, and restores them without `--clean` or `--create`. Then start the application stack with Compose. The default host addresses are `http://localhost:3001` for the frontend and `http://localhost:8085` for the Gateway because ports 3000 and 8080 are already in use on this machine. Change `LMS_FRONTEND_PORT` or `LMS_GATEWAY_PORT` in `.env` only when the desired host port is free.
+
+The five Java services listen on ports 8080-8084 inside the Compose network. Only the frontend and Gateway are published on the host. Profile uploads use a separate named volume. Container health checks verify PostgreSQL, HTTP service readiness, and external Kafka availability before dependent services start.
 
 ## Build Commands
 
@@ -202,7 +216,6 @@ cd auth-service && ./mvnw test
 cd user-service && ./mvnw test
 cd course-service && ./mvnw test
 cd quiz-service && ./mvnw test
-cd notification-service && ./mvnw test
 ```
 
 ## Configuration
@@ -224,7 +237,7 @@ If you change service ports or gateway URLs, update the corresponding frontend A
 ## Suggested Roadmap
 
 - Complete remaining course and quiz workflows.
-- Expand notification delivery and user messaging.
+- Expand the existing course and quiz workflows.
 - Add stronger test coverage across services.
 - Document environment variables and service ports once they are finalized.
 - Add deployment instructions when the release pipeline is ready.

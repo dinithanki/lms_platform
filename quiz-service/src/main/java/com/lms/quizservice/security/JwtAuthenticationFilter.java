@@ -25,6 +25,13 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain chain)
             throws ServletException, IOException {
         String token = bearerToken(request);
+        String requestPath = request.getRequestURI().substring(request.getContextPath().length());
+        boolean publicHealth = requestPath.equals("/actuator/health")
+                || requestPath.startsWith("/actuator/health/");
+        if (token == null && publicHealth) {
+            chain.doFilter(request, response);
+            return;
+        }
         if (token == null) {
             response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "Authentication is required");
             return;

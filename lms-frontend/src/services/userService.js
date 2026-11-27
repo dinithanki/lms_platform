@@ -1,4 +1,5 @@
 import api from "./api";
+import { API_BASE_URL } from "./apiBaseUrl";
 
 const userService = {
   getProfile: async () => {
@@ -32,7 +33,7 @@ const userService = {
   },
 
   getProfilePictureUrl: (id) => {
-    return `http://localhost:8080/api/users/${id}/profile-picture`;
+    return `${API_BASE_URL}/api/users/${id}/profile-picture`;
   },
 };
 

@@ -1,19 +1,30 @@
 import axios from "axios";
+import { API_BASE_URL } from "./apiBaseUrl";
 
 const api = axios.create({
-  baseURL: "http://localhost:8080",
+  baseURL: API_BASE_URL,
   withCredentials: true,
   headers: {
     "Content-Type": "application/json",
   },
 });
 
-// Add a request interceptor to attach JWT token
+// Attach the JWT token to protected API requests.
 api.interceptors.request.use(
   (config) => {
-    const token = localStorage.getItem("token");
-    if (token) {
-      config.headers.Authorization = `Bearer ${token}`;
+    const requestUrl = new URL(
+      config.url ?? "",
+      config.baseURL || "http://localhost"
+    );
+    const isPublicAuthRequest =
+      config.method?.toUpperCase() === "POST" &&
+      ["/api/auth/register", "/api/auth/login"].includes(requestUrl.pathname);
+
+    if (!isPublicAuthRequest) {
+      const token = localStorage.getItem("token");
+      if (token) {
+        config.headers.Authorization = `Bearer ${token}`;
+      }
     }
     return config;
   },

@@ -3,6 +3,7 @@ import { useLocation, useNavigate } from "react-router-dom";
 import { useAuth } from "../store/authStore";
 import NavbarStudyTimer from "./NavbarStudyTimer";
 import { DEFAULT_AVATAR_URL } from "../constants/profile";
+import { API_BASE_URL } from "../services/apiBaseUrl";
 
 const Icon = ({ name, className = "h-5 w-5" }) => {
   const shapes = {
@@ -26,9 +27,8 @@ const Navbar = ({ onMenuToggle, onSidebarToggle, isSidebarCollapsed }) => {
   const [isDark, setIsDark] = useState(() => localStorage.getItem("lms-theme") === "dark");
   const profileRef = useRef(null);
   const searchRef = useRef(null);
-  const apiBase = import.meta.env.VITE_API_BASE_URL || "http://localhost:8080";
   const imageUrl = user?.profileImageUrl
-    ? user.profileImageUrl.startsWith("http") ? user.profileImageUrl : `${apiBase}${user.profileImageUrl.startsWith("/") ? "" : "/"}${user.profileImageUrl}`
+    ? user.profileImageUrl.startsWith("http") ? user.profileImageUrl : `${API_BASE_URL}${user.profileImageUrl.startsWith("/") ? "" : "/"}${user.profileImageUrl}`
     : null;
   const destinations = useMemo(() => [
     { label: "Dashboard", path: "/dashboard" }, { label: "Course catalog", path: "/courses" },

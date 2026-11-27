@@ -20,7 +20,6 @@ import java.util.Map;
 @Service
 public class AdminSeedService {
     private static final Logger log = LoggerFactory.getLogger(AdminSeedService.class);
-    private static final String USER_SERVICE_CREATE_URL = "http://localhost:8082/api/users";
 
     private final UserRepository userRepository;
     private final BCryptPasswordEncoder passwordEncoder;
@@ -28,6 +27,9 @@ public class AdminSeedService {
 
     @Value("${app.auth-service.token:}")
     private String authServiceToken;
+
+    @Value("${app.user-service.url:http://localhost:8082}")
+    private String userServiceUrl = "http://localhost:8082";
 
     public AdminSeedService(UserRepository userRepository,
                             BCryptPasswordEncoder passwordEncoder,
@@ -66,7 +68,7 @@ public class AdminSeedService {
         headers.set("X-Auth-Service-Token", authServiceToken);
 
         try {
-            restTemplate.postForEntity(USER_SERVICE_CREATE_URL, new HttpEntity<>(profile, headers), Void.class);
+            restTemplate.postForEntity(userServiceUrl + "/api/users", new HttpEntity<>(profile, headers), Void.class);
         } catch (RestClientException exception) {
             log.error("Admin seed profile synchronization failed; the Auth Service transaction will roll back.");
             throw new IllegalStateException("Could not create the User Service profile for the seeded admin", exception);

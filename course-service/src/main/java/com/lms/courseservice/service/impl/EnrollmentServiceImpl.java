@@ -3,10 +3,15 @@ package com.lms.courseservice.service.impl;
 import com.lms.courseservice.dto.response.CourseResponseDTO;
 import com.lms.courseservice.entity.Course;
 import com.lms.courseservice.entity.Enrollment;
+import com.lms.courseservice.dto.event.StudentEnrolledEvent;
+import com.lms.courseservice.entity.OutboxEvent;
 import com.lms.courseservice.exception.EnrollmentException;
 import com.lms.courseservice.mapper.CourseMapper;
 import com.lms.courseservice.repository.CourseRepository;
 import com.lms.courseservice.repository.EnrollmentRepository;
+import com.lms.courseservice.repository.OutboxEventRepository;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.lms.courseservice.service.CourseService;
 import com.lms.courseservice.service.EnrollmentService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -15,6 +20,8 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.stream.Collectors;
+import java.time.LocalDateTime;
+import java.util.UUID;
 
 @Service
 public class EnrollmentServiceImpl implements EnrollmentService {
@@ -31,6 +38,12 @@ public class EnrollmentServiceImpl implements EnrollmentService {
     @Autowired
     private CourseMapper courseMapper;
 
+    @Autowired
+    private OutboxEventRepository outboxEventRepository;
+
+    @Autowired
+    private ObjectMapper objectMapper;
+
     @Override
     @Transactional
     public void enrollStudent(Long courseId, Long studentId) {
@@ -45,7 +58,22 @@ public class EnrollmentServiceImpl implements EnrollmentService {
         Enrollment enrollment = new Enrollment();
         enrollment.setStudentId(studentId);
         enrollment.setCourseId(courseId);
-        enrollmentRepository.save(enrollment);
+        Enrollment savedEnrollment = enrollmentRepository.save(enrollment);
+        StudentEnrolledEvent event = new StudentEnrolledEvent(
+                UUID.randomUUID(),
+                "StudentEnrolled",
+                LocalDateTime.now(),
+                savedEnrollment.getId(),
+                savedEnrollment.getStudentId(),
+                savedEnrollment.getCourseId(),
+                savedEnrollment.getEnrolledAt());
+        try {
+            outboxEventRepository.save(OutboxEvent.pending(
+                    event.eventId(), event.eventType(), "lms.course.student-enrolled",
+                    objectMapper.writeValueAsString(event)));
+        } catch (JsonProcessingException e) {
+            throw new IllegalStateException("Unable to serialize StudentEnrolled event", e);
+        }
     }
 
     @Override

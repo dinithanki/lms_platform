@@ -2,6 +2,7 @@ import { NavLink } from "react-router-dom";
 import { useAuth } from "../store/authStore";
 import BrandLogo from "./BrandLogo";
 import { DEFAULT_AVATAR_URL } from "../constants/profile";
+import { API_BASE_URL } from "../services/apiBaseUrl";
 
 const Icon = ({ name, className = "h-5 w-5" }) => {
   const paths = {
@@ -52,7 +53,7 @@ const Sidebar = ({ isOpen, isCollapsed, onClose }) => {
       <div className="mt-auto p-4">
         <div className={`rounded-xl border border-[var(--app-border)] bg-[var(--app-surface-muted)] p-3 ${isCollapsed ? "md:hidden" : ""}`}>
           <div className="flex items-center gap-3">
-            <div className="h-9 w-9 shrink-0 overflow-hidden rounded-full bg-blue-50"><img src={user?.profileImageUrl ? (user.profileImageUrl.startsWith("http") ? user.profileImageUrl : `${import.meta.env.VITE_API_BASE_URL || "http://localhost:8080"}${user.profileImageUrl.startsWith("/") ? "" : "/"}${user.profileImageUrl}`) : DEFAULT_AVATAR_URL} alt={`${user?.name || "User"} profile`} className="h-full w-full object-cover" onError={(event) => { if (!event.currentTarget.src.endsWith(DEFAULT_AVATAR_URL)) event.currentTarget.src = DEFAULT_AVATAR_URL; }}/></div>
+            <div className="h-9 w-9 shrink-0 overflow-hidden rounded-full bg-blue-50"><img src={user?.profileImageUrl ? (user.profileImageUrl.startsWith("http") ? user.profileImageUrl : `${API_BASE_URL}${user.profileImageUrl.startsWith("/") ? "" : "/"}${user.profileImageUrl}`) : DEFAULT_AVATAR_URL} alt={`${user?.name || "User"} profile`} className="h-full w-full object-cover" onError={(event) => { if (!event.currentTarget.src.endsWith(DEFAULT_AVATAR_URL)) event.currentTarget.src = DEFAULT_AVATAR_URL; }}/></div>
             <div className="min-w-0"><div className="truncate text-sm font-semibold text-[var(--app-heading)]">{user?.name || "Learner"}</div><div className="truncate text-xs text-[var(--app-muted)]">{user?.role || "Member"}</div></div>
           </div>
         </div>

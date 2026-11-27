@@ -11,6 +11,7 @@ import com.lms.courseservice.service.CourseService;
 import com.lms.courseservice.service.ModuleService;
 import com.lms.courseservice.util.CertificateGenerator;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
@@ -48,7 +49,8 @@ public class CertificateServiceImpl implements CertificateService {
     @Autowired
     private RestTemplate restTemplate;
 
-    private static final String USER_SERVICE_URL = "http://localhost:8082/api/users/";
+    @Value("${app.user-service.url:http://localhost:8082}")
+    private String userServiceUrl = "http://localhost:8082";
 
     @Override
     @Transactional
@@ -125,7 +127,7 @@ public class CertificateServiceImpl implements CertificateService {
                 headers.set(HttpHeaders.AUTHORIZATION, authorization);
             }
             ResponseEntity<Map> userResponse = restTemplate.exchange(
-                    USER_SERVICE_URL + studentId,
+                    userServiceUrl + "/api/users/" + studentId,
                     HttpMethod.GET,
                     new HttpEntity<>(headers),
                     Map.class);

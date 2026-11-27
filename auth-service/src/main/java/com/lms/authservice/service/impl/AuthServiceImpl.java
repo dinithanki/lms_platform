@@ -46,6 +46,9 @@ public class AuthServiceImpl implements AuthService {
     @Value("${app.auth-service.token:}")
     private String authServiceToken;
 
+    @Value("${app.user-service.url:http://localhost:8082}")
+    private String userServiceUrl = "http://localhost:8082";
+
     @PostConstruct
     void validateServiceTokenConfiguration() {
         if (authServiceToken == null || authServiceToken.getBytes(java.nio.charset.StandardCharsets.UTF_8).length < 32) {
@@ -84,7 +87,7 @@ public class AuthServiceImpl implements AuthService {
             headers.set("X-Auth-Service-Token", authServiceToken);
             HttpEntity<Map<String, Object>> entity = new HttpEntity<>(profileRequest, headers);
             
-            restTemplate.postForEntity("http://localhost:8082/api/users", entity, Void.class);
+            restTemplate.postForEntity(userServiceUrl + "/api/users", entity, Void.class);
         } catch (Exception e) {
             throw new RuntimeException("Failed to create user profile in User Service. Registration rolled back: " + e.getMessage(), e);
         }
@@ -154,8 +157,8 @@ public class AuthServiceImpl implements AuthService {
             Map<String, String> body = new HashMap<>();
             body.put("role", role.trim().toUpperCase());
             HttpEntity<Map<String, String>> requestEntity = new HttpEntity<>(body, headers);
-            String userServiceUrl = "http://localhost:8082/api/users/" + userId + "/role/sync";
-            restTemplate.exchange(userServiceUrl, HttpMethod.PUT, requestEntity, Void.class);
+            String userProfileUrl = userServiceUrl + "/api/users/" + userId + "/role/sync";
+            restTemplate.exchange(userProfileUrl, HttpMethod.PUT, requestEntity, Void.class);
         } catch (Exception e) {
             // Log but don't abort — auth-service DB is already updated
             System.err.println("Warning: Failed to sync role update to User Service for user id " + userId + ": " + e.getMessage());
@@ -191,8 +194,8 @@ public class AuthServiceImpl implements AuthService {
                 headers.set("Authorization", authHeader);
             }
             HttpEntity<Void> requestEntity = new HttpEntity<>(headers);
-            String userServiceUrl = "http://localhost:8082/api/users/" + userId;
-            restTemplate.exchange(userServiceUrl, HttpMethod.DELETE, requestEntity, Void.class);
+            String userProfileUrl = userServiceUrl + "/api/users/" + userId;
+            restTemplate.exchange(userProfileUrl, HttpMethod.DELETE, requestEntity, Void.class);
         } catch (org.springframework.web.client.HttpClientErrorException.NotFound e) {
             // 404: profile doesn't exist in User Service (data inconsistency or already deleted).
             // Treat as "already gone" — still proceed to delete from auth DB.

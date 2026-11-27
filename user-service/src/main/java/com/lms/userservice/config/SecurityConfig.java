@@ -41,6 +41,7 @@ public class SecurityConfig {
         http.csrf(csrf -> csrf.disable())
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(auth -> auth
+                        .requestMatchers("/actuator/health", "/actuator/health/**").permitAll()
                         .requestMatchers(HttpMethod.POST, "/api/users").hasRole("SERVICE")
                         .requestMatchers(HttpMethod.GET, "/api/users/*/profile-picture").permitAll() // Serve profile picture publicly
                         .requestMatchers(HttpMethod.PUT, "/api/users/*/role/sync").hasRole("SERVICE")

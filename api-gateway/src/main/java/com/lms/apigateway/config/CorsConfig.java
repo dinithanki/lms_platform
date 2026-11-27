@@ -18,6 +18,7 @@ public class CorsConfig {
         // Allowed origins: React/Angular dev servers on localhost
         corsConfig.setAllowedOrigins(Arrays.asList(
                 "http://localhost:3000", // React default
+                "http://localhost:3001", // Docker frontend
                 "http://localhost:4200", // Angular default
                 "http://localhost:5173", // Vite default (React/Vue modern)
                 "http://localhost:8080"  // Self / other endpoints
