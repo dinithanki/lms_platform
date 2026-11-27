@@ -1,0 +1,542 @@
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: user-profile-uploads
+  namespace: lms
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 2Gi
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: auth-service
+  namespace: lms
+  labels:
+    app.kubernetes.io/name: auth-service
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: auth-service
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: auth-service
+    spec:
+      containers:
+        - name: auth-service
+          image: ghcr.io/dinithanki/lms_platform-auth-service:latest
+          imagePullPolicy: IfNotPresent
+          ports:
+            - name: http
+              containerPort: 8081
+              protocol: TCP
+          env:
+            - name: SERVER_PORT
+              value: "8081"
+            - name: SPRING_DATASOURCE_URL
+              value: jdbc:postgresql://postgres-external:5432/auth_db
+            - name: SPRING_DATASOURCE_USERNAME
+              valueFrom:
+                secretKeyRef:
+                  name: lms-app-secrets
+                  key: LMS_DB_USER
+            - name: SPRING_DATASOURCE_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: lms-app-secrets
+                  key: LMS_DB_PASSWORD
+            - name: SPRING_FLYWAY_BASELINE_ON_MIGRATE
+              value: "true"
+            - name: SPRING_FLYWAY_BASELINE_VERSION
+              value: "1"
+            - name: LMS_JWT_SECRET
+              valueFrom:
+                secretKeyRef:
+                  name: lms-app-secrets
+                  key: LMS_JWT_SECRET
+            - name: LMS_AUTH_SERVICE_TOKEN
+              valueFrom:
+                secretKeyRef:
+                  name: lms-app-secrets
+                  key: LMS_AUTH_SERVICE_TOKEN
+            - name: USER_SERVICE_URL
+              value: http://user-service:8082
+          startupProbe:
+            httpGet:
+              path: /actuator/health
+              port: http
+            periodSeconds: 10
+            timeoutSeconds: 3
+            failureThreshold: 36
+          readinessProbe:
+            httpGet:
+              path: /actuator/health/readiness
+              port: http
+            periodSeconds: 10
+            timeoutSeconds: 3
+            failureThreshold: 3
+          livenessProbe:
+            httpGet:
+              path: /actuator/health/liveness
+              port: http
+            periodSeconds: 20
+            timeoutSeconds: 3
+            failureThreshold: 3
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: auth-service
+  namespace: lms
+spec:
+  type: ClusterIP
+  selector:
+    app.kubernetes.io/name: auth-service
+  ports:
+    - name: http
+      port: 8081
+      targetPort: http
+      protocol: TCP
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: user-service
+  namespace: lms
+  labels:
+    app.kubernetes.io/name: user-service
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: user-service
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: user-service
+    spec:
+      containers:
+        - name: user-service
+          image: ghcr.io/dinithanki/lms_platform-user-service:latest
+          imagePullPolicy: IfNotPresent
+          ports:
+            - name: http
+              containerPort: 8082
+              protocol: TCP
+          env:
+            - name: SERVER_PORT
+              value: "8082"
+            - name: SPRING_DATASOURCE_URL
+              value: jdbc:postgresql://postgres-external:5432/user_db
+            - name: SPRING_DATASOURCE_USERNAME
+              valueFrom:
+                secretKeyRef:
+                  name: lms-app-secrets
+                  key: LMS_DB_USER
+            - name: SPRING_DATASOURCE_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: lms-app-secrets
+                  key: LMS_DB_PASSWORD
+            - name: SPRING_FLYWAY_BASELINE_ON_MIGRATE
+              value: "true"
+            - name: SPRING_FLYWAY_BASELINE_VERSION
+              value: "1"
+            - name: LMS_JWT_SECRET
+              valueFrom:
+                secretKeyRef:
+                  name: lms-app-secrets
+                  key: LMS_JWT_SECRET
+            - name: LMS_AUTH_SERVICE_TOKEN
+              valueFrom:
+                secretKeyRef:
+                  name: lms-app-secrets
+                  key: LMS_AUTH_SERVICE_TOKEN
+            - name: KAFKA_BOOTSTRAP_SERVERS
+              value: kafka:29092
+            - name: KAFKA_CONSUMER_GROUP_ID
+              value: lms-user-service
+            - name: KAFKA_STUDENT_ENROLLED_TOPIC
+              value: lms.course.student-enrolled
+            - name: APP_UPLOAD_DIR
+              value: /app/uploads/profile-pictures
+          volumeMounts:
+            - name: profile-uploads
+              mountPath: /app/uploads/profile-pictures
+          startupProbe:
+            httpGet:
+              path: /actuator/health
+              port: http
+            periodSeconds: 10
+            timeoutSeconds: 3
+            failureThreshold: 36
+          readinessProbe:
+            httpGet:
+              path: /actuator/health/readiness
+              port: http
+            periodSeconds: 10
+            timeoutSeconds: 3
+            failureThreshold: 3
+          livenessProbe:
+            httpGet:
+              path: /actuator/health/liveness
+              port: http
+            periodSeconds: 20
+            timeoutSeconds: 3
+            failureThreshold: 3
+      volumes:
+        - name: profile-uploads
+          persistentVolumeClaim:
+            claimName: user-profile-uploads
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: user-service
+  namespace: lms
+spec:
+  type: ClusterIP
+  selector:
+    app.kubernetes.io/name: user-service
+  ports:
+    - name: http
+      port: 8082
+      targetPort: http
+      protocol: TCP
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: course-service
+  namespace: lms
+  labels:
+    app.kubernetes.io/name: course-service
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: course-service
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: course-service
+    spec:
+      containers:
+        - name: course-service
+          image: ghcr.io/dinithanki/lms_platform-course-service:latest
+          imagePullPolicy: IfNotPresent
+          ports:
+            - name: http
+              containerPort: 8083
+              protocol: TCP
+          env:
+            - name: SERVER_PORT
+              value: "8083"
+            - name: SPRING_DATASOURCE_URL
+              value: jdbc:postgresql://postgres-external:5432/course_db
+            - name: SPRING_DATASOURCE_USERNAME
+              valueFrom:
+                secretKeyRef:
+                  name: lms-app-secrets
+                  key: LMS_DB_USER
+            - name: SPRING_DATASOURCE_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: lms-app-secrets
+                  key: LMS_DB_PASSWORD
+            - name: SPRING_FLYWAY_BASELINE_ON_MIGRATE
+              value: "true"
+            - name: SPRING_FLYWAY_BASELINE_VERSION
+              value: "1"
+            - name: LMS_JWT_SECRET
+              valueFrom:
+                secretKeyRef:
+                  name: lms-app-secrets
+                  key: LMS_JWT_SECRET
+            - name: LMS_QUIZ_SERVICE_TOKEN
+              valueFrom:
+                secretKeyRef:
+                  name: lms-app-secrets
+                  key: LMS_QUIZ_SERVICE_TOKEN
+            - name: USER_SERVICE_URL
+              value: http://user-service:8082
+            - name: KAFKA_BOOTSTRAP_SERVERS
+              value: kafka:29092
+          startupProbe:
+            httpGet:
+              path: /actuator/health
+              port: http
+            periodSeconds: 10
+            timeoutSeconds: 3
+            failureThreshold: 36
+          readinessProbe:
+            httpGet:
+              path: /actuator/health/readiness
+              port: http
+            periodSeconds: 10
+            timeoutSeconds: 3
+            failureThreshold: 3
+          livenessProbe:
+            httpGet:
+              path: /actuator/health/liveness
+              port: http
+            periodSeconds: 20
+            timeoutSeconds: 3
+            failureThreshold: 3
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: course-service
+  namespace: lms
+spec:
+  type: ClusterIP
+  selector:
+    app.kubernetes.io/name: course-service
+  ports:
+    - name: http
+      port: 8083
+      targetPort: http
+      protocol: TCP
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: quiz-service
+  namespace: lms
+  labels:
+    app.kubernetes.io/name: quiz-service
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: quiz-service
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: quiz-service
+    spec:
+      containers:
+        - name: quiz-service
+          image: ghcr.io/dinithanki/lms_platform-quiz-service:latest
+          imagePullPolicy: IfNotPresent
+          ports:
+            - name: http
+              containerPort: 8084
+              protocol: TCP
+          env:
+            - name: SERVER_PORT
+              value: "8084"
+            - name: SPRING_DATASOURCE_URL
+              value: jdbc:postgresql://postgres-external:5432/quiz_db
+            - name: SPRING_DATASOURCE_USERNAME
+              valueFrom:
+                secretKeyRef:
+                  name: lms-app-secrets
+                  key: LMS_DB_USER
+            - name: SPRING_DATASOURCE_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: lms-app-secrets
+                  key: LMS_DB_PASSWORD
+            - name: SPRING_FLYWAY_BASELINE_ON_MIGRATE
+              value: "true"
+            - name: SPRING_FLYWAY_BASELINE_VERSION
+              value: "1"
+            - name: LMS_JWT_SECRET
+              valueFrom:
+                secretKeyRef:
+                  name: lms-app-secrets
+                  key: LMS_JWT_SECRET
+            - name: LMS_QUIZ_SERVICE_TOKEN
+              valueFrom:
+                secretKeyRef:
+                  name: lms-app-secrets
+                  key: LMS_QUIZ_SERVICE_TOKEN
+            - name: COURSE_SERVICE_URL
+              value: http://course-service:8083
+          startupProbe:
+            httpGet:
+              path: /actuator/health
+              port: http
+            periodSeconds: 10
+            timeoutSeconds: 3
+            failureThreshold: 36
+          readinessProbe:
+            httpGet:
+              path: /actuator/health/readiness
+              port: http
+            periodSeconds: 10
+            timeoutSeconds: 3
+            failureThreshold: 3
+          livenessProbe:
+            httpGet:
+              path: /actuator/health/liveness
+              port: http
+            periodSeconds: 20
+            timeoutSeconds: 3
+            failureThreshold: 3
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: quiz-service
+  namespace: lms
+spec:
+  type: ClusterIP
+  selector:
+    app.kubernetes.io/name: quiz-service
+  ports:
+    - name: http
+      port: 8084
+      targetPort: http
+      protocol: TCP
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: api-gateway
+  namespace: lms
+  labels:
+    app.kubernetes.io/name: api-gateway
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: api-gateway
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: api-gateway
+    spec:
+      containers:
+        - name: api-gateway
+          image: ghcr.io/dinithanki/lms_platform-api-gateway:latest
+          imagePullPolicy: IfNotPresent
+          ports:
+            - name: http
+              containerPort: 8080
+              protocol: TCP
+            - name: management
+              containerPort: 9080
+              protocol: TCP
+          env:
+            - name: SERVER_PORT
+              value: "8080"
+            - name: LMS_JWT_SECRET
+              valueFrom:
+                secretKeyRef:
+                  name: lms-app-secrets
+                  key: LMS_JWT_SECRET
+            - name: AUTH_SERVICE_URL
+              value: http://auth-service:8081
+            - name: USER_SERVICE_URL
+              value: http://user-service:8082
+            - name: COURSE_SERVICE_URL
+              value: http://course-service:8083
+            - name: QUIZ_SERVICE_URL
+              value: http://quiz-service:8084
+          startupProbe:
+            httpGet:
+              path: /actuator/health
+              port: management
+            periodSeconds: 10
+            timeoutSeconds: 3
+            failureThreshold: 36
+          readinessProbe:
+            httpGet:
+              path: /actuator/health/readiness
+              port: management
+            periodSeconds: 10
+            timeoutSeconds: 3
+            failureThreshold: 3
+          livenessProbe:
+            httpGet:
+              path: /actuator/health/liveness
+              port: management
+            periodSeconds: 20
+            timeoutSeconds: 3
+            failureThreshold: 3
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: api-gateway
+  namespace: lms
+spec:
+  type: ClusterIP
+  selector:
+    app.kubernetes.io/name: api-gateway
+  ports:
+    - name: http
+      port: 8080
+      targetPort: http
+      protocol: TCP
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: lms-frontend
+  namespace: lms
+  labels:
+    app.kubernetes.io/name: lms-frontend
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: lms-frontend
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: lms-frontend
+    spec:
+      containers:
+        - name: lms-frontend
+          image: ghcr.io/dinithanki/lms_platform-lms-frontend:latest
+          imagePullPolicy: IfNotPresent
+          ports:
+            - name: http
+              containerPort: 80
+              protocol: TCP
+          startupProbe:
+            httpGet:
+              path: /
+              port: http
+            periodSeconds: 5
+            timeoutSeconds: 3
+            failureThreshold: 24
+          readinessProbe:
+            httpGet:
+              path: /
+              port: http
+            periodSeconds: 10
+            timeoutSeconds: 3
+            failureThreshold: 3
+          livenessProbe:
+            httpGet:
+              path: /
+              port: http
+            periodSeconds: 20
+            timeoutSeconds: 3
+            failureThreshold: 3
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: lms-frontend
+  namespace: lms
+spec:
+  type: NodePort
+  selector:
+    app.kubernetes.io/name: lms-frontend
+  ports:
+    - name: http
+      port: 80
+      targetPort: http
+      nodePort: 30080
+      protocol: TCP
